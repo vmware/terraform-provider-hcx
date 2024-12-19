@@ -1,41 +1,28 @@
-terraform-provider-velocloud
-bin
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-# Local .terraform directories
-**/.terraform/*
+# Ignore any built binaries with default name
+terraform-provider-hcx
 
-# .tfstate files
-*.tfstate
-*.tfstate.*
+# Test binary, built with `go test -c`
+*.test
 
-# Crash log files
-crash.log
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
 
-# Ignore any .tfvars files that are generated automatically for each Terraform run. Most
-# .tfvars files are managed as part of configuration and so should be included in
-# version control.
-#
-# example.tfvars
+secrets.yml
+dist/
+.idea/
+.vscode/
+*.iml
 
-# Ignore override files as they are usually used to override resources locally and so
-# are not checked in
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
+# Ignore editor temp files
+*~
 
-# Include override files you do wish to add to version control using negated pattern
-#
-# !example_override.tf
-
-# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
-# example: *tfplan*
-
-# Ignore CLI configuration files
-.terraformrc
-terraform.rc
-terraform
-
-examples
-
-registry.terraform.io/*
+# MacOS
+## Ignore desktop services store files.
+**/.DS_Store
