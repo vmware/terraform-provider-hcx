@@ -55,7 +55,7 @@ To install this provider, copy and paste this code into your Terraform configura
 terraform {
   required_providers {
     hcx = {
-      source = "adeleporte/hcx"
+      source = "vmware/hcx"
     }
   }
 }
@@ -76,19 +76,19 @@ provider "hcx" {
 
 **NOTE:** Recommended way to compile the provider is using [Go Modules](https://blog.golang.org/using-go-modules), however vendored dependencies are still supported.
 
-**NOTE:** For terraform 0.13, please refer to [provider installation configuration][install-013] in order to use custom provider.
+**NOTE:** For Terraform 0.13, please refer to [provider installation configuration][install-013] in order to use custom provider.
 [install-013]: https://www.terraform.io/docs/commands/cli-config.html#provider-installation
 
 
 ## Cloning the Project
 
 First, you will want to clone the repository to
-`$GOPATH/src/github.com/adeleporte/terraform-provider-hcx`:
+`$GOPATH/src/github.com/vmware/terraform-provider-hcx`:
 
 ```sh
-mkdir -p $GOPATH/src/github.com/adeleporte
-cd $GOPATH/src/github.com/adeleporte
-git clone https://github.com/adeleporte/terraform-provider-hcx.git
+mkdir -p $GOPATH/src/github.com/vmware
+cd $GOPATH/src/github.com/vmware
+git clone https://github.com/vmware/terraform-provider-hcx.git
 ```
 
 ## Building and Installing the Provider
@@ -96,7 +96,7 @@ git clone https://github.com/adeleporte/terraform-provider-hcx.git
 After the clone has been completed, you can enter the provider directory and build the provider.
 
 ```sh
-cd $GOPATH/src/github.com/adeleporte/terraform-provider-hcx
+cd $GOPATH/src/github.com/vmware/terraform-provider-hcx
 make
 ```
 
