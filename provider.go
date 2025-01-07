@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 
-	hcx "github.com/adeleporte/terraform-provider-hcx/hcx"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	hcx "github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // Provider -

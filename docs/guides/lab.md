@@ -16,7 +16,7 @@ This TF file automates the configuration of a HCX lab. It manages creation/updat
 terraform {
   required_providers {
     hcx = {
-      source = "adeleporte/hcx"
+      source = "vmware/hcx"
     }
   }
 }
