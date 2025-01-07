@@ -7,9 +7,9 @@ import (
 	"errors"
 	"time"
 
+	hcx "github.com/adeleporte/terraform-provider-hcx/hcx"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	hcx "github.com/adeleporte/terraform-provider-hcx/hcx"
 )
 
 func resourceComputeProfile() *schema.Resource {
