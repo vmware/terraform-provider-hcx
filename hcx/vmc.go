@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
-	"log"
 )
 
 type SDDC struct {
@@ -62,7 +62,7 @@ func VmcAuthenticate(token string) (string, error) {
 
 	_, r, err := c.doVmcRequest(req)
 	if err != nil {
-		return  "", err
+		return "", err
 	}
 
 	resp := VmcAccessToken{}
@@ -83,7 +83,7 @@ func VmcAuthenticate(token string) (string, error) {
 
 }
 
-func HcxCloudAuthenticate(client *Client, token string) (error) {
+func HcxCloudAuthenticate(client *Client, token string) error {
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
@@ -129,7 +129,7 @@ func GetSddcByName(client *Client, sddc_name string) (SDDC, error) {
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
 		HostURL:    "https://connect.hcx.vmware.com/provider/csp/consumer",
-		HcxToken:      client.HcxToken,
+		HcxToken:   client.HcxToken,
 	}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/sddcs", c.HostURL), nil)
@@ -166,7 +166,7 @@ func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
 		HostURL:    "https://connect.hcx.vmware.com/provider/csp/consumer",
-		HcxToken:      client.HcxToken,
+		HcxToken:   client.HcxToken,
 	}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/sddcs", c.HostURL), nil)
@@ -205,7 +205,7 @@ func ActivateHcxOnSDDC(client *Client, sddc_id string) (ActivateHcxOnSDDCResults
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
 		HostURL:    "https://connect.hcx.vmware.com/provider/csp/consumer",
-		HcxToken:      client.HcxToken,
+		HcxToken:   client.HcxToken,
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sddcs/%s?action=activate", c.HostURL, sddc_id), nil)
@@ -237,7 +237,7 @@ func DeactivateHcxOnSDDC(client *Client, sddc_id string) (DeactivateHcxOnSDDCRes
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
 		HostURL:    "https://connect.hcx.vmware.com/provider/csp/consumer",
-		HcxToken:      client.HcxToken,
+		HcxToken:   client.HcxToken,
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sddcs/%s?action=deactivate", c.HostURL, sddc_id), nil)
