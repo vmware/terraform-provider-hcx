@@ -10,7 +10,7 @@ SPDX-License-Identifier: MPL-2.0
 
 # Terraform Provider for VMware HCX
 
-[![Latest Release](https://img.shields.io/github/v/tag/vmware/terraform-provider-vmc?label=latest%20release&style=for-the-badge)](https://github.com/vmware/terraform-provider-vmc/releases/latest) [![License](https://img.shields.io/github/license/vmware/terraform-provider-vmc.svg?style=for-the-badge)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/tag/vmware/terraform-provider-hcx?label=latest%20release&style=for-the-badge)](https://github.com/vmware/terraform-provider-hcx/releases/latest) [![License](https://img.shields.io/github/license/vmware/terraform-provider-hcx.svg?style=for-the-badge)](LICENSE)
 
 The Terraform Provider for [VMware HCX][product-documentation] is a plugin for Terraform that allows you to interact with VMware HCX.
 
