@@ -5,10 +5,7 @@
 > Release Date: 2025-01-13
 
 - License changed from Apache License 2.0 to Mozilla Public License 2.0.
-- Transferred to
-  [`vmware/terraform-provider-hcx`](https://github.com/vmware/terraform-provider-hcx)
-  from
-  [`adeleporte/terraform-provider-hcx`](https://github.com/adeleporte/terraform-provider-hcx).
+- Transferred to [`vmware/terraform-provider-hcx`](https://github.com/vmware/terraform-provider-hcx) from [`adeleporte/terraform-provider-hcx`](https://github.com/adeleporte/terraform-provider-hcx).
 
 ## [v0.4.3](https://github.com/vmware/terraform-provider-hcx/releases/tag/v0.4.3)
 
