@@ -305,7 +305,7 @@ func GetLocalContainer(c *Client) (PostResourceContainerListResultDataItem, erro
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
 		fmt.Println(err)
-		return PostResouceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, err
 	}
 
 	resp := PostResourceContainerListResult{}
@@ -349,7 +349,7 @@ func GetRemoteContainer(c *Client) (PostResourceContainerListResultDataItem, err
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
 		fmt.Println(err)
-		return PostResouceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, err
 	}
 
 	resp := PostResourceContainerListResult{}

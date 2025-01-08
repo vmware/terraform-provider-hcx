@@ -18,15 +18,16 @@ import (
 
 // Client -
 type Client struct {
-	HostURL         string
-	HTTPClient      *http.Client
-	Token           string
-	HcxToken        string
-	AdminUsername   string
-	AdminPassword   string
-	Username        string
-	Password        string
-	IsAuthenticated bool
+	HostURL            string
+	HTTPClient         *http.Client
+	Token              string
+	HcxToken           string
+	AdminUsername      string
+	AdminPassword      string
+	Username           string
+	Password           string
+	IsAuthenticated    bool
+	AllowUnverifiedSSL bool
 }
 
 // AuthStruct -
@@ -67,13 +68,15 @@ func (c *Client) HcxConnectorAuthenticate() error {
 		return err
 	}
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: c.AllowUnverifiedSSL,
+	}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = tlsConfig
 
 	var resp *http.Response
 	for {
 		resp, err = c.HTTPClient.Do(req)
 		if err != nil {
-			// Hum...let's wait a bit and try again
 			time.Sleep(180 * time.Second)
 			resp, err = c.HTTPClient.Do(req)
 
@@ -131,18 +134,19 @@ func (c *Client) HcxConnectorAuthenticate() error {
 }
 
 // NewClient -
-func NewClient(hcx, username *string, password *string, adminUsername *string, adminPassword *string, vmcToken *string) (*Client, error) {
+func NewClient(hcx, username *string, password *string, adminUsername *string, adminPassword *string, allowUnverifiedSSL *bool, vmcToken *string) (*Client, error) {
 	c := Client{
 		HTTPClient: &http.Client{
 			Timeout: 60 * time.Second,
 		},
-		HostURL:         *hcx,
-		Username:        *username,
-		Password:        *password,
-		AdminUsername:   *adminUsername,
-		AdminPassword:   *adminPassword,
-		IsAuthenticated: false,
-		Token:           *vmcToken,
+		HostURL:            *hcx,
+		Username:           *username,
+		Password:           *password,
+		AdminUsername:      *adminUsername,
+		AdminPassword:      *adminPassword,
+		IsAuthenticated:    false,
+		AllowUnverifiedSSL: *allowUnverifiedSSL,
+		Token:              *vmcToken,
 	}
 
 	return &c, nil
@@ -163,7 +167,10 @@ func (c *Client) doRequest(req *http.Request) (*http.Response, []byte, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("x-hm-authorization", c.Token)
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: c.AllowUnverifiedSSL,
+	}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = tlsConfig
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -193,12 +200,15 @@ func (c *Client) doAdminRequest(req *http.Request) (*http.Response, []byte, erro
 	c.HTTPClient.Timeout = 300 * time.Second
 
 	if (c.AdminUsername == "") || (c.AdminPassword == "") {
-		return nil, nil, fmt.Errorf("Admin Username or Password Empty")
+		return nil, nil, fmt.Errorf("admin_username or admin_password is empty")
 	}
 
 	req.SetBasicAuth(c.AdminUsername, c.AdminPassword)
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: c.AllowUnverifiedSSL,
+	}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = tlsConfig
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -231,7 +241,10 @@ func (c *Client) doVmcRequest(req *http.Request) (*http.Response, []byte, error)
 		req.Header.Set("x-hm-authorization", c.HcxToken)
 	}
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: c.AllowUnverifiedSSL,
+	}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = tlsConfig
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {

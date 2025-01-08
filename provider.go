@@ -49,6 +49,12 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_ADMIN_PASSWORD", nil),
 			},
+			"allow_unverified_ssl": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("HCX_ALLOW_UNVERIFIED_SSL", false),
+				Description: "Allow SSL connections with unverifiable certificates.",
+			},
 			"vmc_token": {
 				Type:        schema.TypeString,
 				Description: "The token to authenticate with the VMware Cloud Services API.",
@@ -86,10 +92,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	password := d.Get("password").(string)
 	adminUsername := d.Get("admin_username").(string)
 	adminPassword := d.Get("admin_password").(string)
+	allowUnverifiedSSL := d.Get("allow_unverified_ssl").(bool)
 	vmcToken := d.Get("vmc_token").(string)
 
-	c, err := hcx.NewClient(&hcxURL, &username, &password, &adminUsername, &adminPassword, &vmcToken)
-	//c := &http.Client{Timeout: 10 * time.Second}
+	c, err := hcx.NewClient(&hcxURL, &username, &password, &adminUsername, &adminPassword, &allowUnverifiedSSL, &vmcToken)
 
 	if err != nil {
 		return nil, diag.FromErr(err)
@@ -98,8 +104,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	if hcxURL == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity:      diag.Warning,
-			Summary:       "No HCX Url provided",
-			Detail:        "Only hcx_vmc resource will be manageable",
+			Summary:       "No HCX URL provided.",
+			Detail:        "Only 'hcx_vmc' resource will be manageable.",
 			AttributePath: cty.Path{cty.GetAttrStep{Name: "hcx"}},
 		})
 	}
