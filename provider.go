@@ -21,34 +21,46 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_URL", nil),
+				Description: "URL of the HCX connector",
 			},
 			"username": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_USER", nil),
+				Description: "Username for HCX consumption",
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_PASSWORD", nil),
+				Description: "Password for HCX consumption",
 			},
 			"admin_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_ADMIN_USER", nil),
+				Description: "Username of the HCX appliance.",
 			},
 			"admin_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_ADMIN_PASSWORD", nil),
+				Description: "Password of the HCX appliance.",
+			},
+			"allow_unverified_ssl": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("HCX_ALLOW_UNVERIFIED_SSL", false),
+				Description: "Allow SSL connections with unverifiable certificates.",
 			},
 			"vmc_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("VMC_API_TOKEN", nil),
+				Description: "VMware Cloud Service API Token.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -80,10 +92,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	password := d.Get("password").(string)
 	adminusername := d.Get("admin_username").(string)
 	adminpassword := d.Get("admin_password").(string)
+	allowUnverifiedSSL := d.Get("allow_unverified_ssl").(bool)
 	vmc_token := d.Get("vmc_token").(string)
 
-	c, err := hcx.NewClient(&hcxurl, &username, &password, &adminusername, &adminpassword, &vmc_token)
-	//c := &http.Client{Timeout: 10 * time.Second}
+	c, err := hcx.NewClient(&hcxurl, &username, &password, &adminusername, &adminpassword, &allowUnverifiedSSL, &vmc_token)
 
 	if err != nil {
 		return nil, diag.FromErr(err)
@@ -92,7 +104,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	if hcxurl == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity:      diag.Warning,
-			Summary:       "No HCX Url provided",
+			Summary:       "No HCX URL provided",
 			Detail:        "Only hcx_vmc resource will be manageable",
 			AttributePath: cty.Path{cty.GetAttrStep{Name: "hcx"}},
 		})
