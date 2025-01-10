@@ -12,10 +12,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	hcx "github.com/vmware/terraform-provider-hcx/hcx"
-
-	"log"
 )
 
+const (
+	vmcMaxRetries               = 12
+	vmcRetryInterval            = 10 * time.Second
+	vmcMaxRetryInterval         = 5 * time.Minute
+	vmcActivationStatus         = "ACTIVE"
+	vmcActivationFailedStatus   = "ACTIVATION_FAILED"
+	vmcDeactivationStatus       = "DE-ACTIVATED"
+	vmcDeactivationFailedStatus = "DEACTIVATION_FAILED"
+)
+
+// resourceVmc defines the VMware Cloud SDDC resource for Terraform management, supporting creation, reading, updates,
+// and deletion. It allows activation and deactivation of HCX on an SDDC, with fields to specify and retrieve SDDC
+// details and related metadata.
 func resourceVmc() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVmcCreate,
@@ -25,228 +36,239 @@ func resourceVmc() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"sddc_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "ID of the SDDC. Either 'sddc_id' or 'sddc_name' must be specified.",
 			},
 			"sddc_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Name of the SDDC. Either 'sddc_name' or 'sddc_id' must be specified.",
 			},
 			"cloud_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "URL of HCX Cloud. Used for the site pairing configuration.",
 			},
 			"cloud_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Name of the HCX Cloud.",
 			},
 			"cloud_type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Type of the HCX Cloud.",
 			},
 		},
 	}
 }
 
+// resourceVmcCreate triggers the activation of HCX on a specified SDDC and ensures the process completes successfully.
+// It authenticates, validates, and polls the activation status until the SDDC reaches the desired state.
+// In case of repeated failures or errors during activation, it returns diagnostic information for troubleshooting.
 func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
 	client := m.(*hcx.Client)
 
-	token := client.Token
-	sddc_name := d.Get("sddc_name").(string)
-	sddcID := d.Get("sddc_id").(string)
-
-	if sddc_name == "" && sddcID == "" {
-		return diag.Errorf("SDDC name or Id must be specified")
+	// Authenticate and fetch the SDDC details.
+	sddc, diags := authenticateAndFetchSDDC(ctx, d, client)
+	if diags != nil {
+		return diags
 	}
 
-	// Authenticate with VMware Cloud Services
-	access_token, err := hcx.VmcAuthenticate(token)
+	// Validate if the SDDC is already activated.
+	if sddc.DeploymentStatus == vmcActivationStatus {
+		return diag.Errorf("sddc is already activated")
+	}
+
+	// Trigger the activation of HCX on the specified SDDC.
+	_, err := hcx.ActivateHcxOnSDDC(client, sddc.ID)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("failed to activate hcx on the sddc: %s", err.Error())
 	}
 
-	err = hcx.HcxCloudAuthenticate(client, access_token)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	// Poll the activation status until the process completes successfully or fails.
+	for retries := 0; retries < vmcMaxRetries; retries++ {
+		// Fetch the updated SDDC details.
+		sddc, diags = authenticateAndFetchSDDC(ctx, d, client)
+		if diags != nil {
+			hclog.Default().Info("[INFO] - resourceVmcCreate() - error retrieving sddc status; retrying...",
+				"sddc_id", sddc.ID, "sddc_name", sddc.Name, "error", diags[0].Summary, "RetryCount", retries)
 
-	var sddc hcx.SDDC
-	if sddcID != "" {
-		sddc, err = hcx.GetSddcByID(client, sddcID)
-	} else {
-		sddc, err = hcx.GetSddcByName(client, sddc_name)
-	}
-
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	// Check if already activated
-	if sddc.DeploymentStatus == "ACTIVE" {
-		return diag.Errorf("Already activated")
-	}
-
-	// Activate HCX
-	_, err = hcx.ActivateHcxOnSDDC(client, sddc.ID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	// Wait for task to be completed
-	errcount := 0
-	for {
-		if sddcID != "" {
-			sddc, err = hcx.GetSddcByID(client, sddcID)
-		} else {
-			sddc, err = hcx.GetSddcByName(client, sddc_name)
-		}
-		if err != nil {
-			// Attempt to bypass recurring situation where the HCX API
-			// returns status 502 with a proxy server error, and an HTML response
-			// instead of JSON.
-			errcount += 1
-			hclog.Default().Info("[INFO] - resourceVmcCreate() - Error retrieving SDDC status: ", "error", err.Error(), "Errcount:", errcount)
-			if errcount > 12 {
-				return diag.FromErr(err)
+			// Exit if the retry limit is exceeded.
+			if retries == vmcMaxRetries-1 {
+				return diags
 			}
+
+			// Apply exponential backoff with capped interval.
+			waitTime := calculateBackoff(retries)
+			time.Sleep(waitTime)
+			continue
 		}
 
-		if sddc.DeploymentStatus == "ACTIVE" {
-			break
+		// Check the current deployment status of the SDDC.
+		switch sddc.DeploymentStatus {
+		case vmcActivationStatus:
+			// Activation successful. Refresh the resource state by calling "read".
+			return resourceVmcRead(ctx, d, m)
+
+		case vmcActivationFailedStatus:
+			// Explicit activation failure. Return an appropriate error message.
+			return diag.Errorf("activation failed with status: %s", vmcActivationFailedStatus)
+
+		default:
+			hclog.Default().Warn("unknown sddc status during polling", "status", sddc.DeploymentStatus)
 		}
 
-		if sddc.DeploymentStatus == "ACTIVATION_FAILED" {
-			return diag.Errorf("Activation failed")
-		}
-
-		time.Sleep(10 * time.Second)
+		// Wait before the next polling attempt.
+		time.Sleep(vmcRetryInterval)
 	}
 
-	return resourceVmcRead(ctx, d, m)
+	// If retry limit is reached without resolution, return an error.
+	return diag.Errorf("maximum retries reached while activating the sddc")
 }
 
+// resourceVmcRead reads the current state of the SDDC from the remote API and updates resource data.
+// Returns diagnostic information on any errors encountered during authentication or data retrieval.
 func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
 	client := m.(*hcx.Client)
 
-	token := client.Token
-	sddc_name := d.Get("sddc_name").(string)
-	sddcID := d.Get("sddc_id").(string)
-
-	log.Printf("******************************************************************\n")
-	log.Printf("token: %s, sddc_name: %s,   sddc: %s   \n", token, sddc_name, sddcID)
-	log.Printf("******************************************************************\n")
-
-	if sddc_name == "" && sddcID == "" {
-		return diag.Errorf("SDDC name or Id must be specified")
+	// Authenticate and fetch the SDDC details.
+	sddc, diags := authenticateAndFetchSDDC(ctx, d, client)
+	if diags != nil {
+		return diags
 	}
 
-	// Authenticate with VMware Cloud Services
-	access_token, err := hcx.VmcAuthenticate(token)
-	if err != nil {
-		return diag.FromErr(err)
+	// Set resource data fields with retrieved SDDC details.
+	if err := d.Set("cloud_url", sddc.CloudURL); err != nil {
+		return diag.Errorf("failed to set 'cloud_url': %s", err.Error())
 	}
-
-	err = hcx.HcxCloudAuthenticate(client, access_token)
-	if err != nil {
-		return diag.FromErr(err)
+	if err := d.Set("cloud_name", sddc.CloudName); err != nil {
+		return diag.Errorf("failed to set 'cloud_name': %s", err.Error())
 	}
-
-	log.Printf("****************")
-	log.Printf("[Client inside]: %+v ", client)
-	log.Printf("****************")
-
-	var sddc hcx.SDDC
-	if sddcID != "" {
-		sddc, err = hcx.GetSddcByID(client, sddcID)
-	} else {
-		sddc, err = hcx.GetSddcByName(client, sddc_name)
+	if err := d.Set("cloud_type", sddc.CloudType); err != nil {
+		return diag.Errorf("failed to set 'cloud_type': %s", err.Error())
 	}
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	d.SetId(sddc.ID)
-	d.Set("cloud_url", sddc.CloudURL)
-	d.Set("cloud_name", sddc.CloudName)
-	d.Set("cloud_type", sddc.CloudType)
 
-	return diags
+	// Return diagnostics response.
+	return nil
 }
 
+// resourceVmcUpdate handles the update logic for the resource, ensuring immutable fields are not modified.
+// It validates updates to "sddc_id" and "sddc_name" and returns an error if modifications are attempted.
 func resourceVmcUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Validate immutable fields to prevent unsupported updates.
+	if d.HasChange("sddc_id") || d.HasChange("sddc_name") {
+		return diag.Errorf("opdating 'sddc_id' or 'sddc_name' is not supported")
+	}
 
+	// Return the current state using Read.
 	return resourceVmcRead(ctx, d, m)
 }
 
+// resourceVmcDelete handles the deletion of an SDDC by deactivating HCX and polling status until completion or failure.
 func resourceVmcDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
 	client := m.(*hcx.Client)
 
+	// Authenticate and fetch the SDDC details.
+	sddc, diags := authenticateAndFetchSDDC(ctx, d, client)
+	if diags != nil {
+		return diags
+	}
+
+	// Trigger the deactivation of HCX on the specified SDDC.
+	_, err := hcx.DeactivateHcxOnSDDC(client, sddc.ID)
+	if err != nil {
+		return diag.Errorf("failed to deactivate hcx on the sddc: %s", err.Error())
+	}
+
+	// Poll the deactivation status until the process completes successfully or fails.
+	for retries := 0; retries < vmcMaxRetries; retries++ {
+		// Fetch the updated status of the SDDC.
+		sddc, diags = authenticateAndFetchSDDC(ctx, d, client)
+		if diags != nil {
+			hclog.Default().Info("[INFO] - resourceVmcDelete() - error retrieving sddc status; retrying...",
+				"sddc_id", sddc.ID, "sddc_name", sddc.Name, "error", diags[0].Summary, "RetryCount", retries)
+
+			// Exit if the retry limit is exceeded
+			if retries == vmcMaxRetries-1 {
+				return diags
+			}
+
+			// Apply exponential backoff with capped interval.
+			waitTime := calculateBackoff(retries)
+			time.Sleep(waitTime)
+			continue
+		}
+
+		// Evaluate the current deployment status of the SDDC.
+		switch sddc.DeploymentStatus {
+		case vmcDeactivationStatus:
+			// Deactivation successful. Exit the deletion process.
+			return nil
+
+		case vmcDeactivationFailedStatus:
+			// Explicit deactivation failure. Return an appropriate error message.
+			return diag.Errorf("deactivation failed with status: %s", vmcDeactivationFailedStatus)
+
+		case "":
+			// SDDC resource already missing or deleted.
+			hclog.Default().Info("[INFO] - resourceVmcDelete() - sddc already missing or deleted.")
+			return nil
+
+		default:
+			hclog.Default().Warn("unknown sddc status during polling", "status", sddc.DeploymentStatus)
+		}
+	}
+
+	// If retry limit is reached without resolution, return an error.
+	return diag.Errorf("maximum retries reached while deleting the sddc")
+}
+
+// authenticateAndFetchSDDC authenticates with VMware Cloud and HCX APIs, and retrieves SDDC details by name or ID.
+func authenticateAndFetchSDDC(ctx context.Context, d *schema.ResourceData, client *hcx.Client) (hcx.SDDC, diag.Diagnostics) {
+	// Extract input parameters.
 	token := client.Token
-	sddc_name := d.Get("sddc_name").(string)
+	sddcName := d.Get("sddc_name").(string)
 	sddcID := d.Get("sddc_id").(string)
 
-	// Authenticate with VMware Cloud Services
-	access_token, err := hcx.VmcAuthenticate(token)
-	if err != nil {
-		return diag.FromErr(err)
+	// Validate inputs.
+	if sddcName == "" && sddcID == "" {
+		return hcx.SDDC{}, diag.Errorf("neither 'sddc_name' nor 'sddc_id' was specified")
 	}
 
-	err = hcx.HcxCloudAuthenticate(client, access_token)
+	// Authenticate with VMware Cloud Services.
+	accessToken, err := hcx.VmcAuthenticate(token)
 	if err != nil {
-		return diag.FromErr(err)
+		return hcx.SDDC{}, diag.Errorf("failed to authenticate with VMware Cloud Services: %s", err.Error())
 	}
 
+	// Authenticate the HCX API.
+	err = hcx.HcxCloudAuthenticate(client, accessToken)
+	if err != nil {
+		return hcx.SDDC{}, diag.Errorf("failed to authenticate hcx api: %s", err.Error())
+	}
+
+	// Retrieve the SDDC details.
 	var sddc hcx.SDDC
 	if sddcID != "" {
 		sddc, err = hcx.GetSddcByID(client, sddcID)
 	} else {
-		sddc, err = hcx.GetSddcByName(client, sddc_name)
+		sddc, err = hcx.GetSddcByName(client, sddcName)
 	}
 	if err != nil {
-		return diag.FromErr(err)
+		return hcx.SDDC{}, diag.Errorf("failed to retrieve sddc details: %s", err.Error())
 	}
 
-	// Deactivate HCX
-	_, err = hcx.DeactivateHcxOnSDDC(client, sddc.ID)
-	if err != nil {
-		return diag.FromErr(err)
+	return sddc, nil
+}
+
+// calculateBackoff computes the exponential backoff duration with a capped interval based on the number of retries.
+func calculateBackoff(retries int) time.Duration {
+	wait := vmcRetryInterval * time.Duration(1<<retries)
+	if wait > vmcMaxRetryInterval {
+		wait = vmcMaxRetryInterval
 	}
-
-	// Wait for task to be completed
-	errcount := 0
-	for {
-		var sddc hcx.SDDC
-		if sddcID != "" {
-			sddc, err = hcx.GetSddcByID(client, sddcID)
-		} else {
-			sddc, err = hcx.GetSddcByName(client, sddc_name)
-		}
-		if err != nil {
-			// Attempt to bypass recurring situation where the HCX API
-			// returns status 502 with a proxy server error, and an HTML response
-			// instead of JSON.
-			errcount += 1
-			hclog.Default().Info("[INFO] - resourceVmcDelete() - Error retrieving SDDC status: ", "error", err.Error(), "Errcount:", errcount)
-			if errcount > 12 {
-				return diag.FromErr(err)
-			}
-		}
-
-		if sddc.DeploymentStatus == "DE-ACTIVATED" {
-			break
-		}
-
-		if sddc.DeploymentStatus == "DEACTIVATION_FAILED" {
-			return diag.Errorf("Deactivation failed")
-		}
-
-		time.Sleep(10 * time.Second)
-	}
-
-	return diags
+	return wait
 }
