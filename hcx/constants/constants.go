@@ -24,6 +24,7 @@ const (
 	// VMC
 	VmcMaxRetries                 = 12
 	VmcRetryInterval              = 10 * time.Second
+	VmcMaxRetryInterval           = 5 * time.Minute
 	VmcActivationActiveStatus     = "ACTIVE"
 	VmcActivationFailedStatus     = "ACTIVATION_FAILED"
 	VmcDeactivationInactiveStatus = "DE-ACTIVATED"
