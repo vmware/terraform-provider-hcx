@@ -28,7 +28,7 @@ Learn more:
 
 * [Go 1.15][golang-install]
 
-    Required, if [building][provider-build] and [testing][provider-test].
+    Required, if [building][provider-build] the provider.
 
 ## Using the Provider
 
@@ -79,7 +79,6 @@ The Terraform Provider for VMware HCX is available under the [Mozilla Public Lic
 [provider-documentation]: https://registry.terraform.io/providers/vmware/hcx/latest/docs
 [provider-build]: docs/build.md
 [provider-install]: docs/install.md
-[provider-test]: docs/test.md
 [provider-issues]: https://github.com/vmware/terraform-provider-hcx/issues/new/choose
 [provider-license]: LICENSE
 [terraform-github]: https://github.com/hashicorp/terraform
