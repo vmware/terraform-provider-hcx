@@ -14,7 +14,7 @@ import (
 type SetLocationBody struct {
 	City      string  `json:"city"`
 	Country   string  `json:"country"`
-	CityAscii string  `json:"cityAscii"`
+	CityASCII string  `json:"cityAscii"`
 	Province  string  `json:"province"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
@@ -24,7 +24,7 @@ type GetLocationResult struct {
 	City      string  `json:"city"`
 	Country   string  `json:"country"`
 	Province  string  `json:"province"`
-	CityAscii string  `json:"cityAscii"`
+	CityASCII string  `json:"cityAscii"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }

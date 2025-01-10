@@ -128,7 +128,7 @@ func HcxCloudAuthenticate(client *Client, token string) error {
 
 }
 
-func GetSddcByName(client *Client, sddc_name string) (SDDC, error) {
+func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
@@ -155,7 +155,7 @@ func GetSddcByName(client *Client, sddc_name string) (SDDC, error) {
 	}
 
 	for _, j := range resp.SDDCs {
-		if j.Name == sddc_name {
+		if j.Name == sddcName {
 			return j, nil
 		}
 	}
@@ -202,7 +202,7 @@ func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 
 }
 
-func ActivateHcxOnSDDC(client *Client, sddc_id string) (ActivateHcxOnSDDCResults, error) {
+func ActivateHcxOnSDDC(client *Client, sddcID string) (ActivateHcxOnSDDCResults, error) {
 
 	resp := ActivateHcxOnSDDCResults{}
 
@@ -212,7 +212,7 @@ func ActivateHcxOnSDDC(client *Client, sddc_id string) (ActivateHcxOnSDDCResults
 		HcxToken:   client.HcxToken,
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sddcs/%s?action=activate", c.HostURL, sddc_id), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sddcs/%s?action=activate", c.HostURL, sddcID), nil)
 	if err != nil {
 		return resp, err
 	}
@@ -234,7 +234,7 @@ func ActivateHcxOnSDDC(client *Client, sddc_id string) (ActivateHcxOnSDDCResults
 
 }
 
-func DeactivateHcxOnSDDC(client *Client, sddc_id string) (DeactivateHcxOnSDDCResults, error) {
+func DeactivateHcxOnSDDC(client *Client, sddcID string) (DeactivateHcxOnSDDCResults, error) {
 
 	resp := DeactivateHcxOnSDDCResults{}
 
@@ -244,7 +244,7 @@ func DeactivateHcxOnSDDC(client *Client, sddc_id string) (DeactivateHcxOnSDDCRes
 		HcxToken:   client.HcxToken,
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sddcs/%s?action=deactivate", c.HostURL, sddc_id), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sddcs/%s?action=deactivate", c.HostURL, sddcID), nil)
 	if err != nil {
 		return resp, err
 	}

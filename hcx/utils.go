@@ -13,7 +13,7 @@ import (
 	"net/http"
 )
 
-type Job_result struct {
+type JobResult struct {
 	JobID                   string `json:"jobId"`
 	Enterprise              string `json:"enterprise"`
 	Organization            string `json:"organization"`
@@ -31,8 +31,8 @@ type Job_result struct {
 	TimeToExecute           int64  `json:"timeToExecute"`
 }
 
-type Task_result struct {
-	InterconnectTaskId string `json:"interconnectTaskId"`
+type TaskResult struct {
+	InterconnectTaskID string `json:"interconnectTaskId"`
 	Status             string `json:"status"`
 }
 
@@ -62,16 +62,16 @@ type PostResouceContainerListResultData struct {
 
 type PostResouceContainerListResultDataItem struct {
 	URL           string `json:"url"`
-	Vcuuid        string `json:"vcuuid"`
+	Vcuuid        string `json:"vcUUID"`
 	Version       string `json:"version"`
 	BuildNumber   string `json:"buildNumber"`
 	OsType        string `json:"osType"`
 	Name          string `json:"name"`
-	ResourceId    string `json:"resourceId"`
+	ResourceID    string `json:"resourceId"`
 	ResourceType  string `json:"resourceType"`
 	ResourceName  string `json:"resourceName"`
-	VimId         string `json:"vimId"`
-	VimServerUuid string `json:"vimServerUuid"`
+	VimID         string `json:"vimId"`
+	VimServerUUID string `json:"vimServerUuid"`
 }
 
 type PostNetworkBackingBody struct {
@@ -80,7 +80,7 @@ type PostNetworkBackingBody struct {
 
 type PostNetworkBackingBodyFilter struct {
 	Cloud PostCloudListResultDataItem `json:"cloud"`
-	//VCenterInstanceUuid string   `json:"vCenterInstanceUuid"`
+	//VcenterInstanceUUID string   `json:"vCenterInstanceUuid"`
 	//ExcludeUsed         bool     `json:"excludeUsed"`
 	//BackingTypes        []string `json:"backingTypes"`
 }
@@ -108,26 +108,26 @@ type GetVcInventoryResultData struct {
 }
 
 type GetVcInventoryResultDataItem struct {
-	Vcenter_instanceId string                                 `json:"vcenter_instanceId"`
-	Entity_id          string                                 `json:"entity_id"`
-	Children           []GetVcInventoryResultDataItemChildren `json:"children"`
-	Name               string                                 `json:"name"`
-	EntityType         string                                 `json:"entityType"`
+	VcenterInstanceID string                                 `json:"vcenter_instanceId"`
+	EntityID          string                                 `json:"entity_id"`
+	Children          []GetVcInventoryResultDataItemChildren `json:"children"`
+	Name              string                                 `json:"name"`
+	EntityType        string                                 `json:"entityType"`
 }
 
 type GetVcInventoryResultDataItemChildren struct {
-	Vcenter_instanceId string                                         `json:"vcenter_instanceId"`
-	Entity_id          string                                         `json:"entity_id"`
-	Children           []GetVcInventoryResultDataItemChildrenChildren `json:"children"`
-	Name               string                                         `json:"name"`
-	EntityType         string                                         `json:"entityType"`
+	VcenterInstanceID string                                         `json:"vcenter_instanceId"`
+	EntityID          string                                         `json:"entity_id"`
+	Children          []GetVcInventoryResultDataItemChildrenChildren `json:"children"`
+	Name              string                                         `json:"name"`
+	EntityType        string                                         `json:"entityType"`
 }
 
 type GetVcInventoryResultDataItemChildrenChildren struct {
-	Vcenter_instanceId string `json:"vcenter_instanceId"`
-	Entity_id          string `json:"entity_id"`
-	Name               string `json:"name"`
-	EntityType         string `json:"entityType"`
+	VcenterInstanceID string `json:"vcenter_instanceId"`
+	EntityID          string `json:"entity_id"`
+	Name              string `json:"name"`
+	EntityType        string `json:"entityType"`
 	// Datastores
 }
 
@@ -155,7 +155,7 @@ type GetVcDatastoreBody struct {
 type GetVcDatastoreFilter struct {
 	ComputeType       string   `json:"computeType"`
 	VCenterInstanceID string   `json:"vcenter_instanceId"`
-	ComputeIds        []string `json:"computeIds"`
+	ComputeIDs        []string `json:"computeIds"`
 }
 
 type GetVcDvsResult struct {
@@ -183,7 +183,7 @@ type GetVcDvsBody struct {
 type GetVcDvsFilter struct {
 	ComputeType       string   `json:"computeType"`
 	VCenterInstanceID string   `json:"vcenter_instanceId"`
-	ComputeIds        []string `json:"computeIds"`
+	ComputeIDs        []string `json:"computeIds"`
 }
 
 type PostCloudListFilter struct {
@@ -207,7 +207,7 @@ type PostCloudListResultData struct {
 }
 
 type PostCloudListResultDataItem struct {
-	EndpointId   string `json:"endpointId,omitempty"`
+	EndpointID   string `json:"endpointId,omitempty"`
 	Name         string `json:"name,omitempty"`
 	URL          string `json:"url,omitempty"`
 	EndpointType string `json:"endpointType,omitempty"`
@@ -219,8 +219,8 @@ type GetApplianceBody struct {
 
 type GetApplianceBodyFilter struct {
 	ApplianceType string `json:"applianceType"`
-	EndpointId    string `json:"endpointId"`
-	ServiceMeshId string `json:"serviceMeshId,omitempty"`
+	EndpointID    string `json:"endpointId"`
+	ServiceMeshID string `json:"serviceMeshId,omitempty"`
 }
 
 type GetApplianceResult struct {
@@ -228,17 +228,17 @@ type GetApplianceResult struct {
 }
 
 type GetApplianceResultItem struct {
-	ApplianceId           string `json:"applianceId"`
-	ServiceMeshId         string `json:"serviceMeshId"`
+	ApplianceID           string `json:"applianceId"`
+	ServiceMeshID         string `json:"serviceMeshId"`
 	NetworkExtensionCount int    `json:"networkExtensionCount"`
 }
 
 // GetJobResult ...
-func GetJobResult(c *Client, jobId string) (Job_result, error) {
+func GetJobResult(c *Client, jobID string) (JobResult, error) {
 
-	resp := Job_result{}
+	resp := JobResult{}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/jobs/%s", c.HostURL, jobId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/jobs/%s", c.HostURL, jobID), nil)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
@@ -262,11 +262,11 @@ func GetJobResult(c *Client, jobId string) (Job_result, error) {
 }
 
 // GetTaskResult ...
-func GetTaskResult(c *Client, taskId string) (Task_result, error) {
+func GetTaskResult(c *Client, taskID string) (TaskResult, error) {
 
-	resp := Task_result{}
+	resp := TaskResult{}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/interconnect/tasks/%s", c.HostURL, taskId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/interconnect/tasks/%s", c.HostURL, taskID), nil)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
@@ -370,12 +370,12 @@ func GetRemoteContainer(c *Client) (PostResouceContainerListResultDataItem, erro
 }
 
 // GetNetworkBacking ...
-func GetNetworkBacking(c *Client, endpointid string, network string, network_type string) (Dvpg, error) {
+func GetNetworkBacking(c *Client, endpointID string, network string, networkType string) (Dvpg, error) {
 
 	body := PostNetworkBackingBody{
 		Filter: PostNetworkBackingBodyFilter{
 			Cloud: PostCloudListResultDataItem{
-				EndpointId: endpointid,
+				EndpointID: endpointID,
 			},
 		},
 	}
@@ -410,7 +410,7 @@ func GetNetworkBacking(c *Client, endpointid string, network string, network_typ
 	log.Printf("*************************************")
 
 	for _, j := range resp.Data.Items {
-		if j.Name == network && j.EntityType == network_type {
+		if j.Name == network && j.EntityType == networkType {
 			return j, nil
 		}
 	}
@@ -450,13 +450,13 @@ func GetVcInventory(c *Client) (GetVcInventoryResultDataItem, error) {
 }
 
 // GetVcDatastore ...
-func GetVcDatastore(c *Client, datastore_name string, vcuuid string, cluster string) (GetVcDatastoreResultDataItem, error) {
+func GetVcDatastore(c *Client, datastoreName string, vcUUID string, cluster string) (GetVcDatastoreResultDataItem, error) {
 
 	body := GetVcDatastoreBody{
 		Filter: GetVcDatastoreFilter{
-			VCenterInstanceID: vcuuid,
+			VCenterInstanceID: vcUUID,
 			ComputeType:       "ClusterComputeResource",
-			ComputeIds:        []string{cluster},
+			ComputeIDs:        []string{cluster},
 		},
 	}
 
@@ -486,7 +486,7 @@ func GetVcDatastore(c *Client, datastore_name string, vcuuid string, cluster str
 	}
 
 	for _, j := range resp.Data.Items {
-		if j.Name == datastore_name {
+		if j.Name == datastoreName {
 			return j, nil
 		}
 	}
@@ -495,13 +495,13 @@ func GetVcDatastore(c *Client, datastore_name string, vcuuid string, cluster str
 }
 
 // GetVcDvs ...
-func GetVcDvs(c *Client, dvs_name string, vcuuid string, cluster string) (GetVcDvsResultDataItem, error) {
+func GetVcDvs(c *Client, dvsName string, vcUUID string, cluster string) (GetVcDvsResultDataItem, error) {
 
 	body := GetVcDvsBody{
 		Filter: GetVcDvsFilter{
-			VCenterInstanceID: vcuuid,
+			VCenterInstanceID: vcUUID,
 			ComputeType:       "ClusterComputeResource",
-			ComputeIds:        []string{cluster},
+			ComputeIDs:        []string{cluster},
 		},
 	}
 
@@ -531,7 +531,7 @@ func GetVcDvs(c *Client, dvs_name string, vcuuid string, cluster string) (GetVcD
 	}
 
 	for _, j := range resp.Data.Items {
-		if j.Name == dvs_name {
+		if j.Name == dvsName {
 			return j, nil
 		}
 	}
@@ -614,12 +614,12 @@ func GetLocalCloudList(c *Client) (PostCloudListResult, error) {
 }
 
 // GetRemoteCloudList ...
-func GetAppliance(c *Client, endpointId string, service_mesh_id string) (GetApplianceResultItem, error) {
+func GetAppliance(c *Client, endpointID string, serviceMeshID string) (GetApplianceResultItem, error) {
 
 	body := GetApplianceBody{
 		Filter: GetApplianceBodyFilter{
 			ApplianceType: "HCX-NET-EXT",
-			EndpointId:    endpointId,
+			EndpointID:    endpointID,
 		},
 	}
 
@@ -649,7 +649,7 @@ func GetAppliance(c *Client, endpointId string, service_mesh_id string) (GetAppl
 	}
 
 	for _, j := range resp.Items {
-		if j.ServiceMeshId == service_mesh_id && j.NetworkExtensionCount < 9 {
+		if j.ServiceMeshID == serviceMeshID && j.NetworkExtensionCount < 9 {
 			return j, nil
 		}
 	}
@@ -658,13 +658,13 @@ func GetAppliance(c *Client, endpointId string, service_mesh_id string) (GetAppl
 }
 
 // GetRemoteCloudList ...
-func GetAppliances(c *Client, endpointId string, service_mesh_id string) ([]GetApplianceResultItem, error) {
+func GetAppliances(c *Client, endpointID string, serviceMeshID string) ([]GetApplianceResultItem, error) {
 
 	body := GetApplianceBody{
 		Filter: GetApplianceBodyFilter{
 			ApplianceType: "HCX-NET-EXT",
-			EndpointId:    endpointId,
-			ServiceMeshId: service_mesh_id,
+			EndpointID:    endpointID,
+			ServiceMeshID: serviceMeshID,
 		},
 	}
 

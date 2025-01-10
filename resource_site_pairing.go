@@ -80,7 +80,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 	password := d.Get("password").(string)
 
 	body := hcx.RemoteCloudConfigBody{
-		Remote: hcx.Remote_data{
+		Remote: hcx.RemoteData{
 			Username: username,
 			Password: password,
 			URL:      url,
@@ -93,7 +93,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	second_try := false
+	secondTry := false
 	if res.Errors != nil {
 		if res.Errors[0].Error == "Login failure" {
 			return diag.Errorf("%s", res.Errors[0].Text)
@@ -101,8 +101,8 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 
 		if len(res.Errors[0].Data) > 0 {
 			// Try to get certificate
-			certificate_raw := res.Errors[0].Data[0]
-			certificate, ok := certificate_raw["certificate"].(string)
+			certificateRaw := res.Errors[0].Data[0]
+			certificate, ok := certificateRaw["certificate"].(string)
 
 			if ok {
 				// Add certificate
@@ -118,10 +118,10 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 			return diag.Errorf("Unknown error(s): %+v", res.Errors)
 		}
 
-		second_try = true
+		secondTry = true
 	}
 
-	if second_try {
+	if secondTry {
 		res, err = hcx.InsertSitePairing(client, body)
 		if err != nil {
 			return diag.FromErr(err)
@@ -195,7 +195,7 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 
 	for _, item := range res.Data.Items {
 		if item.URL == url {
-			d.SetId(item.EndpointId)
+			d.SetId(item.EndpointID)
 
 			lc, err := hcx.GetLocalContainer(client)
 			if err != nil {
@@ -208,7 +208,7 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 			if err != nil {
 				return diag.FromErr(errors.New("cannot get remote container info"))
 			}
-			d.Set("remote_resource_id", rc.ResourceId)
+			d.Set("remote_resource_id", rc.ResourceID)
 			d.Set("remote_resource_type", rc.ResourceType)
 			d.Set("remote_resource_name", rc.ResourceName)
 
@@ -229,7 +229,7 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 			if err != nil {
 				return diag.FromErr(errors.New("cannot get remote cloud info"))
 			}
-			d.Set("local_endpoint_id", res3.Data.Items[0].EndpointId)
+			d.Set("local_endpoint_id", res3.Data.Items[0].EndpointID)
 			d.Set("local_name", res3.Data.Items[0].Name)
 
 			return diags
