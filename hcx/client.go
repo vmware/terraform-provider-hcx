@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -99,7 +99,7 @@ func (c *Client) HcxConnectorAuthenticate() error {
 
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
@@ -182,7 +182,7 @@ func (c *Client) doRequest(req *http.Request) (*http.Response, []byte, error) {
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -217,7 +217,7 @@ func (c *Client) doAdminRequest(req *http.Request) (*http.Response, []byte, erro
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -249,7 +249,7 @@ func (c *Client) doVmcRequest(req *http.Request) (*http.Response, []byte, error)
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, nil, err
 	}
