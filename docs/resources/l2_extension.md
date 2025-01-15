@@ -1,8 +1,16 @@
-# l2_extension
+# Resource: `l2_extension`
 
-You can bridge local network segments between HCX-enabled data centers with HCX Network Extension.
+You can bridge local network segments between HCX-enabled data centers with HCX
+Network Extension.
 
-With VMware HCX Network Extension (HCX-NE), a High-Performance (4–6 Gbps) service, you can extend the Virtual Machine networks to a VMware HCX-enabled remote site. Virtual Machines that are migrated or created on the extended segment at the remote site are Layer 2 next to virtual machines placed on the origin network. Using Network Extension a remote site's resources can be quickly consumed. With Network Extension , the default gateway for the extended network only exists at the source site. Traffic from virtual machines (on remote extended networks) that must be routed returns to the source site gateway.
+With VMware HCX Network Extension (HCX-NE), a high-performance (4–6 Gbps)
+service, you can extend the virtual machine networks to a VMware HCX-enabled
+remote site. Virtual machines that are migrated or created on the extended
+segment at the remote site are Layer 2 adjacent to virtual machines on the
+origin network. Using Network Extension, a remote site's resources can be
+quickly consumed. With Network Extension, the default gateway for the extended
+network only exists at the source site. Traffic from virtual machines on remote
+extended networks that must be routed returns to the source site gateway.
 
 ## Example Usage
 
@@ -21,23 +29,31 @@ resource "hcx_l2_extension" "l2_extension_1" {
 }
 
 output "l2_extension_1" {
-    value = hcx_l2_extension.l2_extension_1
+  value = hcx_l2_extension.l2_extension_1
 }
 ```
 
 ## Argument Reference
 
-* `site_pairing` - (Required) Site pairing used by this service mesh.
-* `service_mesh_id` - (Required) ID of the Service Mesh to be used for this L2 extension.
-* `source_network` - (Required) Source Network. Must be a dvpg which is vlan tagged.
-* `destination_t1` - (Required) Name of the T1 NSX-T router at destination.
-* `gateway` - (Required) Gateway address to configure on the T1. Should be equal to the existing default gateway at source site.
-* `netmask` - (Required) Netmask
-* `network_type` - (Optional) Network Backing type. Default is `DistributedVirtualPortgroup`. Accepted Values are `DistributedVirtualPortgroup` and `NsxtSegment`
-* `appliance_id` - (Optional) ID of the NE appliance to use for the L2 extension. If not specified, the first appliance is chosen.
-* `mon` - (Optional - Default is false) Enable the MON (Mobility Optimized Networking) feature. Need Enterprise Licence.
-* `egress_optimization` - (Optional - Default is false) Enable the Egress Optimization feature. Need Enterprise Licence.
+* `site_pairing` - (Required) The site pairing used by this service mesh.
+* `service_mesh_id` - (Required) The ID of the Service Mesh to be used for this
+  L2 extension.
+* `source_network` - (Required) The source network. Must be a distributed port
+  group which is VLAN tagged.
+* `destination_t1` - (Required) The name of the NSX T1 at the destination.
+* `gateway` - (Required) The gateway address to configure on the NSX T1. Should
+  be equal to the existing default gateway at the source site.
+* `netmask` - (Required) The netmask.
+* `network_type` - (Optional) The network backing type. Allowed values include:
+  `DistributedVirtualPortgroup` and `NsxtSegment`. Defaults to
+  `DistributedVirtualPortgroup`.
+* `appliance_id` - (Optional) The ID of the Network Extension appliance to use
+  for the L2 extension. Defaults to the first appliance.
+* `mon` - (Optional, default is false) Enable the MON (Mobility Optimized
+  Networking) feature. Defaults to `false`.
+* `egress_optimization` - (Optional, default is false) Enable the Egress
+  Optimization feature. Defaults to `false`.
 
 ## Attribute Reference
 
-* `id` - ID of the L2 extension.
+* `id` - The ID of the L2 extension.

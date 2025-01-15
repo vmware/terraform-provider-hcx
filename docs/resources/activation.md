@@ -1,8 +1,6 @@
-# activation
+# Resource: `activation`
 
-An activation key is mandatory to use a HCX system
-
-
+An activation key is mandatory to use a HCX system.
 
 ## Example Usage
 
@@ -10,14 +8,12 @@ An activation key is mandatory to use a HCX system
 resource "hcx_activation" "activation" {
     activationkey = "*****-*****-*****-*****-*****"
 }
-
 ```
 
 ## Argument Reference
 
-* `activationkey` - (Required) Activation key.
-
+* `activationkey` - (Required) The activation key.
 
 ## Attribute Reference
 
-* `id` - ID of the activation.
+* `id` - The ID of the activation key.
