@@ -1,19 +1,19 @@
 ---
-page_title: "HCX/VMC Lab - Full HCX Connector configuration"
+page_title: "HCX/VMC Lab - Full HCX Connector Configuration"
 ---
 
-This TF file automates the configuration of a HCX lab. It manages creation/update/deletion of :
-* HCX activation and configuration at VMC side
-* Site pairing
-* Network profiles (Management, vMotion and Uplink)
-* Compute profile
+This example file automates the configuration of an HCX lab, managing the:
+
+* HCX Activation and Configuration at VMC side.
+* Site Pairing
+* Network Profiles (Management, vMotion, and Uplink)
+* Compute Profile
 * Service Mesh
 * L2 Extension
 
-## Usage example
+## Usage Example
 
 ```hcl
-
 terraform {
   required_providers {
     hcx = {
@@ -22,17 +22,15 @@ terraform {
   }
 }
 
-provider hcx {
-    hcx             = "https://172.17.9.10"
+provider "hcx" {
+  hcx            = "https://172.17.9.10"
+  admin_username = "admin"
+  admin_password = "VMware1!VMware1!"
+  username       = "administrator@vsphere.local"
+  password       = "VMware1!"
 
-    admin_username  = "admin"
-    admin_password  = "VMware1!VMware1!"
-
-    username        = "administrator@vsphere.local"
-    password        = "VMware1!"
-
-    // token = "xxx" if VMC
-    // export VMC_API_TOKEN=...
+  // token = "xxx" if VMC
+  // export VMC_API_TOKEN=...
 }
 
 // Variables definitions
@@ -41,198 +39,163 @@ variable "hcx_vmc_vcenter_password" {
   description = "vCenter password (export TF_VAR_hcx_vmc_vcenter_password=...)"
 }
 
-// Provider config
-provider hcx {
-    hcx             = "https://172.17.9.10"
-
-    admin_username  = "admin"
-    admin_password  = "VMware1!VMware1!"
-
-    username        = "administrator@cpod-vcn.az-fkd.cloud-garage.net"
-    password        = "changeme"
+provider "hcx" {
+  hcx            = "https://172.17.9.10"
+  admin_username = "admin"
+  admin_password = "VMware1!VMware1!"
+  username       = "administrator@cpod-vcn.az-fkd.cloud-garage.net"
+  password       = "VMware1!"
 }
 
 resource "hcx_vcenter" "vcenter" {
-    url         = "https://172.17.9.3"
-    username    = "administrator@cpod-vcn.az-fkd.cloud-garage.net"
-    password    = "changeme"
-
-    depends_on  = [hcx_activation.activation]
+  url        = "https://172.17.9.3"
+  username   = "administrator@cpod-vcn.az-fkd.cloud-garage.net"
+  password   = "VMware1!"
+  depends_on = [hcx_activation.activation]
 }
 
 resource "hcx_sso" "sso" {
-    vcenter     = hcx_vcenter.vcenter.id
-    url         = "https://172.17.9.3"
+  vcenter = hcx_vcenter.vcenter.id
+  url     = "https://172.17.9.3"
 }
 
-
 resource "hcx_rolemapping" "rolemapping" {
-    sso = hcx_sso.sso.id
-
-    admin {
-      user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
-    }
-
-    admin {
-      user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
-    }
-
-    enterprise {
-      user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
-    }
+  sso = hcx_sso.sso.id
+  admin {
+    user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
+  }
+  admin {
+    user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
+  }
+  enterprise {
+    user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
+  }
 }
 
 resource "hcx_location" "location" {
-    city        = "Paris"
-    country     = "France"
-    province    = "Ile-de-France"
-    latitude    = 48.86669293
-    longitude   = 2.333335326
+  city      = "Paris"
+  country   = "France"
+  province  = "Ile-de-France"
+  latitude  = 48.86669293
+  longitude = 2.333335326
 }
 
-
-
 // Datasources and Resources
-resource "hcx_vmc" "vmc_nico" {  
-    sddc_name   = "mySDDC-name"
+
+resource "hcx_vmc" "vmc_nico" {
+  sddc_name = "mySDDC-name"
 }
 
 resource "hcx_site_pairing" "vmc" {
-    url         = hcx_vmc.vmc_nico.cloud_url
-    username    = "cloudadmin@vmc.local"
-    password    = var.vmc_vcenter_password
-
-    depends_on  = [hcx_rolemapping.rolemapping]
+  url        = hcx_vmc.vmc_nico.cloud_url
+  username   = "cloudadmin@vmc.local"
+  password   = var.vmc_vcenter_password
+  depends_on = [hcx_rolemapping.rolemapping]
 }
 
 resource "hcx_network_profile" "net_management" {
-  vcenter       = hcx_site_pairing.vmc.local_vc
-  network_name  = "HCX-Management-RegionA01"
-  name          = "HCX-Management-RegionA01-profile"
-  mtu           = 1500
-
+  vcenter      = hcx_site_pairing.vmc.local_vc
+  network_name = "HCX-Management-RegionA01"
+  name         = "HCX-Management-RegionA01-profile"
+  mtu          = 1500
   ip_range {
-    start_address   = "192.168.110.151"
-    end_address     = "192.168.110.155"
+    start_address = "192.168.110.151"
+    end_address   = "192.168.110.155"
   }
-
-  gateway           = "192.168.110.1"
-  prefix_length     = 24
-  primary_dns       = "192.168.110.10"
-  secondary_dns     = ""
-  dns_suffix        = "corp.local"
+  gateway       = "192.168.110.1"
+  prefix_length = 24
+  primary_dns   = "192.168.110.10"
+  secondary_dns = ""
+  dns_suffix    = "corp.local"
 }
 
-
-
 resource "hcx_network_profile" "net_uplink" {
-  vcenter       = hcx_site_pairing.vmc.local_vc
-  network_name  = "HCX-Uplink-RegionA01"
-  name          = "HCX-Uplink-RegionA01-profile"
-  mtu           = 1600
-
+  vcenter      = hcx_site_pairing.vmc.local_vc
+  network_name = "HCX-Uplink-RegionA01"
+  name         = "HCX-Uplink-RegionA01-profile"
+  mtu          = 1600
   ip_range {
-    start_address   = "192.168.110.156"
-    end_address     = "192.168.110.160"
+    start_address = "192.168.110.156"
+    end_address   = "192.168.110.160"
   }
-
-  gateway           = "192.168.110.1"
-  prefix_length     = 24
-  primary_dns       = "192.168.110.1"
-  secondary_dns     = ""
-  dns_suffix        = "corp.local"
+  gateway       = "192.168.110.1"
+  prefix_length = 24
+  primary_dns   = "192.168.110.1"
+  secondary_dns = ""
+  dns_suffix    = "corp.local"
 }
 
 resource "hcx_network_profile" "net_vmotion" {
-  vcenter       = hcx_site_pairing.vmc.local_vc
-  network_name  = "HCX-vMotion-RegionA01"
-  name          = "HCX-vMotion-RegionA01-profile"
-  mtu           = 1500
-
+  vcenter      = hcx_site_pairing.vmc.local_vc
+  network_name = "HCX-vMotion-RegionA01"
+  name         = "HCX-vMotion-RegionA01-profile"
+  mtu          = 1500
   ip_range {
-    start_address   = "10.10.30.151"
-    end_address     = "10.10.30.155"
+    start_address = "10.10.30.151"
+    end_address   = "10.10.30.155"
   }
-
-  gateway           = ""
-  prefix_length     = 24
-  primary_dns       = ""
-  secondary_dns     = ""
-  dns_suffix        = ""
+  gateway       = ""
+  prefix_length = 24
+  primary_dns   = ""
+  secondary_dns = ""
+  dns_suffix    = ""
 }
 
-
-
 resource "hcx_compute_profile" "compute_profile_1" {
-  name                  = "comp1"
-  datacenter            = "RegionA01-ATL"
-  cluster               = "RegionA01-COMP01"
-  datastore             = "RegionA01-ISCSI01-COMP01"
-
-  management_network    = hcx_network_profile.net_management.id
-  replication_network   = hcx_network_profile.net_management.id
-  uplink_network        = hcx_network_profile.net_uplink.id
-  vmotion_network       = hcx_network_profile.net_vmotion.id
-  dvs                   = "RegionA01-vDS-COMP"
-
+  name                = "comp1"
+  datacenter          = "RegionA01-ATL"
+  cluster             = "RegionA01-COMP01"
+  datastore           = "RegionA01-ISCSI01-COMP01"
+  management_network  = hcx_network_profile.net_management.id
+  replication_network = hcx_network_profile.net_management.id
+  uplink_network      = hcx_network_profile.net_uplink.id
+  vmotion_network     = hcx_network_profile.net_vmotion.id
+  dvs                 = "RegionA01-vDS-COMP"
   service {
-    name                = "INTERCONNECT"
+    name = "INTERCONNECT"
   }
-
   service {
-    name                = "WANOPT"
+    name = "WANOPT"
   }
-
   service {
-    name                = "VMOTION"
+    name = "VMOTION"
   }
-
   service {
-    name                = "BULK_MIGRATION"
+    name = "BULK_MIGRATION"
   }
-
   service {
-    name                = "NETWORK_EXTENSION"
+    name = "NETWORK_EXTENSION"
   }
-
   service {
-    name                = "DISASTER_RECOVERY"
+    name = "DISASTER_RECOVERY"
   }
-
 }
 
 resource "hcx_service_mesh" "service_mesh_1" {
-  name                            = "sm1"
-  site_pairing                    = hcx_site_pairing.vmc
-  local_compute_profile           = hcx_compute_profile.compute_profile_1.name
-  remote_compute_profile          = "ComputeProfile(vcenter)"
+  name                   = "sm1"
+  site_pairing           = hcx_site_pairing.vmc
+  local_compute_profile  = hcx_compute_profile.compute_profile_1.name
+  remote_compute_profile = "ComputeProfile(vcenter)"
 
-  app_path_resiliency_enabled     = false
-  tcp_flow_conditioning_enabled   = false
+  app_path_resiliency_enabled   = false
+  tcp_flow_conditioning_enabled = false
 
-  uplink_max_bandwidth            = 10000
-
-  service {
-    name                = "INTERCONNECT"
-  }
+  uplink_max_bandwidth = 10000
 
   service {
-    name                = "VMOTION"
+    name = "INTERCONNECT"
   }
-
   service {
-    name                = "BULK_MIGRATION"
+    name = "VMOTION"
   }
-
   service {
-    name                = "NETWORK_EXTENSION"
+    name = "BULK_MIGRATION"
   }
-
   service {
-    name                = "DISASTER_RECOVERY"
+    name = "NETWORK_EXTENSION"
   }
-
+  service {
+    name = "DISASTER_RECOVERY"
+  }
 }
-
-
 ```

@@ -1,7 +1,10 @@
-# location
+# Resource: `location`
 
-Select the nearest major city to where the HCX system is geographically located. HCX sites are represented visually in the Dashboard.
+Select the nearest major city to where the HCX system is geographically located.
+HCX sites are represented visually in the Dashboard.
 
+Select the nearest major city to where the HCX system is geographically located.
+HCX sites are visually represented in the Dashboard.
 
 ## Example Usage
 
@@ -13,14 +16,12 @@ resource "hcx_location" "location" {
     latitude    = 48.86669293
     longitude   = 2.333335326
 }
-
 ```
 
 ## Argument Reference
 
-* `city` - (Optional) City of this HCX Site.
-* `country` - (Optional) Country of this HCX Site.
-* `province` - (Optional) Province of this HCX Site.
-* `latitude` - (Optional) Latitude of this HCX Site.
-* `longitude` - (Optional) Longitude of this HCX Site.
-
+* `city` - (Optional) The city where the HCX site is located.
+* `province` - (Optional) The province where the HCX site is located.
+* `country` - (Optional) The country where the HCX site is located.
+* `latitude` - (Optional) The latitude coordinate of the HCX site.
+* `longitude` - (Optional) The longitude coordinate of the HCX site.
