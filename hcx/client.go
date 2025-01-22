@@ -42,20 +42,6 @@ type AuthResponse struct {
 	Token    string `json:"token"`
 }
 
-type updateConfigurationModule struct {
-	Name string                 `json:"name"`
-	Data map[string]interface{} `json:"data"`
-}
-
-type updateConfigurationModuleBody struct {
-	ID     int                       `json:"id"`
-	Update updateConfigurationModule `json:"_update"`
-}
-
-type enterprise_get_object_groups struct {
-	Type string `json:"type"`
-}
-
 type Content struct {
 	Strings []string `xml:"string"`
 }
