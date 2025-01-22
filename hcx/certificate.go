@@ -26,7 +26,11 @@ func InsertCertificate(c *Client, body InsertCertificateBody) (InsertCertificate
 	resp := InsertCertificateResult{}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return resp, err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/admin/certificates", c.HostURL), &buf)
 	if err != nil {

@@ -157,7 +157,9 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	if err := json.NewEncoder(buf).Encode(body); err != nil {
+		return diag.FromErr(err)
+	}
 
 	res2, err := hcx.InsertL2Extension(client, body)
 

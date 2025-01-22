@@ -65,7 +65,11 @@ func InsertServiceMesh(c *Client, body InsertServiceMeshBody) (InsertServiceMesh
 	resp := InsertServiceMeshResult{}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return resp, err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/serviceMesh", c.HostURL), &buf)
 	if err != nil {

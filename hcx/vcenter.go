@@ -45,7 +45,11 @@ func InsertvCenter(c *Client, body InsertvCenterBody) (InsertvCenterResult, erro
 	resp := InsertvCenterResult{}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return resp, err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/vcenter", c.HostURL), &buf)
 	if err != nil {

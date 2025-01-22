@@ -100,7 +100,10 @@ func (c *Client) HcxConnectorAuthenticate() error {
 
 		// Check if SSO is ready
 		var xmlmessage Entries
-		xml.Unmarshal(body, &xmlmessage)
+		err = xml.Unmarshal(body, &xmlmessage)
+		if err != nil {
+			return err
+		}
 
 		certificate_pb := false
 		for _, j := range xmlmessage.Entry {

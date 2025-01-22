@@ -299,12 +299,12 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	if err := json.NewEncoder(buf).Encode(body); err != nil {
+		return diag.FromErr(err)
+	}
 
 	res2, err := hcx.InsertComputeProfile(client, body)
-
 	if err != nil {
-		//return diag.FromErr(errors.New(fmt.Sprintf("%s", buf)))
 		return diag.FromErr(err)
 	}
 

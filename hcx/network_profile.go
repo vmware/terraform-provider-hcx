@@ -74,7 +74,11 @@ func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 	resp := NetworkProfileResult{}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return resp, err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/admin/hybridity/api/networks", c.HostURL), &buf)
 	if err != nil {
@@ -111,7 +115,11 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return NetworkProfileBody{}, err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), &buf)
 	if err != nil {
@@ -154,7 +162,11 @@ func GetNetworkProfileById(c *Client, id string) (NetworkProfileBody, error) {
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return NetworkProfileBody{}, err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), &buf)
 	if err != nil {
@@ -219,7 +231,11 @@ func UpdateNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 	resp := NetworkProfileResult{}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return resp, err
+	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, body.ObjectId), &buf)
 	if err != nil {

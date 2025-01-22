@@ -80,7 +80,11 @@ func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2Extention
 	resp := InsertL2ExtentionResult{}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return resp, err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/l2Extensions", c.HostURL), &buf)
 	if err != nil {

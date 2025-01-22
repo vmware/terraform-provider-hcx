@@ -117,7 +117,10 @@ func resourceSSODelete(ctx context.Context, d *schema.ResourceData, m interface{
 
 	client := m.(*hcx.Client)
 
-	hcx.DeleteSSO(client, d.Id())
+	_, err := hcx.DeleteSSO(client, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }

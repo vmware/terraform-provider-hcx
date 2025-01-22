@@ -302,7 +302,11 @@ func GetLocalContainer(c *Client) (PostResouceContainerListResultDataItem, error
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return PostResouceContainerListResultDataItem{}, err
+	}
 
 	resp := PostResouceContainerListResult{}
 
@@ -342,7 +346,11 @@ func GetRemoteContainer(c *Client) (PostResouceContainerListResultDataItem, erro
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return PostResouceContainerListResultDataItem{}, err
+	}
 
 	resp := PostResouceContainerListResult{}
 
@@ -381,7 +389,11 @@ func GetNetworkBacking(c *Client, endpointid string, network string, network_typ
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return Dvpg{}, err
+	}
 
 	resp := PostNetworkBackingResult{}
 
@@ -461,7 +473,11 @@ func GetVcDatastore(c *Client, datastore_name string, vcuuid string, cluster str
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return GetVcDatastoreResultDataItem{}, err
+	}
 
 	resp := GetVcDatastoreResult{}
 
@@ -506,7 +522,11 @@ func GetVcDvs(c *Client, dvs_name string, vcuuid string, cluster string) (GetVcD
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return GetVcDvsResultDataItem{}, err
+	}
 
 	resp := GetVcDvsResult{}
 
@@ -549,7 +569,11 @@ func GetRemoteCloudList(c *Client) (PostCloudListResult, error) {
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return PostCloudListResult{}, err
+	}
 
 	resp := PostCloudListResult{}
 
@@ -586,7 +610,11 @@ func GetLocalCloudList(c *Client) (PostCloudListResult, error) {
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return PostCloudListResult{}, err
+	}
 
 	resp := PostCloudListResult{}
 
@@ -624,7 +652,11 @@ func GetAppliance(c *Client, endpointId string, service_mesh_id string) (GetAppl
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return GetApplianceResultItem{}, err
+	}
 
 	resp := GetApplianceResult{}
 
@@ -669,7 +701,11 @@ func GetAppliances(c *Client, endpointId string, service_mesh_id string) ([]GetA
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return []GetApplianceResultItem{}, err
+	}
 
 	resp := GetApplianceResult{}
 
