@@ -161,7 +161,7 @@ func (c *Client) doRequest(req *http.Request) (*http.Response, []byte, error) {
 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-hm-authorization", fmt.Sprintf("%s", c.Token))
+	req.Header.Set("x-hm-authorization", c.Token)
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -228,8 +228,9 @@ func (c *Client) doVmcRequest(req *http.Request) (*http.Response, []byte, error)
 	req.Header.Set("Content-Type", "application/json")
 
 	if c.HcxToken != "" {
-		req.Header.Set("x-hm-authorization", fmt.Sprintf("%s", c.HcxToken))
+		req.Header.Set("x-hm-authorization", c.HcxToken)
 	}
+
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	res, err := c.HTTPClient.Do(req)
