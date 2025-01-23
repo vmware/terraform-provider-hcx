@@ -43,13 +43,13 @@ func dataSourceComputeProfileRead(ctx context.Context, d *schema.ResourceData, m
 
 	network := d.Get("name").(string)
 
-	cp, err := hcx.GetComputeProfile(client, res.Data.Items[0].EndpointId, network)
+	cp, err := hcx.GetComputeProfile(client, res.Data.Items[0].EndpointID, network)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(cp.ComputeProfileId)
+	d.SetId(cp.ComputeProfileID)
 
 	return diags
 }

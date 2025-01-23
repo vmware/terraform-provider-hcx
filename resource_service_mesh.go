@@ -111,74 +111,74 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 	client := m.(*hcx.Client)
 
 	name := d.Get("name").(string)
-	site_pairing := d.Get("site_pairing").(map[string]interface{})
-	local_endpoint_id := site_pairing["local_endpoint_id"].(string)
-	local_endpoint_name := site_pairing["local_name"].(string)
+	sitePairing := d.Get("site_pairing").(map[string]interface{})
+	localEndpointID := sitePairing["local_endpoint_id"].(string)
+	localEndpointName := sitePairing["local_name"].(string)
 
-	remote_endpoint_id := site_pairing["id"].(string)
-	remote_endpoint_name := site_pairing["remote_name"].(string)
+	remoteEndpointID := sitePairing["id"].(string)
+	remoteEndpointName := sitePairing["remote_name"].(string)
 
-	uplink_max_bandwidth := d.Get("uplink_max_bandwidth").(int)
-	app_path_resiliency_enabled := d.Get("app_path_resiliency_enabled").(bool)
-	tcp_flow_conditioning_enabled := d.Get("tcp_flow_conditioning_enabled").(bool)
+	uplinkMaxBandwidth := d.Get("uplink_max_bandwidth").(int)
+	appPathResiliencyEnabled := d.Get("app_path_resiliency_enabled").(bool)
+	tcpFlowConditioningEnabled := d.Get("tcp_flow_conditioning_enabled").(bool)
 
 	services := d.Get("service").([]interface{})
-	services_from_schema := []hcx.Service{}
+	servicesFromSchema := []hcx.Service{}
 	for _, j := range services {
 		s := j.(map[string]interface{})
 		name := s["name"].(string)
 
-		s_tmp := hcx.Service{
+		sTmp := hcx.Service{
 			Name: name,
 		}
-		services_from_schema = append(services_from_schema, s_tmp)
+		servicesFromSchema = append(servicesFromSchema, sTmp)
 	}
 
-	remote_compute_profile_name := d.Get("remote_compute_profile").(string)
-	remote_compute_profile, err := hcx.GetComputeProfile(client, remote_endpoint_id, remote_compute_profile_name)
+	remoteComputeProfileName := d.Get("remote_compute_profile").(string)
+	remoteComputeProfile, err := hcx.GetComputeProfile(client, remoteEndpointID, remoteComputeProfileName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	local_compute_profile_name := d.Get("local_compute_profile").(string)
-	local_compute_profile, err := hcx.GetComputeProfile(client, local_endpoint_id, local_compute_profile_name)
+	localComputeProfileName := d.Get("local_compute_profile").(string)
+	localComputeProfile, err := hcx.GetComputeProfile(client, localEndpointID, localComputeProfileName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	nb_appliances := d.Get("nb_appliances").(int)
+	nbAppliances := d.Get("nb_appliances").(int)
 
 	body := hcx.InsertServiceMeshBody{
 		Name: name,
 		ComputeProfiles: []hcx.ComputeProfile{
 			{
-				EndpointId:         local_endpoint_id,
-				EndpointName:       local_endpoint_name,
-				ComputeProfileId:   local_compute_profile.ComputeProfileId,
-				ComputeProfileName: local_compute_profile.Name,
+				EndpointID:         localEndpointID,
+				EndpointName:       localEndpointName,
+				ComputeProfileID:   localComputeProfile.ComputeProfileID,
+				ComputeProfileName: localComputeProfile.Name,
 			},
 			{
-				EndpointId:         remote_endpoint_id,
-				EndpointName:       remote_endpoint_name,
-				ComputeProfileId:   remote_compute_profile.ComputeProfileId,
-				ComputeProfileName: remote_compute_profile.Name,
+				EndpointID:         remoteEndpointID,
+				EndpointName:       remoteEndpointName,
+				ComputeProfileID:   remoteComputeProfile.ComputeProfileID,
+				ComputeProfileName: remoteComputeProfile.Name,
 			},
 		},
 		WanoptConfig: hcx.WanoptConfig{
-			UplinkMaxBandwidth: uplink_max_bandwidth,
+			UplinkMaxBandwidth: uplinkMaxBandwidth,
 		},
 		TrafficEnggCfg: hcx.TrafficEnggCfg{
-			IsAppPathResiliencyEnabled:   app_path_resiliency_enabled,
-			IsTcpFlowConditioningEnabled: tcp_flow_conditioning_enabled,
+			IsAppPathResiliencyEnabled:   appPathResiliencyEnabled,
+			IsTCPFlowConditioningEnabled: tcpFlowConditioningEnabled,
 		},
-		Services: services_from_schema,
+		Services: servicesFromSchema,
 		SwitchPairCount: []hcx.SwitchPairCount{
 			{
 				Switches: []hcx.Switch{
-					local_compute_profile.Switches[0],
-					remote_compute_profile.Switches[0],
+					localComputeProfile.Switches[0],
+					remoteComputeProfile.Switches[0],
 				},
-				L2cApplianceCount: nb_appliances,
+				L2cApplianceCount: nbAppliances,
 			},
 		},
 	}
@@ -196,7 +196,7 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	// Wait for task completion
 	for {
-		jr, err := hcx.GetTaskResult(client, res2.Data.InterconnectTaskId)
+		jr, err := hcx.GetTaskResult(client, res2.Data.InterconnectID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -213,7 +213,7 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	// Update Appliances ID
-	appliances, err := hcx.GetAppliances(client, site_pairing["local_endpoint_id"].(string), res2.Data.ServiceMeshId)
+	appliances, err := hcx.GetAppliances(client, sitePairing["local_endpoint_id"].(string), res2.Data.ServiceMeshID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -222,12 +222,12 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	for _, j := range appliances {
 		a := map[string]string{}
-		a["id"] = j.ApplianceId
+		a["id"] = j.ApplianceID
 		tmp = append(tmp, a)
 	}
 	d.Set("appliances_id", tmp)
 
-	d.SetId(res2.Data.ServiceMeshId)
+	d.SetId(res2.Data.ServiceMeshID)
 
 	return resourceServiceMeshRead(ctx, d, m)
 
@@ -257,7 +257,7 @@ func resourceServiceMeshDelete(ctx context.Context, d *schema.ResourceData, m in
 
 	// Wait for task completion
 	for {
-		jr, err := hcx.GetTaskResult(client, res.Data.InterconnectTaskId)
+		jr, err := hcx.GetTaskResult(client, res.Data.InterconnectTaskID)
 		if err != nil {
 			return diag.FromErr(err)
 		}

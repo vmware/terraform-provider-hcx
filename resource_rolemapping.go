@@ -77,26 +77,26 @@ func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m in
 	admin := d.Get("admin").([]interface{})
 	enterprise := d.Get("enterprise").([]interface{})
 
-	admin_groups := []string{}
+	adminGroups := []string{}
 	for _, j := range admin {
 		tmp := j.(map[string]interface{})
-		admin_groups = append(admin_groups, tmp["user_group"].(string))
+		adminGroups = append(adminGroups, tmp["user_group"].(string))
 	}
 
-	enterprise_groups := []string{}
+	enterpriseGroups := []string{}
 	for _, j := range enterprise {
 		tmp := j.(map[string]interface{})
-		enterprise_groups = append(enterprise_groups, tmp["user_group"].(string))
+		enterpriseGroups = append(enterpriseGroups, tmp["user_group"].(string))
 	}
 
 	body := []hcx.RoleMapping{
 		{
 			Role:       "System Administrator",
-			UserGroups: admin_groups,
+			UserGroups: adminGroups,
 		},
 		{
 			Role:       "Enterprise Administrator",
-			UserGroups: enterprise_groups,
+			UserGroups: enterpriseGroups,
 		},
 	}
 	/*

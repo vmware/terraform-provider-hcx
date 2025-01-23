@@ -48,10 +48,10 @@ func dataSourceNetworkBackingRead(ctx context.Context, d *schema.ResourceData, m
 	client := m.(*hcx.Client)
 
 	network := d.Get("name").(string)
-	vcuuid := d.Get("vcuuid").(string)
-	network_type := d.Get("network_type").(string)
+	vcUUID := d.Get("vcuuid").(string)
+	networkType := d.Get("network_type").(string)
 
-	res, err := hcx.GetNetworkBacking(client, vcuuid, network, network_type)
+	res, err := hcx.GetNetworkBacking(client, vcUUID, network, networkType)
 
 	if err != nil {
 		return diag.FromErr(err)
