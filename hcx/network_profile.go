@@ -73,10 +73,10 @@ func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 
 	resp := NetworkProfileResult{}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/admin/hybridity/api/networks", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/admin/hybridity/api/networks", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
@@ -110,10 +110,10 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return NetworkProfileBody{}, err
@@ -153,10 +153,10 @@ func GetNetworkProfileById(c *Client, id string) (NetworkProfileBody, error) {
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return NetworkProfileBody{}, err
@@ -218,10 +218,10 @@ func UpdateNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 
 	resp := NetworkProfileResult{}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, body.ObjectId), buf)
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, body.ObjectId), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err

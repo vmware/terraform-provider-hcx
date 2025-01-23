@@ -301,12 +301,12 @@ func GetLocalContainer(c *Client) (PostResouceContainerListResultDataItem, error
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := PostResouceContainerListResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/resourcecontainer/list", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/resourcecontainer/list", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return PostResouceContainerListResultDataItem{}, err
@@ -341,12 +341,12 @@ func GetRemoteContainer(c *Client) (PostResouceContainerListResultDataItem, erro
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := PostResouceContainerListResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/resourcecontainer/list", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/resourcecontainer/list", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return PostResouceContainerListResultDataItem{}, err
@@ -380,12 +380,12 @@ func GetNetworkBacking(c *Client, endpointid string, network string, network_typ
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := PostNetworkBackingResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/networks", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/networks", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return Dvpg{}, err
@@ -460,12 +460,12 @@ func GetVcDatastore(c *Client, datastore_name string, vcuuid string, cluster str
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := GetVcDatastoreResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/vc/datastores/query", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/vc/datastores/query", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return GetVcDatastoreResultDataItem{}, err
@@ -505,12 +505,12 @@ func GetVcDvs(c *Client, dvs_name string, vcuuid string, cluster string) (GetVcD
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := GetVcDvsResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/vc/dvs/query", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/vc/dvs/query", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return GetVcDvsResultDataItem{}, err
@@ -548,12 +548,12 @@ func GetRemoteCloudList(c *Client) (PostCloudListResult, error) {
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := PostCloudListResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/cloud/list", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/cloud/list", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return PostCloudListResult{}, err
@@ -585,12 +585,12 @@ func GetLocalCloudList(c *Client) (PostCloudListResult, error) {
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := PostCloudListResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/cloud/list", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/cloud/list", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return PostCloudListResult{}, err
@@ -623,12 +623,12 @@ func GetAppliance(c *Client, endpointId string, service_mesh_id string) (GetAppl
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := GetApplianceResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/appliances/query", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/appliances/query", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return GetApplianceResultItem{}, err
@@ -668,12 +668,12 @@ func GetAppliances(c *Client, endpointId string, service_mesh_id string) ([]GetA
 		},
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
 	resp := GetApplianceResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/appliances/query", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/appliances/query", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return []GetApplianceResultItem{}, err
