@@ -98,10 +98,10 @@ func CloudAuthenticate(client *Client, token string) error {
 		Token: token,
 	}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sessions", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sessions", c.HostURL), &buf)
 	if err != nil {
 		return err
 	}

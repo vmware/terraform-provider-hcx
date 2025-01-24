@@ -32,10 +32,10 @@ type GetLocationResult struct {
 // SetLocation ...
 func SetLocation(c *Client, body SetLocationBody) error {
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s:9443/api/admin/global/config/location", c.HostURL), buf)
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s:9443/api/admin/global/config/location", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return err

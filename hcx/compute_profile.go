@@ -101,10 +101,10 @@ func InsertComputeProfile(c *Client, body InsertComputeProfileBody) (InsertCompu
 
 	resp := InsertComputeProfileResult{}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err

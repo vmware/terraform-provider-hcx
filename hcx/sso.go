@@ -74,10 +74,10 @@ func InsertSSO(c *Client, body InsertSSOBody) (InsertSSOResult, error) {
 
 	resp := InsertSSOResult{}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/lookupservice", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/lookupservice", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
@@ -105,10 +105,10 @@ func UpdateSSO(c *Client, body InsertSSOBody) (InsertSSOResult, error) {
 
 	resp := InsertSSOResult{}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/lookupservice/%s", c.HostURL, body.Data.Items[0].Config.UUID), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/lookupservice/%s", c.HostURL, body.Data.Items[0].Config.UUID), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err

@@ -34,10 +34,10 @@ func PostActivate(c *Client, body ActivateBody) (ActivateBody, error) {
 
 	resp := ActivateBody{}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/hcx", c.HostURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/hcx", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
@@ -93,10 +93,10 @@ func DeleteActivate(c *Client, body ActivateBody) (ActivateBody, error) {
 
 	resp := ActivateBody{}
 
-	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(body)
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s:9443/api/admin/global/config/hcx", c.HostURL), buf)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s:9443/api/admin/global/config/hcx", c.HostURL), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
