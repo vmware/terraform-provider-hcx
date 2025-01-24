@@ -66,7 +66,7 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
-	err = hcx.HcxCloudAuthenticate(client, access_token)
+	err = hcx.CloudAuthenticate(client, access_token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -149,7 +149,7 @@ func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{})
 		return diag.FromErr(err)
 	}
 
-	err = hcx.HcxCloudAuthenticate(client, access_token)
+	err = hcx.CloudAuthenticate(client, access_token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -196,7 +196,7 @@ func resourceVmcDelete(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
-	err = hcx.HcxCloudAuthenticate(client, access_token)
+	err = hcx.CloudAuthenticate(client, access_token)
 	if err != nil {
 		return diag.FromErr(err)
 	}

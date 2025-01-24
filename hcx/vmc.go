@@ -40,7 +40,7 @@ type VmcAccessToken struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
-type HcxCloudAuthorizationBody struct {
+type CloudAuthorizationBody struct {
 	Token string `json:"token"`
 }
 
@@ -87,14 +87,14 @@ func VmcAuthenticate(token string) (string, error) {
 
 }
 
-func HcxCloudAuthenticate(client *Client, token string) error {
+func CloudAuthenticate(client *Client, token string) error {
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
 		HostURL:    "https://connect.hcx.vmware.com/provider/csp",
 	}
 
-	body := HcxCloudAuthorizationBody{
+	body := CloudAuthorizationBody{
 		Token: token,
 	}
 
