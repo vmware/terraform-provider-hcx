@@ -35,7 +35,7 @@ provider "hcx" {
 provider "hcx" {
   alias    = "onprem"
   hcx      = "https://172.17.9.10"
-  username = "administrator@cpod-vcn.az-fkd.cloud-garage.net"
+  username = "administrator@cpod-vcn.az-fkd.example.com"
   password = "VMware1!"
 }
 
@@ -237,7 +237,7 @@ resource "hcx_network_profile" "net_onprem_management" {
   prefix_length = 24
   primary_dns   = "172.17.9.1"
   secondary_dns = ""
-  dns_suffix    = "cpod-vcn.az-fkd.cloud-garage.net"
+  dns_suffix    = "cpod-vcn.az-fkd.example.com"
 }
 
 resource "hcx_network_profile" "net_onprem_uplink" {
@@ -254,7 +254,7 @@ resource "hcx_network_profile" "net_onprem_uplink" {
   prefix_length = 24
   primary_dns   = "172.17.9.1"
   secondary_dns = ""
-  dns_suffix    = "cpod-vcn.az-fkd.cloud-garage.net"
+  dns_suffix    = "cpod-vcn.az-fkd.example.com"
 }
 
 resource "hcx_network_profile" "net_onprem_vmotion" {
@@ -271,7 +271,7 @@ resource "hcx_network_profile" "net_onprem_vmotion" {
   prefix_length = 24
   primary_dns   = "172.17.9.1"
   secondary_dns = ""
-  dns_suffix    = "cpod-vcn.az-fkd.cloud-garage.net"
+  dns_suffix    = "cpod-vcn.az-fkd.example.com"
 }
 
 resource "hcx_compute_profile" "compute_profile_1" {

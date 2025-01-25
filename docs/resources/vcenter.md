@@ -7,7 +7,7 @@ updated, the application service is restarted.
 
 ```hcl
 resource "hcx_vcenter" "vcenter" {
-    url         = "https://vcsa-01a.corp.local"
+    url         = "https://vcsa-01a.example.com"
     username    = "administrator@vsphere.local"
     password    = "VMware1!"
     depends_on  = [hcx_activation.activation]

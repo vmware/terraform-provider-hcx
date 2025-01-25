@@ -43,13 +43,13 @@ provider "hcx" {
   hcx            = "https://172.17.9.10"
   admin_username = "admin"
   admin_password = "VMware1!VMware1!"
-  username       = "administrator@cpod-vcn.az-fkd.cloud-garage.net"
+  username       = "administrator@cpod-vcn.az-fkd.example.com"
   password       = "VMware1!"
 }
 
 resource "hcx_vcenter" "vcenter" {
   url        = "https://172.17.9.3"
-  username   = "administrator@cpod-vcn.az-fkd.cloud-garage.net"
+  username   = "administrator@cpod-vcn.az-fkd.example.com"
   password   = "VMware1!"
   depends_on = [hcx_activation.activation]
 }
@@ -62,13 +62,13 @@ resource "hcx_sso" "sso" {
 resource "hcx_rolemapping" "rolemapping" {
   sso = hcx_sso.sso.id
   admin {
-    user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
+    user_group = "cpod-vcn.az-fkd.example.com\\Administrators"
   }
   admin {
-    user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
+    user_group = "cpod-vcn.az-fkd.example.com\\Administrators"
   }
   enterprise {
-    user_group = "cpod-vcn.az-fkd.cloud-garage.net\\Administrators"
+    user_group = "cpod-vcn.az-fkd.example.com\\Administrators"
   }
 }
 
@@ -106,7 +106,7 @@ resource "hcx_network_profile" "net_management" {
   prefix_length = 24
   primary_dns   = "192.168.110.10"
   secondary_dns = ""
-  dns_suffix    = "corp.local"
+  dns_suffix    = "example.com"
 }
 
 resource "hcx_network_profile" "net_uplink" {
@@ -122,7 +122,7 @@ resource "hcx_network_profile" "net_uplink" {
   prefix_length = 24
   primary_dns   = "192.168.110.1"
   secondary_dns = ""
-  dns_suffix    = "corp.local"
+  dns_suffix    = "example.com"
 }
 
 resource "hcx_network_profile" "net_vmotion" {

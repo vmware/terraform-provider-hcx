@@ -24,7 +24,7 @@ resource "hcx_network_profile" "net_management" {
   prefix_length = 24
   primary_dns   = "192.168.110.10"
   secondary_dns = ""
-  dns_suffix    = "corp.local"
+  dns_suffix    = "example.com"
 }
 
 output "net_management" {

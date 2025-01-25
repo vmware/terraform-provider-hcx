@@ -28,7 +28,7 @@ provider "hcx" {
 }
 
 resource "hcx_site_pairing" "site1" {
-  url      = "https://hcx-cloud-01b.corp.local"
+  url      = "https://hcx-cloud-01b.example.com"
   username = "administrator@vsphere.local"
   password = "VMware1!"
 }
@@ -46,7 +46,7 @@ resource "hcx_network_profile" "net_management" {
   prefix_length = 24
   primary_dns   = "192.168.110.10"
   secondary_dns = ""
-  dns_suffix    = "corp.local"
+  dns_suffix    = "example.com"
 }
 
 resource "hcx_network_profile" "net_uplink" {
@@ -62,7 +62,7 @@ resource "hcx_network_profile" "net_uplink" {
   prefix_length = 24
   primary_dns   = "192.168.110.1"
   secondary_dns = ""
-  dns_suffix    = "corp.local"
+  dns_suffix    = "example.com"
 }
 
 resource "hcx_network_profile" "net_vmotion" {
