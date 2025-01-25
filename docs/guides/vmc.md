@@ -1,10 +1,10 @@
 ---
-page_title: "HCX/VMC Lab - Full HCX Connector Configuration"
+page_title: "VMware Cloud on AWS: HCX Configuration"
 ---
 
-This example file automates the configuration of an HCX lab, managing the:
+This example file automates the configuration of HCX, managing the:
 
-* HCX Activation and Configuration at VMC side.
+* HCX Activation and Configuration on VMware Cloud on AWS
 * Site Pairing
 * Network Profiles (Management, vMotion, and Uplink)
 * Compute Profile

@@ -1,6 +1,6 @@
 # Resource: `vmc`
 
-This resource manages the activation and deactivation of HCX on VMC.
+This resource manages the activation and deactivation of HCX on VMware Cloud on AWS.
 
 When HCX is activated, it is also configured with appropriate network and
 compute profiles.
@@ -33,5 +33,5 @@ resource "hcx_site_pairing" "example" {
 
 * `id` - The ID of the SDDC.
 * `cloud_url` - The URL of HCX Cloud, used for the site pairing configuration.
-* `cloud_type` - The type of the HCX Cloud. Should be `nsp` for VMC.
+* `cloud_type` - The type of the HCX Cloud. Use `nsp` for VMware Cloud on AWS.
 * `cloud_name` - The name of the HCX Cloud.
