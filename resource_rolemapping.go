@@ -21,34 +21,39 @@ func resourceRoleMapping() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"admin": {
-				Type:     schema.TypeList,
-				Required: true,
+				Type:        schema.TypeList,
+				Description: "The group for 'admin' users.",
+				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"user_group": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "vsphere.local\\Administrators",
+							Type:        schema.TypeString,
+							Description: "The group name.",
+							Optional:    true,
+							Default:     "vsphere.local\\Administrators",
 						},
 					},
 				},
 			},
 			"enterprise": {
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:        schema.TypeList,
+				Description: "The group for 'enterprise' users.",
+				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"user_group": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "",
+							Type:        schema.TypeString,
+							Description: "The group name.",
+							Optional:    true,
+							Default:     "",
 						},
 					},
 				},
 			},
 			"sso": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The ID of the SSO Lookup Service.",
+				Required:    true,
 			},
 		},
 	}

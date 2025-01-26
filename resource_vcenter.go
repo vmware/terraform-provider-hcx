@@ -24,16 +24,19 @@ func resourcevCenter() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The URL of the vCenter instance.",
+				Required:    true,
 			},
 			"username": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The username to authenticate with the vCenter instance.",
+				Required:    true,
 			},
 			"password": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The password to authenticate with the vCenter instance.",
+				Required:    true,
 			},
 		},
 	}
@@ -69,10 +72,10 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	d.SetId(res.InsertvCenterData.Items[0].Config.UUID)
 
-	// Restart App Deamon
+	// Restart App Daemon
 	hcx.AppEngineStop(client)
 
-	// Wait for App Deamon to be stopped
+	// Wait for App Daemon to be stopped
 	for {
 		jr, err := hcx.GetAppEngineStatus(client)
 		if err != nil {
@@ -87,7 +90,7 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	hcx.AppEngineStart(client)
 
-	// Wait for App Deamon to be started
+	// Wait for App Daemon to be started
 	for {
 		jr, err := hcx.GetAppEngineStatus(client)
 		if err != nil {

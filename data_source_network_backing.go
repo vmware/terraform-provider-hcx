@@ -18,21 +18,25 @@ func dataSourceNetworkBacking() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The name of the network backing.",
+				Required:    true,
 			},
 			"vcuuid": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The UUID of the vCenter instance associated with the network backing.",
+				Required:    true,
 			},
 			"entityid": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The entity ID of the network backing.",
+				Computed:    true,
 			},
 			"network_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "DistributedVirtualPortgroup",
+				Type:        schema.TypeString,
+				Description: "The type of the network backing. Allowed values are 'DistributedVirtualPortgroup' and 'NsxtSegment'.",
+				Optional:    true,
+				Default:     "DistributedVirtualPortgroup",
 			},
 		},
 	}

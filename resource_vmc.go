@@ -6,14 +6,13 @@ package main
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	hcx "github.com/vmware/terraform-provider-hcx/hcx"
-
-	"log"
 )
 
 func resourceVmc() *schema.Resource {
@@ -25,24 +24,29 @@ func resourceVmc() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"sddc_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The ID of the SDDC.",
+				Optional:    true,
 			},
 			"sddc_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The name of the SDDC.",
+				Optional:    true,
 			},
 			"cloud_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The URL of HCX Cloud, used for the site pairing configuration.",
+				Computed:    true,
 			},
 			"cloud_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The name of the HCX Cloud.",
+				Computed:    true,
 			},
 			"cloud_type": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The type of the HCX Cloud. Use 'nsp' for VMware Cloud on AWS.",
+				Computed:    true,
 			},
 		},
 	}

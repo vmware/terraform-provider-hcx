@@ -19,7 +19,8 @@ output "compute_profile_vmc" {
 
 ## Argument Reference
 
-* `name` - (Required) Name of the compute profile.
+* `name` - (Required) The name of the compute profile.
+* `vcenter` - (Required) The ID of the vCenter instance.
 
 ## Attribute Reference
 
