@@ -311,7 +311,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 		}
 
 		if jr.Status == "FAILED" {
-			return diag.FromErr(errors.New("Task Failed"))
+			return diag.FromErr(errors.New("task failed"))
 		}
 
 		time.Sleep(5 * time.Second)
@@ -356,7 +356,7 @@ func resourceComputeProfileDelete(ctx context.Context, d *schema.ResourceData, m
 		}
 
 		if jr.Status == "FAILED" {
-			return diag.FromErr(errors.New("Task Failed"))
+			return diag.FromErr(errors.New("task failed"))
 		}
 
 		time.Sleep(5 * time.Second)
