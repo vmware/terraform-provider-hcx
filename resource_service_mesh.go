@@ -193,7 +193,7 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 		}
 
 		if jr.Status == "FAILED" {
-			return diag.FromErr(errors.New("Task Failed"))
+			return diag.FromErr(errors.New("task failed"))
 		}
 
 		time.Sleep(5 * time.Second)
@@ -254,7 +254,7 @@ func resourceServiceMeshDelete(ctx context.Context, d *schema.ResourceData, m in
 		}
 
 		if jr.Status == "FAILED" {
-			return diag.FromErr(errors.New("Task Failed"))
+			return diag.FromErr(errors.New("task failed"))
 		}
 
 		time.Sleep(5 * time.Second)
