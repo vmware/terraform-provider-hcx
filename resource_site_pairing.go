@@ -11,7 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	hcx "github.com/vmware/terraform-provider-hcx/hcx"
+	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 func resourceSitePairing() *schema.Resource {
