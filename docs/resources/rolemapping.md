@@ -12,10 +12,10 @@ resource "hcx_rolemapping" "rolemapping" {
       user_group = "vsphere.local\\Administrators"
     }
     admin {
-      user_group = "corp.local\\Administrators"
+      user_group = "example.com\\Administrators"
     }
     enterprise {
-      user_group = "corp.local\\Administrators"
+      user_group = "example.com\\Administrators"
     }
 }
 ```
@@ -28,4 +28,4 @@ resource "hcx_rolemapping" "rolemapping" {
 
 ### `admin` and `enterprise` Argument Reference
 
-* `user_group` - (Optional) The group name.
+* `user_group` - (Optional) The group name. Defaults to `vsphere.local\\Administrators` for `admin`.

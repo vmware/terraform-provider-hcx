@@ -13,7 +13,7 @@ reverse migrations, are always initiated from the HCX Connector at the source.
 
 ```hcl
 resource "hcx_site_pairing" "site1" {
-    url      = "https://hcx-cloud-01b.corp.local"
+    url      = "https://hcx-cloud-01b.example.com"
     username = "administrator@vsphere.local"
     password = "VMware1!"
 }
@@ -32,7 +32,7 @@ output "hcx_site_pairing_site1" {
 ## Attribute Reference
 
 * `id` - The ID of the site pairing.
-* `local_vc` - The ID of the local vCenter.
+* `local_vc` - The ID of the local vCenter instance.
 * `local_endpoint_id` - The endpoint ID of the local HCX site.
 * `local_name` - The endpoint name of the local HCX site.
 * `remote_name` - The endpoint name of the remote HCX site.
