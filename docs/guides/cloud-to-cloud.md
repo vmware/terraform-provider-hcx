@@ -1,17 +1,17 @@
 ---
-page_title: "HCX/VMC Lab - Cloud to Cloud"
+page_title: "Cloud to Cloud: HCX Configuration"
 ---
 
-This example file automates the configuration of an HCX lab, managing the:
+This example file automates the configuration of HCX, managing the:
 
-* HCX Activation and Configuration at VMC side.
+* HCX Activation and Configuration on VMware Cloud AWS
 * Site Pairing
 * Network Profiles (Management, vMotion, and Uplink)
 * Compute Profile
 * Service Mesh
 * L2 Extension
 
-This example can be used for an private cloud to VMC and private cloud to private cloud.
+This example can be used for both a private cloud to VMware Cloud on AWS and a private cloud to another private cloud.
 
 ## Usage Example
 
@@ -31,7 +31,7 @@ provider "hcx" {
   password = "VMware1!"
 }
 
-// Provider config - On PRem instance
+// On-premises
 provider "hcx" {
   alias    = "onprem"
   hcx      = "https://172.17.9.10"

@@ -1,5 +1,5 @@
 ---
-page_title: "HCX Lab - Full HCX Connector Configuration"
+page_title: "Lab: HCX Configuration"
 ---
 
 This example file automates the configuration of an HCX lab, managing the:
