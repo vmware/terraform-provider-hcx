@@ -13,6 +13,7 @@ resource "hcx_activation" "activation" {
 ## Argument Reference
 
 * `activationkey` - (Required) The activation key.
+* `url` - (Optional) The URL for activation. Defaults to `https://connect.hcx.vmware.com`.
 
 ## Attribute Reference
 

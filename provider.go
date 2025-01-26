@@ -19,33 +19,39 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"hcx": {
 				Type:        schema.TypeString,
+				Description: "The URL of the HCX connector",
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_URL", nil),
 			},
 			"username": {
 				Type:        schema.TypeString,
+				Description: "The username to authenticate for HCX consumption.",
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_USER", nil),
 			},
 			"password": {
 				Type:        schema.TypeString,
+				Description: "The password to authenticate for HCX consumption.",
 				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_PASSWORD", nil),
 			},
 			"admin_username": {
 				Type:        schema.TypeString,
+				Description: "The username to authenticate with the HCX appliance.",
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_ADMIN_USER", nil),
 			},
 			"admin_password": {
 				Type:        schema.TypeString,
+				Description: "The password to authenticate with the HCX connector",
 				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("HCX_ADMIN_PASSWORD", nil),
 			},
 			"vmc_token": {
 				Type:        schema.TypeString,
+				Description: "The token to authenticate with the VMware Cloud Services API.",
 				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("VMC_API_TOKEN", nil),

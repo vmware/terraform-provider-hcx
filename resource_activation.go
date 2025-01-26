@@ -21,13 +21,15 @@ func resourceActivation() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"url": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "https://connect.hcx.vmware.com",
+				Type:        schema.TypeString,
+				Description: "The URL for activation.",
+				Optional:    true,
+				Default:     "https://connect.hcx.vmware.com",
 			},
 			"activationkey": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The activation key.",
+				Required:    true,
 			},
 		},
 	}

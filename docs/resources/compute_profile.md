@@ -62,7 +62,7 @@ output "compute_profile_1" {
 * `replication_network` - (Required) The replication network profile (ID).
 * `vmotion_network` - (Required) The vMotion network profile (ID).
 * `uplink_network` - (Required) The uplink network profile (ID).
-* `dvs` - (Required) The DVS used for L2 extension.
+* `dvs` - (Required) The distributed switch used for L2 extension.
 * `service` - (Required) The list of HCX services.
 
 ### `service` Argument Reference

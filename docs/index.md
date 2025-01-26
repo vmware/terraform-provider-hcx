@@ -20,11 +20,11 @@ provider "hcx" {
 
 ## Argument Reference
 
-* `hcx` - (Optional) URL of the HCX connector. If not specified, only `hcx_vmc` is usable by this provider.
-* `admin_username` - (Optional) Username of the HCX appliance. Only need if you want to manage the appliance setup.
-* `admin_password` - (Optional) Password of the HCX appliance. Only need if you want to manage the appliance setup.
-* `username` - (Optional) Username for HCX consumption. SSO/vSphere Role Mappings need to be set.
-* `password` - (Optional) Password for HCX consumption. SSO/vSphere Role Mappings need to be set.
-* `token` - (Required) VMware Cloud Service API Token. Generated from the **VMware Cloud Services Console** > **My account** > **API Tokens**. Environment variable `VMC_API_TOKEN` can be used to avoid setting the token in the code.
+* `hcx` - (Optional) The URL of the HCX connector. If not specified, only `hcx_vmc` is usable by this provider.
+* `username` - (Optional) The username to authenticate for HCX consumption. SSO/vSphere Role Mappings need to be set.
+* `password` - (Optional) The password to authenticate for HCX consumption. SSO/vSphere Role Mappings need to be set.
+* `vmc_token` - (Required) The token to authenticate with the VMware Cloud Services API. Generated from the **VMware Cloud Services Console** > **My account** > **API Tokens**. Environment variable `VMC_API_TOKEN` can be used to avoid setting the token in the code.
+* `admin_username` - (Optional) The username to authenticate with the HCX appliance. Only need if you want to manage the appliance setup.
+* `admin_password` - (Optional) The password to authenticate with the HCX appliance. Only need if you want to manage the appliance setup.
 
 [product-documentation]: https://techdocs.broadcom.com/us/en/vmware-cis/hcx.html

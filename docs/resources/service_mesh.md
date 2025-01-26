@@ -58,8 +58,8 @@ output "service_mesh_1" {
   Defaults to `10000`.
 * `service` - (Required) The list of HCX services. (Services selected here must
   be part of the compute profiles selected).
-* `force_delete` - (Optional) Enable or disable force delete of the service
-  mesh. Sometimes needed when site pairing is not connected anymore.
+* `force_delete` - (Optional) Force delete of the service mesh. 
+  Sometimes needed when site pairing is no longer connected.
 * `nb_appliances` - (Optional) The number of Network Extension appliances to
   deploy. Defaults to `1`.
 

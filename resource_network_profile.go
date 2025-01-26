@@ -16,54 +16,65 @@ import (
 func NetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"vmc": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  false,
+			Type:        schema.TypeBool,
+			Description: "If set to true, the network profile will not be created or deleted, only IP pools will be updated.",
+			Optional:    true,
+			Default:     false,
 		},
 		"mtu": {
-			Type:     schema.TypeInt,
-			Required: true,
+			Type:        schema.TypeInt,
+			Description: "The MTU of the network profile.",
+			Required:    true,
 		},
 		"prefix_length": {
-			Type:     schema.TypeInt,
-			Required: true,
+			Type:        schema.TypeInt,
+			Description: "The prefix length for the network profile.",
+			Required:    true,
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Description: "The name of the network profile.",
+			Required:    true,
 		},
 		"gateway": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
+			Type:        schema.TypeString,
+			Description: "The gateway for the network profile.",
+			Optional:    true,
+			Default:     "",
 		},
 		"site_pairing": {
-			Type:     schema.TypeMap,
-			Required: true,
+			Type:        schema.TypeMap,
+			Description: "The site pairing map, to be retrieved with the 'hcx_site_pairing' resource.",
+			Required:    true,
 		},
 		"primary_dns": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
+			Type:        schema.TypeString,
+			Description: "The primary DNS server for the network profile.",
+			Optional:    true,
+			Default:     "",
 		},
 		"secondary_dns": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
+			Type:        schema.TypeString,
+			Description: "The secondary DNS server for the network profile.",
+			Optional:    true,
+			Default:     "",
 		},
 		"dns_suffix": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "",
+			Type:        schema.TypeString,
+			Description: "The DNS suffix for the network profile.",
+			Optional:    true,
+			Default:     "",
 		},
 		"network_name": {
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:        schema.TypeString,
+			Description: "The network name used for the network profile.",
+			Optional:    true,
 		},
 		"network_type": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Default:  "DistributedVirtualPortgroup",
+			Type:        schema.TypeString,
+			Description: "The network type for the network profile.",
+			Optional:    true,
+			Default:     "DistributedVirtualPortgroup",
 		},
 		"ip_range": {
 			Type:     schema.TypeList,
@@ -71,12 +82,14 @@ func NetSchema() map[string]*schema.Schema {
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"start_address": {
-						Type:     schema.TypeString,
-						Required: true,
+						Type:        schema.TypeString,
+						Description: "The start address of the IP pool for the network profile.",
+						Required:    true,
 					},
 					"end_address": {
-						Type:     schema.TypeString,
-						Required: true,
+						Type:        schema.TypeString,
+						Description: "The end address of the IP pool for the network profile.",
+						Required:    true,
 					},
 				},
 			},
@@ -314,8 +327,8 @@ func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m
 	vmc := d.Get("vmc").(bool)
 
 	if vmc {
-		// If VMC, don't really delete the network profile
-		// Read the exisint profile
+		// If VMware Cloud on AWS, don't really delete the network profile
+		// Read the exising profile
 		/*
 			body, err := hcx.GetNetworkProfile(client, name)
 			if err != nil {

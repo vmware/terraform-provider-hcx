@@ -21,12 +21,14 @@ func resourceSSO() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"url": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The URL of the vCenter instance.",
+				Required:    true,
 			},
 			"vcenter": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The ID of the vCenter instance.",
+				Required:    true,
 			},
 		},
 	}
@@ -64,9 +66,6 @@ func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{
 		if err != nil {
 			return diag.FromErr(err)
 		}
-
-		// Seems that we need to wait a bit
-		//time.Sleep(60 * time.Second)
 
 		d.SetId(res.InsertSSOData.Items[0].Config.UUID)
 		return resourceSSORead(ctx, d, m)

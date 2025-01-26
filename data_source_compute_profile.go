@@ -18,12 +18,14 @@ func dataSourceComputeProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The name of the compute profile.",
+				Required:    true,
 			},
 			"vcenter": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Description: "The ID of the local vCenter instance.",
+				Required:    true,
 			},
 		},
 	}
