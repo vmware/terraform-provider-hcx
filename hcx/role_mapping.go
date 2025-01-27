@@ -28,7 +28,11 @@ func PutRoleMapping(c *Client, body []RoleMapping) (RoleMappingResult, error) {
 	resp := RoleMappingResult{}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return resp, err
+	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s:9443/api/admin/global/config/roleMappings", c.HostURL), &buf)
 	if err != nil {

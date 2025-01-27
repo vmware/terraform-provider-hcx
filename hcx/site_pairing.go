@@ -66,7 +66,11 @@ func InsertSitePairing(c *Client, body RemoteCloudConfigBody) (PostRemoteCloudCo
 	resp := PostRemoteCloudConfigResult{}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return resp, err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/cloudConfigs", c.HostURL), &buf)
 	if err != nil {

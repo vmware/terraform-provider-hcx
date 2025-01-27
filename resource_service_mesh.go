@@ -184,12 +184,13 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	buf := new(bytes.Buffer)
-	json.NewEncoder(buf).Encode(body)
+	if err := json.NewEncoder(buf).Encode(body); err != nil {
+		return diag.FromErr(err)
+	}
 
 	res2, err := hcx.InsertServiceMesh(client, body)
 
 	if err != nil {
-		//return diag.FromErr(errors.New(fmt.Sprintf("%s", buf)))
 		return diag.FromErr(err)
 	}
 

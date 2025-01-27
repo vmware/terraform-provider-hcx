@@ -72,8 +72,11 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	d.SetId(res.InsertvCenterData.Items[0].Config.UUID)
 
-	// Restart App Daemon
-	hcx.AppEngineStop(client)
+	// Restart App Deamon
+	_, err = hcx.AppEngineStop(client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// Wait for App Daemon to be stopped
 	for {
@@ -88,7 +91,10 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 		time.Sleep(5 * time.Second)
 	}
 
-	hcx.AppEngineStart(client)
+	_, err = hcx.AppEngineStart(client)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// Wait for App Daemon to be started
 	for {
@@ -124,7 +130,10 @@ func resourcevCenterDelete(ctx context.Context, d *schema.ResourceData, m interf
 
 	client := m.(*hcx.Client)
 
-	hcx.DeletevCenter(client, d.Id())
+	_, err := hcx.DeletevCenter(client, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }

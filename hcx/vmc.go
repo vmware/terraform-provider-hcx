@@ -99,7 +99,11 @@ func CloudAuthenticate(client *Client, token string) error {
 	}
 
 	var buf bytes.Buffer
-	json.NewEncoder(&buf).Encode(body)
+	err := json.NewEncoder(&buf).Encode(body)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sessions", c.HostURL), &buf)
 	if err != nil {
