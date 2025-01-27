@@ -81,21 +81,21 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	hcxurl := d.Get("hcx").(string)
+	hcxURL := d.Get("hcx").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
-	adminusername := d.Get("admin_username").(string)
-	adminpassword := d.Get("admin_password").(string)
-	vmc_token := d.Get("vmc_token").(string)
+	adminUsername := d.Get("admin_username").(string)
+	adminPassword := d.Get("admin_password").(string)
+	vmcToken := d.Get("vmc_token").(string)
 
-	c, err := hcx.NewClient(&hcxurl, &username, &password, &adminusername, &adminpassword, &vmc_token)
+	c, err := hcx.NewClient(&hcxURL, &username, &password, &adminUsername, &adminPassword, &vmcToken)
 	//c := &http.Client{Timeout: 10 * time.Second}
 
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
 
-	if hcxurl == "" {
+	if hcxURL == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity:      diag.Warning,
 			Summary:       "No HCX Url provided",
@@ -104,7 +104,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		})
 	}
 
-	c.Token = vmc_token
+	c.Token = vmcToken
 
 	return c, diags
 }

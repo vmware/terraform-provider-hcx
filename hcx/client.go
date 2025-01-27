@@ -105,17 +105,17 @@ func (c *Client) HcxConnectorAuthenticate() error {
 			return err
 		}
 
-		certificate_pb := false
+		certificatePb := false
 		for _, j := range xmlmessage.Entry {
 			if j.Strings[0] == "message" {
 				if j.Strings[1] == "'Trusted root certificates' value should not be empty" {
-					certificate_pb = true
+					certificatePb = true
 					log.Println("Certificate error")
 				}
 			}
 		}
 
-		if !certificate_pb {
+		if !certificatePb {
 			return fmt.Errorf("body: %s", body)
 		}
 
@@ -131,7 +131,7 @@ func (c *Client) HcxConnectorAuthenticate() error {
 }
 
 // NewClient -
-func NewClient(hcx, username *string, password *string, adminusername *string, adminpassword *string, vmc_token *string) (*Client, error) {
+func NewClient(hcx, username *string, password *string, adminUsername *string, adminPassword *string, vmcToken *string) (*Client, error) {
 	c := Client{
 		HTTPClient: &http.Client{
 			Timeout: 60 * time.Second,
@@ -139,10 +139,10 @@ func NewClient(hcx, username *string, password *string, adminusername *string, a
 		HostURL:         *hcx,
 		Username:        *username,
 		Password:        *password,
-		AdminUsername:   *adminusername,
-		AdminPassword:   *adminpassword,
+		AdminUsername:   *adminUsername,
+		AdminPassword:   *adminPassword,
 		IsAuthenticated: false,
-		Token:           *vmc_token,
+		Token:           *vmcToken,
 	}
 
 	return &c, nil

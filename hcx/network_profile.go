@@ -21,7 +21,7 @@ type NetworkProfileBody struct {
 	Name            string    `json:"name"`
 	L3TenantManaged bool      `json:"l3TenantManaged"`
 	OwnedBySystem   bool      `json:"ownedBySystem"`
-	ObjectId        string    `json:"objectId,omitempty"`
+	ObjectID        string    `json:"objectId,omitempty"`
 }
 
 type Filter struct {
@@ -37,21 +37,21 @@ type Backing struct {
 	BackingID           string `json:"backingId"`
 	BackingName         string `json:"backingName"`
 	Type                string `json:"type"`
-	VCenterInstanceUuid string `json:"vCenterInstanceUuid"`
+	VCenterInstanceUUID string `json:"vCenterInstanceUuid"`
 	VCenterName         string `json:"vCenterName,omitempty"`
 }
 
 type IPScope struct {
-	DnsSuffix       string           `json:"dnsSuffix,omitempty"`
+	DNSSuffix       string           `json:"dnsSuffix,omitempty"`
 	Gateway         string           `json:"gateway,omitempty"`
 	PrefixLength    int              `json:"prefixLength"`
-	PrimaryDns      string           `json:"primaryDns,omitempty"`
-	SecondaryDns    string           `json:"secondaryDns,omitempty"`
-	NetworkIpRanges []NetworkIpRange `json:"networkIpRanges,omitempty"`
+	PrimaryDNS      string           `json:"primaryDns,omitempty"`
+	SecondaryDNS    string           `json:"secondaryDns,omitempty"`
+	NetworkIPRanges []NetworkIPRange `json:"networkIpRanges,omitempty"`
 	PoolID          string           `json:"poolId"`
 }
 
-type NetworkIpRange struct {
+type NetworkIPRange struct {
 	EndAddress   string `json:"endAddress"`
 	StartAddress string `json:"startAddress"`
 }
@@ -65,7 +65,7 @@ type NetworkProfileResult struct {
 
 type NetworkProfileData struct {
 	JobID    string `json:"jobId"`
-	ObjectId string `json:"objectId"`
+	ObjectID string `json:"objectId"`
 }
 
 // InsertNetworkProfile ...
@@ -150,8 +150,8 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 	return NetworkProfileBody{}, errors.New("cannot find network profile")
 }
 
-// GetNetworkProfileById ...
-func GetNetworkProfileById(c *Client, id string) (NetworkProfileBody, error) {
+// GetNetworkProfileByID ...
+func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
 
 	resp := []NetworkProfileBody{}
 	body := NetworkFilter{
@@ -189,7 +189,7 @@ func GetNetworkProfileById(c *Client, id string) (NetworkProfileBody, error) {
 	}
 
 	for _, j := range resp {
-		if j.ObjectId == id {
+		if j.ObjectID == id {
 			return j, nil
 		}
 	}
@@ -237,7 +237,7 @@ func UpdateNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 		return resp, err
 	}
 
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, body.ObjectId), &buf)
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, body.ObjectID), &buf)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err

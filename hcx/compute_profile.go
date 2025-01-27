@@ -24,26 +24,26 @@ type InsertComputeProfileBody struct {
 }
 
 type Compute struct {
-	CmpId   string `json:"cmpId"`
-	CmpName string `json:"cmpName"`
-	CmpType string `json:"cmpType"`
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
+	ComputeID   string `json:"cmpId"`
+	ComputeName string `json:"cmpName"`
+	ComputeType string `json:"cmpType"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Type        string `json:"type"`
 }
 
 type Storage struct {
-	CmpId   string `json:"cmpId"`
-	CmpName string `json:"cmpName"`
-	CmpType string `json:"cmpType"`
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
+	ComputeID   string `json:"cmpId"`
+	ComputeName string `json:"cmpName"`
+	ComputeType string `json:"cmpType"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Type        string `json:"type"`
 }
 
 type DeploymentContainer struct {
 	Computes          []Compute `json:"compute"`
-	CpuReservation    int       `json:"cpuReservation"`
+	CPUReservation    int       `json:"cpuReservation"`
 	MemoryReservation int       `json:"memoryReservation"`
 	Storage           []Storage `json:"storage"`
 }
@@ -65,11 +65,11 @@ type Service struct {
 }
 
 type Switch struct {
-	CmpID  string `json:"cmpId"`
-	ID     string `json:"id"`
-	MaxMTU int    `json:"maxMtu,omitempty"`
-	Name   string `json:"name"`
-	Type   string `json:"type"`
+	ComputeID string `json:"cmpId"`
+	ID        string `json:"id"`
+	MaxMTU    int    `json:"maxMtu,omitempty"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
 }
 
 type InsertComputeProfileResult struct {
@@ -77,8 +77,8 @@ type InsertComputeProfileResult struct {
 }
 
 type InsertComputeProfileResultData struct {
-	InterconnectTaskId string `json:"interconnectTaskId"`
-	ComputeProfileId   string `json:"computeProfileId"`
+	InterconnectTaskID string `json:"interconnectTaskId"`
+	ComputeProfileID   string `json:"computeProfileId"`
 }
 
 type GetComputeProfileResult struct {
@@ -86,7 +86,7 @@ type GetComputeProfileResult struct {
 }
 
 type GetComputeProfileResultItem struct {
-	ComputeProfileId     string              `json:"computeProfileId"`
+	ComputeProfileID     string              `json:"computeProfileId"`
 	Name                 string              `json:"name"`
 	Compute              []Compute           `json:"compute"`
 	Services             []Service           `json:"services"`
@@ -160,11 +160,11 @@ func DeleteComputeProfile(c *Client, computeprofileID string) (InsertComputeProf
 }
 
 // GetComputeProfile ...
-func GetComputeProfile(c *Client, endpointId string, computeprofileName string) (GetComputeProfileResultItem, error) {
+func GetComputeProfile(c *Client, endpointID string, computeProfileName string) (GetComputeProfileResultItem, error) {
 
 	resp := GetComputeProfileResult{}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles?endpointId=%s", c.HostURL, endpointId), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles?endpointId=%s", c.HostURL, endpointID), nil)
 	if err != nil {
 		fmt.Println(err)
 		return GetComputeProfileResultItem{}, err
@@ -185,7 +185,7 @@ func GetComputeProfile(c *Client, endpointId string, computeprofileName string) 
 	}
 
 	for _, j := range resp.Items {
-		if j.Name == computeprofileName {
+		if j.Name == computeProfileName {
 			return j, nil
 		}
 	}

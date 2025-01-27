@@ -19,7 +19,7 @@ type RoleMapping struct {
 type RoleMappingResult struct {
 	IsSuccess      bool   `json:"isSuccess"`
 	Message        string `json:"message"`
-	HttpStatusCode int    `json:"httpStatusCode"`
+	HTTPStatusCode int    `json:"httpStatusCode"`
 }
 
 // PostActivate ...

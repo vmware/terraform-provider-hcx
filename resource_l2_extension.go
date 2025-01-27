@@ -87,72 +87,72 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	client := m.(*hcx.Client)
 
-	site_pairing := d.Get("site_pairing").(map[string]interface{})
-	vcGuid := site_pairing["local_vc"].(string)
+	sitePairing := d.Get("site_pairing").(map[string]interface{})
+	vcGUID := sitePairing["local_vc"].(string)
 
 	//service_mesh := d.Get("service_mesh").(map[string]interface{})
-	source_network := d.Get("source_network").(string)
-	destination_t1 := d.Get("destination_t1").(string)
+	sourceNetwork := d.Get("source_network").(string)
+	destinationT1 := d.Get("destination_t1").(string)
 	gateway := d.Get("gateway").(string)
 	netmask := d.Get("netmask").(string)
 
-	destination_endpoint_id := site_pairing["id"].(string)
-	destination_endpoint_name := site_pairing["remote_name"].(string)
-	destination_endpoint_type := site_pairing["remote_endpoint_type"].(string)
+	destinationEndpointID := sitePairing["id"].(string)
+	destinationEndpointName := sitePairing["remote_name"].(string)
+	destinationEndpointType := sitePairing["remote_endpoint_type"].(string)
 
-	destination_resource_id := site_pairing["remote_resource_id"].(string)
-	destination_resource_name := site_pairing["remote_resource_name"].(string)
-	destination_resource_type := site_pairing["remote_resource_type"].(string)
+	destinationResourceID := sitePairing["remote_resource_id"].(string)
+	destinationResourceName := sitePairing["remote_resource_name"].(string)
+	destinationResourceType := sitePairing["remote_resource_type"].(string)
 
 	mon := d.Get("mon").(bool)
-	egress_optimization := d.Get("egress_optimization").(bool)
+	egressOptimization := d.Get("egress_optimization").(bool)
 
-	network_type := d.Get("network_type").(string)
+	networkType := d.Get("network_type").(string)
 
-	service_mesh_id := d.Get("service_mesh_id").(string)
+	serviceMeshID := d.Get("service_mesh_id").(string)
 
-	dvpg, err := hcx.GetNetworkBacking(client, site_pairing["local_endpoint_id"].(string), source_network, network_type)
+	dvpg, err := hcx.GetNetworkBacking(client, sitePairing["local_endpoint_id"].(string), sourceNetwork, networkType)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	appliance_id := d.Get("appliance_id").(string)
-	if appliance_id == "" {
+	applianceID := d.Get("appliance_id").(string)
+	if applianceID == "" {
 		// GET THE FIRST APPLIANCE
-		appliance, err := hcx.GetAppliance(client, site_pairing["local_endpoint_id"].(string), service_mesh_id)
+		appliance, err := hcx.GetAppliance(client, sitePairing["local_endpoint_id"].(string), serviceMeshID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		appliance_id = appliance.ApplianceId
+		applianceID = appliance.ApplianceID
 	}
 
 	body := hcx.InsertL2ExtensionBody{
 		Gateway: gateway,
 		Netmask: netmask,
 		DestinationNetwork: hcx.DestinationNetwork{
-			GatewayId: destination_t1,
+			GatewayID: destinationT1,
 		},
-		Dns: []string{},
+		DNS: []string{},
 		Features: hcx.Features{
-			EgressOptimization: egress_optimization,
+			EgressOptimization: egressOptimization,
 			Mon:                mon,
 		},
 		SourceAppliance: hcx.SourceAppliance{
-			ApplianceId: appliance_id,
+			ApplianceID: applianceID,
 		},
 		SourceNetwork: hcx.SourceNetwork{
-			NetworkId:   dvpg.EntityID,
+			NetworkID:   dvpg.EntityID,
 			NetworkName: dvpg.Name,
 			NetworkType: dvpg.EntityType,
 		},
-		VcGuid: vcGuid,
+		VcGUID: vcGUID,
 		Destination: hcx.Destination{
-			EndpointId:   destination_endpoint_id,
-			EndpointName: destination_endpoint_name,
-			EndpointType: destination_endpoint_type,
-			ResourceId:   destination_resource_id,
-			ResourceName: destination_resource_name,
-			ResourceType: destination_resource_type,
+			EndpointID:   destinationEndpointID,
+			EndpointName: destinationEndpointName,
+			EndpointType: destinationEndpointType,
+			ResourceID:   destinationResourceID,
+			ResourceName: destinationResourceName,
+			ResourceType: destinationResourceType,
 		},
 	}
 
@@ -186,7 +186,7 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	d.SetId(res3.StretchId)
+	d.SetId(res3.StretchID)
 
 	return resourceL2ExtensionRead(ctx, d, m)
 

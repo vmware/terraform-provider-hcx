@@ -24,7 +24,7 @@ type InsertSSODataItem struct {
 }
 
 type InsertSSODataItemConfig struct {
-	LookupServiceUrl string `json:"lookupServiceUrl"`
+	LookupServiceURL string `json:"lookupServiceUrl"`
 	ProviderType     string `json:"providerType"`
 	UUID             string `json:"UUID,omitempty"`
 }

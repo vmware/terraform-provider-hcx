@@ -90,7 +90,7 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	city := d.Get("city").(string)
 	country := d.Get("country").(string)
-	cityAscii := city
+	CityASCII := city
 	latitude := d.Get("latitude").(float64)
 	longitude := d.Get("longitude").(float64)
 	province := d.Get("province").(string)
@@ -98,7 +98,7 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	body := hcx.SetLocationBody{
 		City:      city,
 		Country:   country,
-		CityAscii: cityAscii,
+		CityASCII: CityASCII,
 		Latitude:  latitude,
 		Longitude: longitude,
 		Province:  province,
@@ -122,7 +122,7 @@ func resourceLocationDelete(ctx context.Context, d *schema.ResourceData, m inter
 	body := hcx.SetLocationBody{
 		City:      "",
 		Country:   "",
-		CityAscii: "",
+		CityASCII: "",
 		Latitude:  0,
 		Longitude: 0,
 		Province:  "",

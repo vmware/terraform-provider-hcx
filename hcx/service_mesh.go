@@ -12,9 +12,9 @@ import (
 )
 
 type ComputeProfile struct {
-	ComputeProfileId   string `json:"computeProfileId"`
+	ComputeProfileID   string `json:"computeProfileId"`
 	ComputeProfileName string `json:"computeProfileName"`
-	EndpointId         string `json:"endpointId"`
+	EndpointID         string `json:"endpointId"`
 	EndpointName       string `json:"endpointName"`
 }
 
@@ -24,7 +24,7 @@ type WanoptConfig struct {
 
 type TrafficEnggCfg struct {
 	IsAppPathResiliencyEnabled   bool `json:"isAppPathResiliencyEnabled"`
-	IsTcpFlowConditioningEnabled bool `json:"isTcpFlowConditioningEnabled"`
+	IsTCPFlowConditioningEnabled bool `json:"isTcpFlowConditioningEnabled"`
 }
 
 type SwitchPairCount struct {
@@ -46,8 +46,8 @@ type InsertServiceMeshResult struct {
 }
 
 type InsertServiceMeshData struct {
-	InterconnectTaskId string `json:"interconnectTaskId"`
-	ServiceMeshId      string `json:"serviceMeshId"`
+	InterconnectID string `json:"interconnectTaskId"`
+	ServiceMeshID  string `json:"serviceMeshId"`
 }
 
 type DeleteServiceMeshResult struct {
@@ -55,8 +55,8 @@ type DeleteServiceMeshResult struct {
 }
 
 type DeleteServiceMeshData struct {
-	InterconnectTaskId string `json:"interconnectTaskId"`
-	ServiceMeshId      string `json:"serviceMeshId"`
+	InterconnectTaskID string `json:"interconnectTaskId"`
+	ServiceMeshID      string `json:"serviceMeshId"`
 }
 
 // InsertServiceMesh ...

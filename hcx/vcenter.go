@@ -27,7 +27,7 @@ type InsertvCenterDataItemConfig struct {
 	URL      string `json:"url"`
 	Username string `json:"userName"`
 	Password string `json:"password"`
-	Vcuuid   string `json:"vcuuid,omitempty"`
+	VcUUID   string `json:"vcuuid,omitempty"`
 	UUID     string `json:"UUID,omitempty"`
 }
 

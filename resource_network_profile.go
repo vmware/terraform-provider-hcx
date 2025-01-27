@@ -119,41 +119,41 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	mtu := d.Get("mtu").(int)
-	prefix_length := d.Get("prefix_length").(int)
+	prefixLength := d.Get("prefix_length").(int)
 
 	name := d.Get("name").(string)
 	gateway := d.Get("gateway").(string)
 
-	primary_dns := d.Get("primary_dns").(string)
-	secondary_dns := d.Get("secondary_dns").(string)
-	dns_suffix := d.Get("dns_suffix").(string)
+	primaryDNS := d.Get("primary_dns").(string)
+	secondaryDNS := d.Get("secondary_dns").(string)
+	dnsSuffix := d.Get("dns_suffix").(string)
 
 	sp := d.Get("site_pairing").(map[string]interface{})
-	vcuuid := sp["local_vc"].(string)
-	vclocalendpointid := sp["local_endpoint_id"].(string)
+	vcUUID := sp["local_vc"].(string)
+	vcLocalEndpointID := sp["local_endpoint_id"].(string)
 
-	network_name, ok := d.GetOk("network_name")
+	networkName, ok := d.GetOk("network_name")
 	if !ok && !vmc {
 		return diag.Errorf("VMC switch is not enabled. Network name is mandatory")
 	}
-	network_type := d.Get("network_type").(string)
-	network_id, err := hcx.GetNetworkBacking(client, vclocalendpointid, network_name.(string), network_type)
+	networkType := d.Get("network_type").(string)
+	networkiD, err := hcx.GetNetworkBacking(client, vcLocalEndpointID, networkName.(string), networkType)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Get IP Ranges from schema
-	ip_range := d.Get("ip_range").([]interface{})
+	ipRange := d.Get("ip_range").([]interface{})
 
-	ipr := []hcx.NetworkIpRange{}
-	for _, j := range ip_range {
+	ipr := []hcx.NetworkIPRange{}
+	for _, j := range ipRange {
 		s := j.(map[string]interface{})
-		start_address := s["start_address"].(string)
-		end_address := s["end_address"].(string)
+		startAddress := s["start_address"].(string)
+		endAddress := s["end_address"].(string)
 
-		ipr = append(ipr, hcx.NetworkIpRange{
-			StartAddress: start_address,
-			EndAddress:   end_address,
+		ipr = append(ipr, hcx.NetworkIPRange{
+			StartAddress: startAddress,
+			EndAddress:   endAddress,
 		})
 	}
 
@@ -162,20 +162,20 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 		Organization: "DEFAULT",
 		MTU:          mtu,
 		Backings: []hcx.Backing{{
-			BackingID:           network_id.EntityID,
-			BackingName:         network_name.(string),
-			VCenterInstanceUuid: vcuuid,
-			Type:                network_type,
+			BackingID:           networkiD.EntityID,
+			BackingName:         networkName.(string),
+			VCenterInstanceUUID: vcUUID,
+			Type:                networkType,
 		},
 		},
 		IPScopes: []hcx.IPScope{
 			{
-				DnsSuffix:       dns_suffix,
+				DNSSuffix:       dnsSuffix,
 				Gateway:         gateway,
-				PrefixLength:    prefix_length,
-				PrimaryDns:      primary_dns,
-				SecondaryDns:    secondary_dns,
-				NetworkIpRanges: ipr,
+				PrefixLength:    prefixLength,
+				PrimaryDNS:      primaryDNS,
+				SecondaryDNS:    secondaryDNS,
+				NetworkIPRanges: ipr,
 			},
 		},
 		L3TenantManaged: false,
@@ -214,7 +214,7 @@ func resourceNetworkProfileRead(ctx context.Context, d *schema.ResourceData, m i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(np.ObjectId)
+	d.SetId(np.ObjectID)
 
 	return diags
 }
@@ -226,37 +226,37 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 	// Get values from schema
 	vmc := d.Get("vmc").(bool)
 	mtu := d.Get("mtu").(int)
-	prefix_length := d.Get("prefix_length").(int)
+	prefixLength := d.Get("prefix_length").(int)
 
 	name := d.Get("name").(string)
 	gateway := d.Get("gateway").(string)
 
-	primary_dns := d.Get("primary_dns").(string)
-	secondary_dns := d.Get("secondary_dns").(string)
-	dns_suffix := d.Get("dns_suffix").(string)
-	network_name := d.Get("network_name").(string)
-	network_type := d.Get("network_type").(string)
+	primaryDNS := d.Get("primary_dns").(string)
+	secondaryDNS := d.Get("secondary_dns").(string)
+	dnsSuffix := d.Get("dns_suffix").(string)
+	networkName := d.Get("network_name").(string)
+	networkType := d.Get("network_type").(string)
 
 	sp := d.Get("site_pairing").(map[string]interface{})
-	vcuuid := sp["local_vc"].(string)
-	vclocalendpointid := sp["local_endpoint_id"].(string)
+	vcUUID := sp["local_vc"].(string)
+	vcLocalEndpointID := sp["local_endpoint_id"].(string)
 
 	// Get IP Ranges from schema
-	ip_range := d.Get("ip_range").([]interface{})
+	ipRange := d.Get("ip_range").([]interface{})
 
-	ipr := []hcx.NetworkIpRange{}
-	for _, j := range ip_range {
+	ipr := []hcx.NetworkIPRange{}
+	for _, j := range ipRange {
 		s := j.(map[string]interface{})
-		start_address := s["start_address"].(string)
-		end_address := s["end_address"].(string)
+		startAddress := s["start_address"].(string)
+		endAddress := s["end_address"].(string)
 
-		ipr = append(ipr, hcx.NetworkIpRange{
-			StartAddress: start_address,
-			EndAddress:   end_address,
+		ipr = append(ipr, hcx.NetworkIPRange{
+			StartAddress: startAddress,
+			EndAddress:   endAddress,
 		})
 	}
 
-	// Read the exisint profile
+	// Read the exising profile
 	body, err := hcx.GetNetworkProfile(client, name)
 	if err != nil {
 		return diag.FromErr(err)
@@ -268,16 +268,16 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 		body.Name = name
 
 		// Get network details
-		network_id, err := hcx.GetNetworkBacking(client, vclocalendpointid, network_name, network_type)
+		networkID, err := hcx.GetNetworkBacking(client, vcLocalEndpointID, networkName, networkType)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
 		body.Backings = []hcx.Backing{{
-			BackingID:           network_id.EntityID,
-			BackingName:         network_name,
-			VCenterInstanceUuid: vcuuid,
-			Type:                network_type,
+			BackingID:           networkID.EntityID,
+			BackingName:         networkName,
+			VCenterInstanceUUID: vcUUID,
+			Type:                networkType,
 		}}
 	}
 
@@ -285,12 +285,12 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	body.IPScopes = []hcx.IPScope{
 		{
-			DnsSuffix:       dns_suffix,
+			DNSSuffix:       dnsSuffix,
 			Gateway:         gateway,
-			PrefixLength:    prefix_length,
-			PrimaryDns:      primary_dns,
-			SecondaryDns:    secondary_dns,
-			NetworkIpRanges: ipr,
+			PrefixLength:    prefixLength,
+			PrimaryDNS:      primaryDNS,
+			SecondaryDNS:    secondaryDNS,
+			NetworkIPRanges: ipr,
 			PoolID:          body.IPScopes[0].PoolID,
 		},
 	}
@@ -336,7 +336,7 @@ func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m
 			}
 
 			// Empty the IP Ranges
-			body.IPScopes[0].NetworkIpRanges = []hcx.NetworkIpRange{}
+			body.IPScopes[0].NetworkIPRanges = []hcx.NetworkIPRange{}
 
 			res, err = hcx.UpdateNetworkProfile(client, body)
 

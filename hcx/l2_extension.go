@@ -13,10 +13,10 @@ import (
 )
 
 type InsertL2ExtensionBody struct {
-	VcGuid             string             `json:"vcGuid"`
+	VcGUID             string             `json:"vcGuid"`
 	Gateway            string             `json:"gateway"`
 	Netmask            string             `json:"netmask"`
-	Dns                []string           `json:"dns"`
+	DNS                []string           `json:"dns"`
 	Destination        Destination        `json:"destination"`
 	DestinationNetwork DestinationNetwork `json:"destinationNetwork"`
 	Features           Features           `json:"features"`
@@ -25,14 +25,14 @@ type InsertL2ExtensionBody struct {
 }
 
 type DestinationNetwork struct {
-	GatewayId string `json:"gatewayId"`
+	GatewayID string `json:"gatewayId"`
 }
 
 type Destination struct {
-	EndpointId   string `json:"endpointId"`
+	EndpointID   string `json:"endpointId"`
 	EndpointName string `json:"endpointName"`
 	EndpointType string `json:"endpointType"`
-	ResourceId   string `json:"resourceId"`
+	ResourceID   string `json:"resourceId"`
 	ResourceName string `json:"resourceName"`
 	ResourceType string `json:"resourceType"`
 }
@@ -43,16 +43,16 @@ type Features struct {
 }
 
 type SourceAppliance struct {
-	ApplianceId string `json:"applianceId"`
+	ApplianceID string `json:"applianceId"`
 }
 
 type SourceNetwork struct {
-	NetworkId   string `json:"networkId"`
+	NetworkID   string `json:"networkId"`
 	NetworkName string `json:"networkName"`
 	NetworkType string `json:"networkType"`
 }
 
-type InsertL2ExtentionResult struct {
+type InsertL2ExtensionResult struct {
 	ID string `json:"id"`
 }
 
@@ -61,7 +61,7 @@ type GetL2ExtensionsResult struct {
 }
 
 type GetL2ExtensionsResultItem struct {
-	StretchId       string          `json:"stretchId"`
+	StretchID       string          `json:"stretchId"`
 	OperationStatus OperationStatus `json:"operationStatus"`
 	SourceNetwork   SourceNetwork   `json:"sourceNetwork"`
 }
@@ -75,9 +75,9 @@ type DeleteL2ExtensionResult struct {
 }
 
 // InsertL2Extention ...
-func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2ExtentionResult, error) {
+func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2ExtensionResult, error) {
 
-	resp := InsertL2ExtentionResult{}
+	resp := InsertL2ExtensionResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
@@ -110,7 +110,7 @@ func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2Extention
 }
 
 // GetL2Extensions ...
-func GetL2Extensions(c *Client, network_name string) (GetL2ExtensionsResultItem, error) {
+func GetL2Extensions(c *Client, networkName string) (GetL2ExtensionsResultItem, error) {
 
 	resp := GetL2ExtensionsResult{}
 
@@ -135,7 +135,7 @@ func GetL2Extensions(c *Client, network_name string) (GetL2ExtensionsResultItem,
 	}
 
 	for _, j := range resp.Items {
-		if j.SourceNetwork.NetworkName == network_name {
+		if j.SourceNetwork.NetworkName == networkName {
 			return j, nil
 		}
 	}

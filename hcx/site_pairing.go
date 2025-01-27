@@ -11,16 +11,16 @@ import (
 	"net/http"
 )
 
-type Remote_data struct {
+type RemoteData struct {
 	Username   string `json:"username"`
 	Password   string `json:"password"`
 	URL        string `json:"url"`
-	EndpointId string `json:"endpointId,omitempty"`
+	EndpointID string `json:"endpointId,omitempty"`
 	CloudType  string `json:"cloudType,omitempty"`
 }
 
 type RemoteCloudConfigBody struct {
-	Remote Remote_data `json:"remote"`
+	Remote RemoteData `json:"remote"`
 }
 
 type PostRemoteCloudConfigResultData struct {
@@ -51,7 +51,7 @@ type GetRemoteCloudConfigResult struct {
 }
 
 type GetRemoteCloudConfigResultData struct {
-	Items []Remote_data `json:"items"`
+	Items []RemoteData `json:"items"`
 }
 
 type DeleteRemoteCloudConfigResult struct {
@@ -124,11 +124,11 @@ func GetSitePairings(c *Client) (GetRemoteCloudConfigResult, error) {
 }
 
 // DeleteSitePairings ...
-func DeleteSitePairings(c *Client, endpointId string) (DeleteRemoteCloudConfigResult, error) {
+func DeleteSitePairings(c *Client, endpointID string) (DeleteRemoteCloudConfigResult, error) {
 
 	resp := DeleteRemoteCloudConfigResult{}
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/endpointPairing/%s", c.HostURL, endpointId), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/endpointPairing/%s", c.HostURL, endpointID), nil)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err

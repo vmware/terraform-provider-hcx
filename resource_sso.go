@@ -45,7 +45,7 @@ func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{
 			Items: []hcx.InsertSSODataItem{
 				{
 					Config: hcx.InsertSSODataItemConfig{
-						LookupServiceUrl: url,
+						LookupServiceURL: url,
 						ProviderType:     "PSC",
 					},
 				},
@@ -94,7 +94,7 @@ func resourceSSOUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 			Items: []hcx.InsertSSODataItem{
 				{
 					Config: hcx.InsertSSODataItemConfig{
-						LookupServiceUrl: url,
+						LookupServiceURL: url,
 						UUID:             d.Id(),
 						ProviderType:     "PSC",
 					},
