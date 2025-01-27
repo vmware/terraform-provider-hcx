@@ -15,6 +15,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourcevCenter defines the resource schema for managing vCenter instance configuration.
 func resourcevCenter() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcevCenterCreate,
@@ -42,6 +43,7 @@ func resourcevCenter() *schema.Resource {
 	}
 }
 
+// resourcevCenterCreate creates the vCenter instance configuration.
 func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -72,7 +74,7 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	d.SetId(res.InsertvCenterData.Items[0].Config.UUID)
 
-	// Restart App Deamon
+	// Restart App Daemon
 	_, err = hcx.AppEngineStop(client)
 	if err != nil {
 		return diag.FromErr(err)
@@ -114,17 +116,20 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 	return resourcevCenterRead(ctx, d, m)
 }
 
+// resourcevCenterRead retrieves the vCenter instance configuration.
 func resourcevCenterRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	return diags
 }
 
+// resourcevCenterUpdate updates the vCenter instance configuration.
 func resourcevCenterUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourcevCenterRead(ctx, d, m)
 }
 
+// resourcevCenterDelete removes the vCenter instance and clears the state of the resource in the schema.
 func resourcevCenterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

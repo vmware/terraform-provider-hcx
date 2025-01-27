@@ -15,6 +15,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceVmc defines the resource schema for managing a VMware Cloud on AWS configuration.
 func resourceVmc() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVmcCreate,
@@ -52,6 +53,7 @@ func resourceVmc() *schema.Resource {
 	}
 }
 
+// resourceVmcCreate creates the VMware Cloud on AWS configuration.
 func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -130,6 +132,7 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 	return resourceVmcRead(ctx, d, m)
 }
 
+// resourceVmcRead retrieves the VMware Cloud on AWS configuration.
 func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -180,11 +183,13 @@ func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	return diags
 }
 
+// resourceVmcUpdate updates the VMware Cloud on AWS resource configuration.
 func resourceVmcUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourceVmcRead(ctx, d, m)
 }
 
+// resourceVmcDelete removes the VMware Cloud on AWS configuration and clears the state of the resource in the schema.
 func resourceVmcDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

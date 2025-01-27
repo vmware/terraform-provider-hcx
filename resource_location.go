@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceLocation defines the resource schema for managing the location for an HCX site.
 func resourceLocation() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceLocationCreate,
@@ -59,11 +60,13 @@ func resourceLocation() *schema.Resource {
 	}
 }
 
+// resourceLocationCreate creates the location configuration for an HCX site.
 func resourceLocationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourceLocationUpdate(ctx, d, m)
 }
 
+// resourceLocationRead retrieves the location configuration for an HCX site.
 func resourceLocationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -84,6 +87,7 @@ func resourceLocationRead(ctx context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
+// resourceLocationUpdate updates the location configuration for an HCX site.
 func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -114,6 +118,7 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	return resourceLocationRead(ctx, d, m)
 }
 
+// resourceLocationDelete removes the location configuration and clears the state of the resource in the schema.
 func resourceLocationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceSitePairing defines the resource schema for managing site pairing configuration.
 func resourceSitePairing() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceSitePairingCreate,
@@ -82,6 +83,7 @@ func resourceSitePairing() *schema.Resource {
 	}
 }
 
+// resourceSitePairingCreate creates the site paring configuration.
 func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -195,6 +197,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 	return resourceSitePairingRead(ctx, d, m)
 }
 
+// resourceSitePairingRead retrieves a site paring configuration.
 func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -253,11 +256,13 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 	return diags
 }
 
+// resourceSitePairingUpdate updates the site pairing configuration.
 func resourceSitePairingUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourceSitePairingRead(ctx, d, m)
 }
 
+// resourceSitePairingDelete removes the site pairing configuration and clears the state of the resource in the schema.
 func resourceSitePairingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

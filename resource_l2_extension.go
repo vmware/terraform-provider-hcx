@@ -15,6 +15,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceL2Extension defines the resource schema for managing an L2 extension, enabling extended network configurations.
 func resourceL2Extension() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceL2ExtensionCreate,
@@ -83,6 +84,7 @@ func resourceL2Extension() *schema.Resource {
 	}
 }
 
+// resourceComputeProfileCreate creates the L2 extension configuration on the specified service.
 func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -192,17 +194,20 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 
 }
 
+// resourceL2ExtensionRead retrieves the L2 extension configuration.
 func resourceL2ExtensionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	return diags
 }
 
+// resourceL2ExtensionUpdate updates the L2 extension configuration.
 func resourceL2ExtensionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourceL2ExtensionRead(ctx, d, m)
 }
 
+// resourceL2ExtensionDelete removes the L2 extension configuration and clears the state of the resource in the schema.
 func resourceL2ExtensionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

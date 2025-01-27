@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceSSO defines the resource schema for managing SSO configuration.
 func resourceSSO() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceSSOCreate,
@@ -34,6 +35,7 @@ func resourceSSO() *schema.Resource {
 	}
 }
 
+// resourceSSOCreate creates the SSO configuration.
 func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -77,12 +79,14 @@ func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{
 
 }
 
+// resourceSSORead retrieves the SSO configuration.
 func resourceSSORead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	return diags
 }
 
+// resourceSSOUpdate updates the SSO configuration.
 func resourceSSOUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -112,6 +116,7 @@ func resourceSSOUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 	return resourceSSORead(ctx, d, m)
 }
 
+// resourceSSODelete removes the SSO configuration and clears the state of the resource in the schema.
 func resourceSSODelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

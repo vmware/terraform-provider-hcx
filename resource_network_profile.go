@@ -13,6 +13,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// NetSchema defines the resource schema a network profile.
 func NetSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"vmc": {
@@ -97,6 +98,7 @@ func NetSchema() map[string]*schema.Schema {
 	}
 }
 
+// resourceComputeProfile defines the resource for managing network profile configuration.
 func resourceNetworkProfile() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNetworkProfileCreate,
@@ -108,6 +110,7 @@ func resourceNetworkProfile() *schema.Resource {
 	}
 }
 
+// resourceNetworkProfileCreate creates the network profile configuration.
 func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -204,6 +207,7 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceNetworkProfileRead(ctx, d, m)
 }
 
+// resourceNetworkProfileRead retrieves the network profile configuration.
 func resourceNetworkProfileRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -219,6 +223,7 @@ func resourceNetworkProfileRead(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
+// resourceNetworkProfileUpdate updates the network profile configuration.
 func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -256,7 +261,7 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 		})
 	}
 
-	// Read the exising profile
+	// Read the existing profile
 	body, err := hcx.GetNetworkProfile(client, name)
 	if err != nil {
 		return diag.FromErr(err)
@@ -317,6 +322,8 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 	return resourceNetworkProfileRead(ctx, d, m)
 }
 
+// resourceNetworkProfileDelete removes the network profile configuration and clears the state of the resource in the
+// schema.
 func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var res hcx.NetworkProfileResult
@@ -328,7 +335,7 @@ func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m
 
 	if vmc {
 		// If VMware Cloud on AWS, don't really delete the network profile
-		// Read the exising profile
+		// Read the existing profile
 		/*
 			body, err := hcx.GetNetworkProfile(client, name)
 			if err != nil {

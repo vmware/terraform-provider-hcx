@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// dataSourceNetworkBacking defines a data source schema to retrieve information about a network backing.
 func dataSourceNetworkBacking() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceNetworkBackingRead,
@@ -42,6 +43,7 @@ func dataSourceNetworkBacking() *schema.Resource {
 	}
 }
 
+// dataSourceNetworkBackingRead retrieves the network backing configuration.
 func dataSourceNetworkBackingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
