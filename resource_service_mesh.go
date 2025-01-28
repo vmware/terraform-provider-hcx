@@ -16,6 +16,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceServiceMesh defines the resource schema for managing service mesh configuration.
 func resourceServiceMesh() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceServiceMeshCreate,
@@ -106,6 +107,7 @@ func resourceServiceMesh() *schema.Resource {
 	}
 }
 
+// resourceServiceMeshCreate creates the service mesh configuration.
 func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -233,17 +235,20 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 
 }
 
+// resourceServiceMeshRead retrieves the service mesh configuration.
 func resourceServiceMeshRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	return diags
 }
 
+// resourceServiceMeshUpdate updates the service mesh configuration.
 func resourceServiceMeshUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourceServiceMeshRead(ctx, d, m)
 }
 
+// resourceServiceMeshDelete removes the service mesh configuration and clears the state of the resource in the schema.
 func resourceServiceMeshDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

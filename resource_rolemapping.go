@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceRoleMapping defines the resource schema for managing role mapping configuration.
 func resourceRoleMapping() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceRoleMappingCreate,
@@ -59,17 +60,20 @@ func resourceRoleMapping() *schema.Resource {
 	}
 }
 
+// resourceRoleMappingCreate creates the role mapping configuration.
 func resourceRoleMappingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourceRoleMappingUpdate(ctx, d, m)
 }
 
+// resourceRoleMappingRead retrieves the role mapping configuration.
 func resourceRoleMappingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	return diags
 }
 
+// resourceRoleMappingUpdate updates the role mapping configuration.
 func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -114,6 +118,7 @@ func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m in
 	return resourceRoleMappingRead(ctx, d, m)
 }
 
+// resourceRoleMappingDelete removes the role mapping configuration amd clears the state of the resource in the schema.
 func resourceRoleMappingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

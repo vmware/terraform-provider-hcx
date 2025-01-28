@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceActivation defines the resource schema for managing activation configurations.
 func resourceActivation() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceActivationCreate,
@@ -35,6 +36,7 @@ func resourceActivation() *schema.Resource {
 	}
 }
 
+// resourceActivationCreate creates the activation configuration resource.
 func resourceActivationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -77,6 +79,7 @@ func resourceActivationCreate(ctx context.Context, d *schema.ResourceData, m int
 	return resourceActivationRead(ctx, d, m)
 }
 
+// resourceActivationRead retrieves the activation configuration and sets the resource ID in the schema.
 func resourceActivationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
@@ -92,11 +95,13 @@ func resourceActivationRead(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
+// resourceActivationUpdate updates the activation configuration by invoking the read operation to refresh its state.
 func resourceActivationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourceActivationRead(ctx, d, m)
 }
 
+// resourceActivationDelete removes the activation configuration and clears the state of the resource in the schema.
 func resourceActivationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

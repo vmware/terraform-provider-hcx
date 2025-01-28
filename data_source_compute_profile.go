@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// dataSourceComputeProfile defines the data source schema to retrieve information about a compute profile.
 func dataSourceComputeProfile() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceComputeProfileRead,
@@ -31,6 +32,7 @@ func dataSourceComputeProfile() *schema.Resource {
 	}
 }
 
+// dataSourceComputeProfileRead retrieves the compute profile configuration.
 func dataSourceComputeProfileRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 

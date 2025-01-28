@@ -16,6 +16,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
+// resourceComputeProfile defines the resource schema for managing compute profile configuration.
 func resourceComputeProfile() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceComputeProfileCreate,
@@ -90,6 +91,7 @@ func resourceComputeProfile() *schema.Resource {
 	}
 }
 
+// resourceComputeProfileCreate creates the compute profile configuration.
 func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	client := m.(*hcx.Client)
@@ -332,17 +334,21 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 }
 
+// resourceComputeProfileRead retrieves the compute profile configuration.
 func resourceComputeProfileRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	return diags
 }
 
+// resourceComputeProfileUpdate updates the compute profile configuration.
 func resourceComputeProfileUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	return resourceComputeProfileRead(ctx, d, m)
 }
 
+// resourceComputeProfileDelete removes the compute profile configuration and clears the state of the resource in the
+// schema.
 func resourceComputeProfileDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
