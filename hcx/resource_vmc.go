@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceVmc defines the resource schema for managing a VMware Cloud on AWS configuration.
@@ -58,28 +57,28 @@ func resourceVmc() *schema.Resource {
 // resourceVmcCreate creates the VMware Cloud on AWS configuration.
 func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	token := client.Token
 	sddcName := d.Get("sddc_name").(string)
 	sddcID := d.Get("sddc_id").(string)
 
 	// Authenticate with VMware Cloud Services
-	accessToken, err := hcx.VmcAuthenticate(token)
+	accessToken, err := VmcAuthenticate(token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = hcx.CloudAuthenticate(client, accessToken)
+	err = CloudAuthenticate(client, accessToken)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	var sddc hcx.SDDC
+	var sddc SDDC
 	if sddcID != "" {
-		sddc, err = hcx.GetSddcByID(client, sddcID)
+		sddc, err = GetSddcByID(client, sddcID)
 	} else {
-		sddc, err = hcx.GetSddcByName(client, sddcName)
+		sddc, err = GetSddcByName(client, sddcName)
 	}
 
 	if err != nil {
@@ -92,7 +91,7 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 	}
 
 	// Activate HCX
-	_, err = hcx.ActivateHcxOnSDDC(client, sddc.ID)
+	_, err = ActivateHcxOnSDDC(client, sddc.ID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -101,9 +100,9 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 	errcount := 0
 	for {
 		if sddcID != "" {
-			sddc, err = hcx.GetSddcByID(client, sddcID)
+			sddc, err = GetSddcByID(client, sddcID)
 		} else {
-			sddc, err = hcx.GetSddcByName(client, sddcName)
+			sddc, err = GetSddcByName(client, sddcName)
 		}
 		if err != nil {
 			// Attempt to bypass recurring situation where the HCX API
@@ -134,7 +133,7 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	token := client.Token
 	sddcName := d.Get("sddc_name").(string)
@@ -149,12 +148,12 @@ func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	}
 
 	// Authenticate with VMware Cloud Services
-	accessToken, err := hcx.VmcAuthenticate(token)
+	accessToken, err := VmcAuthenticate(token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = hcx.CloudAuthenticate(client, accessToken)
+	err = CloudAuthenticate(client, accessToken)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -163,11 +162,11 @@ func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	log.Printf("[Client inside]: %+v ", client)
 	log.Printf("****************")
 
-	var sddc hcx.SDDC
+	var sddc SDDC
 	if sddcID != "" {
-		sddc, err = hcx.GetSddcByID(client, sddcID)
+		sddc, err = GetSddcByID(client, sddcID)
 	} else {
-		sddc, err = hcx.GetSddcByName(client, sddcName)
+		sddc, err = GetSddcByName(client, sddcName)
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -191,35 +190,35 @@ func resourceVmcUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 func resourceVmcDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	token := client.Token
 	sddcName := d.Get("sddc_name").(string)
 	sddcID := d.Get("sddc_id").(string)
 
 	// Authenticate with VMware Cloud Services
-	accessToken, err := hcx.VmcAuthenticate(token)
+	accessToken, err := VmcAuthenticate(token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = hcx.CloudAuthenticate(client, accessToken)
+	err = CloudAuthenticate(client, accessToken)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	var sddc hcx.SDDC
+	var sddc SDDC
 	if sddcID != "" {
-		sddc, err = hcx.GetSddcByID(client, sddcID)
+		sddc, err = GetSddcByID(client, sddcID)
 	} else {
-		sddc, err = hcx.GetSddcByName(client, sddcName)
+		sddc, err = GetSddcByName(client, sddcName)
 	}
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Deactivate HCX
-	_, err = hcx.DeactivateHcxOnSDDC(client, sddc.ID)
+	_, err = DeactivateHcxOnSDDC(client, sddc.ID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -227,11 +226,11 @@ func resourceVmcDelete(ctx context.Context, d *schema.ResourceData, m interface{
 	// Wait for task to be completed
 	errcount := 0
 	for {
-		var sddc hcx.SDDC
+		var sddc SDDC
 		if sddcID != "" {
-			sddc, err = hcx.GetSddcByID(client, sddcID)
+			sddc, err = GetSddcByID(client, sddcID)
 		} else {
-			sddc, err = hcx.GetSddcByName(client, sddcName)
+			sddc, err = GetSddcByName(client, sddcName)
 		}
 		if err != nil {
 			// Attempt to bypass recurring situation where the HCX API

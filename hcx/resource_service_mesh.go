@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"bytes"
@@ -13,7 +13,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceServiceMesh defines the resource schema for managing service mesh configuration.
@@ -110,7 +109,7 @@ func resourceServiceMesh() *schema.Resource {
 // resourceServiceMeshCreate creates the service mesh configuration.
 func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	name := d.Get("name").(string)
 	sitePairing := d.Get("site_pairing").(map[string]interface{})
@@ -125,34 +124,34 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 	tcpFlowConditioningEnabled := d.Get("tcp_flow_conditioning_enabled").(bool)
 
 	services := d.Get("service").([]interface{})
-	servicesFromSchema := []hcx.Service{}
+	servicesFromSchema := []Service{}
 	for _, j := range services {
 		s := j.(map[string]interface{})
 		name := s["name"].(string)
 
-		sTmp := hcx.Service{
+		sTmp := Service{
 			Name: name,
 		}
 		servicesFromSchema = append(servicesFromSchema, sTmp)
 	}
 
 	remoteComputeProfileName := d.Get("remote_compute_profile").(string)
-	remoteComputeProfile, err := hcx.GetComputeProfile(client, remoteEndpointID, remoteComputeProfileName)
+	remoteComputeProfile, err := GetComputeProfile(client, remoteEndpointID, remoteComputeProfileName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	localComputeProfileName := d.Get("local_compute_profile").(string)
-	localComputeProfile, err := hcx.GetComputeProfile(client, localEndpointID, localComputeProfileName)
+	localComputeProfile, err := GetComputeProfile(client, localEndpointID, localComputeProfileName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	nbAppliances := d.Get("nb_appliances").(int)
 
-	body := hcx.InsertServiceMeshBody{
+	body := InsertServiceMeshBody{
 		Name: name,
-		ComputeProfiles: []hcx.ComputeProfile{
+		ComputeProfiles: []ComputeProfile{
 			{
 				EndpointID:         localEndpointID,
 				EndpointName:       localEndpointName,
@@ -166,17 +165,17 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 				ComputeProfileName: remoteComputeProfile.Name,
 			},
 		},
-		WanoptConfig: hcx.WanoptConfig{
+		WanoptConfig: WanoptConfig{
 			UplinkMaxBandwidth: uplinkMaxBandwidth,
 		},
-		TrafficEnggCfg: hcx.TrafficEnggCfg{
+		TrafficEnggCfg: TrafficEnggCfg{
 			IsAppPathResiliencyEnabled:   appPathResiliencyEnabled,
 			IsTCPFlowConditioningEnabled: tcpFlowConditioningEnabled,
 		},
 		Services: servicesFromSchema,
-		SwitchPairCount: []hcx.SwitchPairCount{
+		SwitchPairCount: []SwitchPairCount{
 			{
-				Switches: []hcx.Switch{
+				Switches: []Switch{
 					localComputeProfile.Switches[0],
 					remoteComputeProfile.Switches[0],
 				},
@@ -190,7 +189,7 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	res2, err := hcx.InsertServiceMesh(client, body)
+	res2, err := InsertServiceMesh(client, body)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -198,7 +197,7 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	// Wait for task completion
 	for {
-		jr, err := hcx.GetTaskResult(client, res2.Data.InterconnectID)
+		jr, err := GetTaskResult(client, res2.Data.InterconnectID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -215,7 +214,7 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	// Update Appliances ID
-	appliances, err := hcx.GetAppliances(client, sitePairing["local_endpoint_id"].(string), res2.Data.ServiceMeshID)
+	appliances, err := GetAppliances(client, sitePairing["local_endpoint_id"].(string), res2.Data.ServiceMeshID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -252,17 +251,17 @@ func resourceServiceMeshUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceServiceMeshDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 	force := d.Get("force_delete").(bool)
 
-	res, err := hcx.DeleteServiceMesh(client, d.Id(), force)
+	res, err := DeleteServiceMesh(client, d.Id(), force)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for task completion
 	for {
-		jr, err := hcx.GetTaskResult(client, res.Data.InterconnectTaskID)
+		jr, err := GetTaskResult(client, res.Data.InterconnectTaskID)
 		if err != nil {
 			return diag.FromErr(err)
 		}

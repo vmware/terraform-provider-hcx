@@ -2,14 +2,13 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceSSO defines the resource schema for managing SSO configuration.
@@ -38,15 +37,15 @@ func resourceSSO() *schema.Resource {
 // resourceSSOCreate creates the SSO configuration.
 func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	url := d.Get("url").(string)
 
-	body := hcx.InsertSSOBody{
-		Data: hcx.InsertSSOData{
-			Items: []hcx.InsertSSODataItem{
+	body := InsertSSOBody{
+		Data: InsertSSOData{
+			Items: []InsertSSODataItem{
 				{
-					Config: hcx.InsertSSODataItemConfig{
+					Config: InsertSSODataItemConfig{
 						LookupServiceURL: url,
 						ProviderType:     "PSC",
 					},
@@ -56,14 +55,14 @@ func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{
 	}
 
 	// First, check if SSO config is already present
-	res, err := hcx.GetSSO(client)
+	res, err := GetSSO(client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	if len(res.InsertSSOData.Items) == 0 {
 		// No SSO config found
-		res, err := hcx.InsertSSO(client, body)
+		res, err := InsertSSO(client, body)
 
 		if err != nil {
 			return diag.FromErr(err)
@@ -89,15 +88,15 @@ func resourceSSORead(ctx context.Context, d *schema.ResourceData, m interface{})
 // resourceSSOUpdate updates the SSO configuration.
 func resourceSSOUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	url := d.Get("url").(string)
 
-	body := hcx.InsertSSOBody{
-		Data: hcx.InsertSSOData{
-			Items: []hcx.InsertSSODataItem{
+	body := InsertSSOBody{
+		Data: InsertSSOData{
+			Items: []InsertSSODataItem{
 				{
-					Config: hcx.InsertSSODataItemConfig{
+					Config: InsertSSODataItemConfig{
 						LookupServiceURL: url,
 						UUID:             d.Id(),
 						ProviderType:     "PSC",
@@ -107,7 +106,7 @@ func resourceSSOUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 		},
 	}
 
-	_, err := hcx.UpdateSSO(client, body)
+	_, err := UpdateSSO(client, body)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -120,9 +119,9 @@ func resourceSSOUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 func resourceSSODelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
-	_, err := hcx.DeleteSSO(client, d.Id())
+	_, err := DeleteSSO(client, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

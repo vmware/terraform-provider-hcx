@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"bytes"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceL2Extension defines the resource schema for managing an L2 extension, enabling extended network configurations.
@@ -87,7 +86,7 @@ func resourceL2Extension() *schema.Resource {
 // resourceComputeProfileCreate creates the L2 extension configuration on the specified service.
 func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	sitePairing := d.Get("site_pairing").(map[string]interface{})
 	vcGUID := sitePairing["local_vc"].(string)
@@ -113,7 +112,7 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	serviceMeshID := d.Get("service_mesh_id").(string)
 
-	dvpg, err := hcx.GetNetworkBacking(client, sitePairing["local_endpoint_id"].(string), sourceNetwork, networkType)
+	dvpg, err := GetNetworkBacking(client, sitePairing["local_endpoint_id"].(string), sourceNetwork, networkType)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -121,34 +120,34 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 	applianceID := d.Get("appliance_id").(string)
 	if applianceID == "" {
 		// GET THE FIRST APPLIANCE
-		appliance, err := hcx.GetAppliance(client, sitePairing["local_endpoint_id"].(string), serviceMeshID)
+		appliance, err := GetAppliance(client, sitePairing["local_endpoint_id"].(string), serviceMeshID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		applianceID = appliance.ApplianceID
 	}
 
-	body := hcx.InsertL2ExtensionBody{
+	body := InsertL2ExtensionBody{
 		Gateway: gateway,
 		Netmask: netmask,
-		DestinationNetwork: hcx.DestinationNetwork{
+		DestinationNetwork: DestinationNetwork{
 			GatewayID: destinationT1,
 		},
 		DNS: []string{},
-		Features: hcx.Features{
+		Features: Features{
 			EgressOptimization: egressOptimization,
 			Mon:                mon,
 		},
-		SourceAppliance: hcx.SourceAppliance{
+		SourceAppliance: SourceAppliance{
 			ApplianceID: applianceID,
 		},
-		SourceNetwork: hcx.SourceNetwork{
+		SourceNetwork: SourceNetwork{
 			NetworkID:   dvpg.EntityID,
 			NetworkName: dvpg.Name,
 			NetworkType: dvpg.EntityType,
 		},
 		VcGUID: vcGUID,
-		Destination: hcx.Destination{
+		Destination: Destination{
 			EndpointID:   destinationEndpointID,
 			EndpointName: destinationEndpointName,
 			EndpointType: destinationEndpointType,
@@ -163,7 +162,7 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 
-	res2, err := hcx.InsertL2Extension(client, body)
+	res2, err := InsertL2Extension(client, body)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -171,7 +170,7 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	// Wait for job completion
 	for {
-		jr, err := hcx.GetJobResult(client, res2.ID)
+		jr, err := GetJobResult(client, res2.ID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -183,7 +182,7 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	// Get L2 Extension ID
-	res3, err := hcx.GetL2Extensions(client, dvpg.Name)
+	res3, err := GetL2Extensions(client, dvpg.Name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -211,16 +210,16 @@ func resourceL2ExtensionUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceL2ExtensionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
-	res, err := hcx.DeleteL2Extension(client, d.Id())
+	res, err := DeleteL2Extension(client, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for job completion
 	for {
-		jr, err := hcx.GetJobResult(client, res.ID)
+		jr, err := GetJobResult(client, res.ID)
 		if err != nil {
 			return diag.FromErr(err)
 		}

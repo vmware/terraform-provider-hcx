@@ -8,6 +8,7 @@ import (
 	"flag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 
 	opts := &plugin.ServeOpts{
 		ProviderFunc: func() *schema.Provider {
-			return Provider()
+			return hcx.Provider()
 		},
 	}
 

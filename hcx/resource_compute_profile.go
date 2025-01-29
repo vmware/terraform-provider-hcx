@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"bytes"
@@ -13,7 +13,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceComputeProfile defines the resource schema for managing compute profile configuration.
@@ -94,12 +93,12 @@ func resourceComputeProfile() *schema.Resource {
 // resourceComputeProfileCreate creates the compute profile configuration.
 func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	name := d.Get("name").(string)
 	cluster := d.Get("cluster").(string)
 
-	res, err := hcx.GetVcInventory(client)
+	res, err := GetVcInventory(client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -121,26 +120,26 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	// Get Datastore info
 	datastore := d.Get("datastore").(string)
-	datastoreFromAPI, err := hcx.GetVcDatastore(client, datastore, res.EntityID, clusterID)
+	datastoreFromAPI, err := GetVcDatastore(client, datastore, res.EntityID, clusterID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Get DVS info
 	dvs := d.Get("dvs").(string)
-	dvsFromAPI, err := hcx.GetVcDvs(client, dvs, res.EntityID, clusterID)
+	dvsFromAPI, err := GetVcDvs(client, dvs, res.EntityID, clusterID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Get Services from schema
 	services := d.Get("service").([]interface{})
-	servicesFromSchema := []hcx.Service{}
+	servicesFromSchema := []Service{}
 	for _, j := range services {
 		s := j.(map[string]interface{})
 		name := s["name"].(string)
 
-		sTmp := hcx.Service{
+		sTmp := Service{
 			Name: name,
 		}
 		servicesFromSchema = append(servicesFromSchema, sTmp)
@@ -152,40 +151,40 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	uplinkNetwork := d.Get("uplink_network").(string)
 	vmotionNetwork := d.Get("vmotion_network").(string)
 
-	networksList := []hcx.Network{}
-	np, err := hcx.GetNetworkProfileByID(client, managementNetwork)
+	networksList := []Network{}
+	np, err := GetNetworkProfileByID(client, managementNetwork)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	managementNetworkName := np.Name
 	managementNetworkID := np.ObjectID
 
-	np, err = hcx.GetNetworkProfileByID(client, replicationNetwork)
+	np, err = GetNetworkProfileByID(client, replicationNetwork)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	replicationNetworkName := np.Name
 	replicationNetworkID := np.ObjectID
 
-	np, err = hcx.GetNetworkProfileByID(client, uplinkNetwork)
+	np, err = GetNetworkProfileByID(client, uplinkNetwork)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	uplinkNetworkName := np.Name
 	uplinkNetworkID := np.ObjectID
 
-	np, err = hcx.GetNetworkProfileByID(client, vmotionNetwork)
+	np, err = GetNetworkProfileByID(client, vmotionNetwork)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	vmotionNetworkName := np.Name
 	vmotionNetworkID := np.ObjectID
 
-	netTmp := hcx.Network{
+	netTmp := Network{
 		Name: managementNetworkName,
 		ID:   managementNetworkID,
 		Tags: []string{"management"},
-		Status: hcx.Status{
+		Status: Status{
 			State: "REALIZED",
 		},
 	}
@@ -203,11 +202,11 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	if found {
 		networksList[index].Tags = append(networksList[index].Tags, "replication")
 	} else {
-		netTmp := hcx.Network{
+		netTmp := Network{
 			Name: replicationNetworkName,
 			ID:   replicationNetworkID,
 			Tags: []string{"replication"},
-			Status: hcx.Status{
+			Status: Status{
 				State: "REALIZED",
 			},
 		}
@@ -226,11 +225,11 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	if found {
 		networksList[index].Tags = append(networksList[index].Tags, "uplink")
 	} else {
-		netTmp := hcx.Network{
+		netTmp := Network{
 			Name: uplinkNetworkName,
 			ID:   uplinkNetworkID,
 			Tags: []string{"uplink"},
-			Status: hcx.Status{
+			Status: Status{
 				State: "REALIZED",
 			},
 		}
@@ -249,21 +248,21 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	if found {
 		networksList[index].Tags = append(networksList[index].Tags, "vmotion")
 	} else {
-		netTmp := hcx.Network{
+		netTmp := Network{
 			Name: vmotionNetworkName,
 			ID:   vmotionNetworkID,
 			Tags: []string{"vmotion"},
-			Status: hcx.Status{
+			Status: Status{
 				State: "REALIZED",
 			},
 		}
 		networksList = append(networksList, netTmp)
 	}
 
-	body := hcx.InsertComputeProfileBody{
+	body := InsertComputeProfileBody{
 		Name:     name,
 		Services: servicesFromSchema,
-		Computes: []hcx.Compute{{
+		Computes: []Compute{{
 			ComputeID:   res.EntityID,
 			ComputeType: "VC",
 			ComputeName: res.Name,
@@ -271,8 +270,8 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			Name:        res.Children[0].Name,
 			Type:        res.Children[0].EntityType,
 		}},
-		DeploymentContainers: hcx.DeploymentContainer{
-			Computes: []hcx.Compute{{
+		DeploymentContainers: DeploymentContainer{
+			Computes: []Compute{{
 				ComputeID:   res.EntityID,
 				ComputeType: "VC",
 				ComputeName: res.Name,
@@ -281,7 +280,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 				Type:        "ClusterComputeResource",
 			},
 			},
-			Storage: []hcx.Storage{{
+			Storage: []Storage{{
 				ComputeID:   res.EntityID,
 				ComputeType: "VC",
 				ComputeName: res.Name,
@@ -291,7 +290,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			}},
 		},
 		Networks: networksList,
-		Switches: []hcx.Switch{{
+		Switches: []Switch{{
 			ComputeID: res.EntityID,
 			MaxMTU:    dvsFromAPI.MaxMTU,
 			ID:        dvsFromAPI.ID,
@@ -305,14 +304,14 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	res2, err := hcx.InsertComputeProfile(client, body)
+	res2, err := InsertComputeProfile(client, body)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for task completion
 	for {
-		jr, err := hcx.GetTaskResult(client, res2.Data.InterconnectTaskID)
+		jr, err := GetTaskResult(client, res2.Data.InterconnectTaskID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -352,16 +351,16 @@ func resourceComputeProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 func resourceComputeProfileDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
-	res, err := hcx.DeleteComputeProfile(client, d.Id())
+	res, err := DeleteComputeProfile(client, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for task completion
 	for {
-		jr, err := hcx.GetTaskResult(client, res.Data.InterconnectTaskID)
+		jr, err := GetTaskResult(client, res.Data.InterconnectTaskID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
