@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceSitePairing defines the resource schema for managing site pairing configuration.
@@ -86,21 +85,21 @@ func resourceSitePairing() *schema.Resource {
 // resourceSitePairingCreate creates the site paring configuration.
 func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	url := d.Get("url").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
-	body := hcx.RemoteCloudConfigBody{
-		Remote: hcx.RemoteData{
+	body := RemoteCloudConfigBody{
+		Remote: RemoteData{
 			Username: username,
 			Password: password,
 			URL:      url,
 		},
 	}
 
-	res, err := hcx.InsertSitePairing(client, body)
+	res, err := InsertSitePairing(client, body)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -119,10 +118,10 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 
 			if ok {
 				// Add certificate
-				body := hcx.InsertCertificateBody{
+				body := InsertCertificateBody{
 					Certificate: certificate,
 				}
-				_, err := hcx.InsertCertificate(client, body)
+				_, err := InsertCertificate(client, body)
 				if err != nil {
 					return diag.FromErr(err)
 				}
@@ -135,7 +134,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	if secondTry {
-		res, err = hcx.InsertSitePairing(client, body)
+		res, err = InsertSitePairing(client, body)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -144,7 +143,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 	// Wait for job completion
 	count := 0
 	for {
-		jr, err := hcx.GetJobResult(client, res.Data.JobID)
+		jr, err := GetJobResult(client, res.Data.JobID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -164,7 +163,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	if count > 5 {
-		res, err = hcx.InsertSitePairing(client, body)
+		res, err = InsertSitePairing(client, body)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -172,7 +171,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 		// Wait for job completion
 		count = 0
 		for {
-			jr, err := hcx.GetJobResult(client, res.Data.JobID)
+			jr, err := GetJobResult(client, res.Data.JobID)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -201,24 +200,24 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	url := d.Get("url").(string)
 
-	res, err := hcx.GetSitePairings(client)
+	res, err := GetSitePairings(client)
 
 	for _, item := range res.Data.Items {
 		if item.URL == url {
 			d.SetId(item.EndpointID)
 
-			lc, err := hcx.GetLocalContainer(client)
+			lc, err := GetLocalContainer(client)
 			if err != nil {
 				return diag.FromErr(errors.New("cannot get local container info"))
 			}
 
 			d.Set("local_vc", lc.VcUUID)
 
-			rc, err := hcx.GetRemoteContainer(client)
+			rc, err := GetRemoteContainer(client)
 			if err != nil {
 				return diag.FromErr(errors.New("cannot get remote container info"))
 			}
@@ -227,7 +226,7 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 			d.Set("remote_resource_name", rc.ResourceName)
 
 			// Update Remote Cloud Info
-			res2, err := hcx.GetRemoteCloudList(client)
+			res2, err := GetRemoteCloudList(client)
 			if err != nil {
 				return diag.FromErr(errors.New("cannot get remote cloud info"))
 			}
@@ -239,7 +238,7 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 			}
 
 			// Update Local Cloud Info
-			res3, err := hcx.GetLocalCloudList(client)
+			res3, err := GetLocalCloudList(client)
 			if err != nil {
 				return diag.FromErr(errors.New("cannot get remote cloud info"))
 			}
@@ -266,10 +265,10 @@ func resourceSitePairingUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceSitePairingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 	url := d.Get("url").(string)
 
-	_, err := hcx.DeleteSitePairings(client, d.Id())
+	_, err := DeleteSitePairings(client, d.Id())
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -277,7 +276,7 @@ func resourceSitePairingDelete(ctx context.Context, d *schema.ResourceData, m in
 
 	// Wait for site pairing deletion
 	for {
-		res, err := hcx.GetSitePairings(client)
+		res, err := GetSitePairings(client)
 		if err != nil {
 			return diag.FromErr(err)
 		}

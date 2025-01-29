@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
@@ -10,10 +10,9 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	hcx "github.com/vmware/terraform-provider-hcx/hcx"
 )
 
-// Provider -
+// Provider returns the schema.Provider object configured with resources, data sources, and schema for the HCX provider.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -95,7 +94,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	allowUnverifiedSSL := d.Get("allow_unverified_ssl").(bool)
 	vmcToken := d.Get("vmc_token").(string)
 
-	c, err := hcx.NewClient(&hcxURL, &username, &password, &adminUsername, &adminPassword, &allowUnverifiedSSL, &vmcToken)
+	c, err := NewClient(&hcxURL, &username, &password, &adminUsername, &adminPassword, &allowUnverifiedSSL, &vmcToken)
 
 	if err != nil {
 		return nil, diag.FromErr(err)

@@ -2,14 +2,13 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // dataSourceNetworkBacking defines a data source schema to retrieve information about a network backing.
@@ -47,13 +46,13 @@ func dataSourceNetworkBacking() *schema.Resource {
 func dataSourceNetworkBackingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	network := d.Get("name").(string)
 	vcUUID := d.Get("vcuuid").(string)
 	networkType := d.Get("network_type").(string)
 
-	res, err := hcx.GetNetworkBacking(client, vcUUID, network, networkType)
+	res, err := GetNetworkBacking(client, vcUUID, network, networkType)
 
 	if err != nil {
 		return diag.FromErr(err)

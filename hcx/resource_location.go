@@ -2,14 +2,13 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceLocation defines the resource schema for managing the location for an HCX site.
@@ -70,9 +69,9 @@ func resourceLocationCreate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceLocationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
-	resp, err := hcx.GetLocation(client)
+	resp, err := GetLocation(client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -90,7 +89,7 @@ func resourceLocationRead(ctx context.Context, d *schema.ResourceData, m interfa
 // resourceLocationUpdate updates the location configuration for an HCX site.
 func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	city := d.Get("city").(string)
 	country := d.Get("country").(string)
@@ -99,7 +98,7 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	longitude := d.Get("longitude").(float64)
 	province := d.Get("province").(string)
 
-	body := hcx.SetLocationBody{
+	body := SetLocationBody{
 		City:      city,
 		Country:   country,
 		CityASCII: CityASCII,
@@ -108,7 +107,7 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		Province:  province,
 	}
 
-	err := hcx.SetLocation(client, body)
+	err := SetLocation(client, body)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -122,9 +121,9 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceLocationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
-	body := hcx.SetLocationBody{
+	body := SetLocationBody{
 		City:      "",
 		Country:   "",
 		CityASCII: "",
@@ -133,7 +132,7 @@ func resourceLocationDelete(ctx context.Context, d *schema.ResourceData, m inter
 		Province:  "",
 	}
 
-	err := hcx.SetLocation(client, body)
+	err := SetLocation(client, body)
 	if err != nil {
 		return diag.FromErr(err)
 	}

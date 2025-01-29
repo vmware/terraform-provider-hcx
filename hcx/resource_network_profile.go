@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // NetSchema defines the resource schema a network profile.
@@ -113,7 +112,7 @@ func resourceNetworkProfile() *schema.Resource {
 // resourceNetworkProfileCreate creates the network profile configuration.
 func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	vmc := d.Get("vmc").(bool)
 	if vmc {
@@ -140,7 +139,7 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.Errorf("VMC switch is not enabled. Network name is mandatory")
 	}
 	networkType := d.Get("network_type").(string)
-	networkiD, err := hcx.GetNetworkBacking(client, vcLocalEndpointID, networkName.(string), networkType)
+	networkiD, err := GetNetworkBacking(client, vcLocalEndpointID, networkName.(string), networkType)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -148,30 +147,30 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	// Get IP Ranges from schema
 	ipRange := d.Get("ip_range").([]interface{})
 
-	ipr := []hcx.NetworkIPRange{}
+	ipr := []NetworkIPRange{}
 	for _, j := range ipRange {
 		s := j.(map[string]interface{})
 		startAddress := s["start_address"].(string)
 		endAddress := s["end_address"].(string)
 
-		ipr = append(ipr, hcx.NetworkIPRange{
+		ipr = append(ipr, NetworkIPRange{
 			StartAddress: startAddress,
 			EndAddress:   endAddress,
 		})
 	}
 
-	body := hcx.NetworkProfileBody{
+	body := NetworkProfileBody{
 		Name:         name,
 		Organization: "DEFAULT",
 		MTU:          mtu,
-		Backings: []hcx.Backing{{
+		Backings: []Backing{{
 			BackingID:           networkiD.EntityID,
 			BackingName:         networkName.(string),
 			VCenterInstanceUUID: vcUUID,
 			Type:                networkType,
 		},
 		},
-		IPScopes: []hcx.IPScope{
+		IPScopes: []IPScope{
 			{
 				DNSSuffix:       dnsSuffix,
 				Gateway:         gateway,
@@ -185,7 +184,7 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 		OwnedBySystem:   true,
 	}
 
-	res, err := hcx.InsertNetworkProfile(client, body)
+	res, err := InsertNetworkProfile(client, body)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -193,7 +192,7 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for job completion
 	for {
-		jr, err := hcx.GetJobResult(client, res.Data.JobID)
+		jr, err := GetJobResult(client, res.Data.JobID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -211,10 +210,10 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 func resourceNetworkProfileRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 	name := d.Get("name").(string)
 
-	np, err := hcx.GetNetworkProfile(client, name)
+	np, err := GetNetworkProfile(client, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -226,7 +225,7 @@ func resourceNetworkProfileRead(ctx context.Context, d *schema.ResourceData, m i
 // resourceNetworkProfileUpdate updates the network profile configuration.
 func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	// Get values from schema
 	vmc := d.Get("vmc").(bool)
@@ -249,20 +248,20 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 	// Get IP Ranges from schema
 	ipRange := d.Get("ip_range").([]interface{})
 
-	ipr := []hcx.NetworkIPRange{}
+	ipr := []NetworkIPRange{}
 	for _, j := range ipRange {
 		s := j.(map[string]interface{})
 		startAddress := s["start_address"].(string)
 		endAddress := s["end_address"].(string)
 
-		ipr = append(ipr, hcx.NetworkIPRange{
+		ipr = append(ipr, NetworkIPRange{
 			StartAddress: startAddress,
 			EndAddress:   endAddress,
 		})
 	}
 
 	// Read the existing profile
-	body, err := hcx.GetNetworkProfile(client, name)
+	body, err := GetNetworkProfile(client, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -273,12 +272,12 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 		body.Name = name
 
 		// Get network details
-		networkID, err := hcx.GetNetworkBacking(client, vcLocalEndpointID, networkName, networkType)
+		networkID, err := GetNetworkBacking(client, vcLocalEndpointID, networkName, networkType)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		body.Backings = []hcx.Backing{{
+		body.Backings = []Backing{{
 			BackingID:           networkID.EntityID,
 			BackingName:         networkName,
 			VCenterInstanceUUID: vcUUID,
@@ -288,7 +287,7 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	body.MTU = mtu
 
-	body.IPScopes = []hcx.IPScope{
+	body.IPScopes = []IPScope{
 		{
 			DNSSuffix:       dnsSuffix,
 			Gateway:         gateway,
@@ -300,7 +299,7 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 		},
 	}
 
-	res, err := hcx.UpdateNetworkProfile(client, body)
+	res, err := UpdateNetworkProfile(client, body)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -308,7 +307,7 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for job completion
 	for {
-		jr, err := hcx.GetJobResult(client, res.Data.JobID)
+		jr, err := GetJobResult(client, res.Data.JobID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -326,10 +325,10 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 // schema.
 func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	var res hcx.NetworkProfileResult
+	var res NetworkProfileResult
 	var err error
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 	//name := d.Get("name").(string)
 	vmc := d.Get("vmc").(bool)
 
@@ -353,7 +352,7 @@ func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m
 		*/
 		return diags
 	} else {
-		res, err = hcx.DeleteNetworkProfile(client, d.Id())
+		res, err = DeleteNetworkProfile(client, d.Id())
 
 		if err != nil {
 			return diag.FromErr(err)
@@ -362,7 +361,7 @@ func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for job completion
 	for {
-		jr, err := hcx.GetJobResult(client, res.Data.JobID)
+		jr, err := GetJobResult(client, res.Data.JobID)
 		if err != nil {
 			return diag.FromErr(err)
 		}

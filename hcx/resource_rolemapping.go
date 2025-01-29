@@ -2,14 +2,13 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceRoleMapping defines the resource schema for managing role mapping configuration.
@@ -76,7 +75,7 @@ func resourceRoleMappingRead(ctx context.Context, d *schema.ResourceData, m inte
 // resourceRoleMappingUpdate updates the role mapping configuration.
 func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	admin := d.Get("admin").([]interface{})
 	enterprise := d.Get("enterprise").([]interface{})
@@ -93,7 +92,7 @@ func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m in
 		enterpriseGroups = append(enterpriseGroups, tmp["user_group"].(string))
 	}
 
-	body := []hcx.RoleMapping{
+	body := []RoleMapping{
 		{
 			Role:       "System Administrator",
 			UserGroups: adminGroups,
@@ -108,7 +107,7 @@ func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m in
 		json.NewEncoder(buf).Encode(body)
 		return diag.Errorf("%s", buf)
 	*/
-	_, err := hcx.PutRoleMapping(client, body)
+	_, err := PutRoleMapping(client, body)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -122,8 +121,8 @@ func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceRoleMappingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
-	body := []hcx.RoleMapping{
+	client := m.(*Client)
+	body := []RoleMapping{
 		{
 			Role:       "System Administrator",
 			UserGroups: []string{},
@@ -134,7 +133,7 @@ func resourceRoleMappingDelete(ctx context.Context, d *schema.ResourceData, m in
 		},
 	}
 
-	_, err := hcx.PutRoleMapping(client, body)
+	_, err := PutRoleMapping(client, body)
 	if err != nil {
 		return diag.FromErr(err)
 	}

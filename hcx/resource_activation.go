@@ -2,14 +2,13 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourceActivation defines the resource schema for managing activation configurations.
@@ -39,16 +38,16 @@ func resourceActivation() *schema.Resource {
 // resourceActivationCreate creates the activation configuration resource.
 func resourceActivationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	url := d.Get("url").(string)
 	activationkey := d.Get("activationkey").(string)
 
-	body := hcx.ActivateBody{
-		Data: hcx.ActivateData{
-			Items: []hcx.ActivateDataItem{
+	body := ActivateBody{
+		Data: ActivateData{
+			Items: []ActivateDataItem{
 				{
-					Config: hcx.ActivateDataItemConfig{
+					Config: ActivateDataItemConfig{
 						URL:           url,
 						ActivationKey: activationkey,
 					},
@@ -58,14 +57,14 @@ func resourceActivationCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	// First, check if already activated
-	res, err := hcx.GetActivate(client)
+	res, err := GetActivate(client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	if len(res.Data.Items) == 0 {
 		// No activation config found
-		_, err := hcx.PostActivate(client, body)
+		_, err := PostActivate(client, body)
 
 		if err != nil {
 			return diag.FromErr(err)
@@ -83,9 +82,9 @@ func resourceActivationCreate(ctx context.Context, d *schema.ResourceData, m int
 func resourceActivationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
-	res, err := hcx.GetActivate(client)
+	res, err := GetActivate(client)
 	if err != nil {
 		return diag.FromErr(err)
 	}

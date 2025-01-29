@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
 
-package main
+package hcx
 
 import (
 	"context"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // resourcevCenter defines the resource schema for managing vCenter instance configuration.
@@ -46,17 +45,17 @@ func resourcevCenter() *schema.Resource {
 // resourcevCenterCreate creates the vCenter instance configuration.
 func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
 	url := d.Get("url").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
-	body := hcx.InsertvCenterBody{
-		Data: hcx.InsertvCenterData{
-			Items: []hcx.InsertvCenterDataItem{
+	body := InsertvCenterBody{
+		Data: InsertvCenterData{
+			Items: []InsertvCenterDataItem{
 				{
-					Config: hcx.InsertvCenterDataItemConfig{
+					Config: InsertvCenterDataItemConfig{
 						Username: username,
 						Password: b64.StdEncoding.EncodeToString([]byte(password)),
 						URL:      url,
@@ -66,7 +65,7 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 		},
 	}
 
-	res, err := hcx.InsertvCenter(client, body)
+	res, err := InsertvCenter(client, body)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -75,14 +74,14 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 	d.SetId(res.InsertvCenterData.Items[0].Config.UUID)
 
 	// Restart App Daemon
-	_, err = hcx.AppEngineStop(client)
+	_, err = AppEngineStop(client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for App Daemon to be stopped
 	for {
-		jr, err := hcx.GetAppEngineStatus(client)
+		jr, err := GetAppEngineStatus(client)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -93,14 +92,14 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 		time.Sleep(5 * time.Second)
 	}
 
-	_, err = hcx.AppEngineStart(client)
+	_, err = AppEngineStart(client)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for App Daemon to be started
 	for {
-		jr, err := hcx.GetAppEngineStatus(client)
+		jr, err := GetAppEngineStatus(client)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -133,9 +132,9 @@ func resourcevCenterUpdate(ctx context.Context, d *schema.ResourceData, m interf
 func resourcevCenterDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	client := m.(*hcx.Client)
+	client := m.(*Client)
 
-	_, err := hcx.DeletevCenter(client, d.Id())
+	_, err := DeletevCenter(client, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
