@@ -25,14 +25,16 @@ func resourceVmc() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"sddc_id": {
-				Type:        schema.TypeString,
-				Description: "The ID of the SDDC.",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "The ID of the SDDC.",
+				Optional:     true,
+				ExactlyOneOf: []string{"sddc_id", "sddc_name"}, // Enforces that at least one of them is provided.
 			},
 			"sddc_name": {
-				Type:        schema.TypeString,
-				Description: "The name of the SDDC.",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "The name of the SDDC.",
+				Optional:     true,
+				ExactlyOneOf: []string{"sddc_id", "sddc_name"}, // Enforces that at least one of them is provided.
 			},
 			"cloud_url": {
 				Type:        schema.TypeString,
@@ -61,10 +63,6 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 	token := client.Token
 	sddcName := d.Get("sddc_name").(string)
 	sddcID := d.Get("sddc_id").(string)
-
-	if sddcName == "" && sddcID == "" {
-		return diag.Errorf("SDDC name or Id must be specified")
-	}
 
 	// Authenticate with VMware Cloud Services
 	accessToken, err := hcx.VmcAuthenticate(token)
