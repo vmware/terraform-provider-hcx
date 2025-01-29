@@ -35,8 +35,8 @@ output "l2_extension_1" {
 
 ## Argument Reference
 
-* `site_pairing` - (Required) The site pairing used by this service mesh.
-* `service_mesh_id` - (Required) The ID of the Service Mesh to be used for this
+* `site_pairing` - (Required) The site pairing used for the L2 extension..
+* `service_mesh_id` - (Required) The ID of the Service Mesh to be used for the
   L2 extension.
 * `source_network` - (Required) The source network. Must be a distributed port
   group which is VLAN tagged.

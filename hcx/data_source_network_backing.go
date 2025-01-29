@@ -7,6 +7,9 @@ package hcx
 import (
 	"context"
 
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
+	"github.com/vmware/terraform-provider-hcx/hcx/validators"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -33,10 +36,11 @@ func dataSourceNetworkBacking() *schema.Resource {
 				Computed:    true,
 			},
 			"network_type": {
-				Type:        schema.TypeString,
-				Description: "The type of the network backing. Allowed values are 'DistributedVirtualPortgroup' and 'NsxtSegment'.",
-				Optional:    true,
-				Default:     "DistributedVirtualPortgroup",
+				Type:         schema.TypeString,
+				Description:  fmt.Sprintf("The network type for the network backing. Allowed values include: %v.", constants.AllowedNetworkTypes),
+				Optional:     true,
+				Default:      constants.NetworkTypeDvpg,
+				ValidateFunc: validators.ValidateNetworkType,
 			},
 		},
 	}

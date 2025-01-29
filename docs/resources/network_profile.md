@@ -54,9 +54,9 @@ resource "hcx_network_profile" "net_management" {
 
 ## Argument Reference
 
-* `site_pairing` - (Required) The site pairing map, to be retrieved with the
-  `hcx_site_pairing` resource.
-* `network_name` - (Required) The network name used for the profile.
+* `site_pairing` - (Required) The site pairing map for the network profile,
+   to be retrieved with the`hcx_site_pairing` resource.
+* `network_name` - (Required) The network name for the network profile.
 * `name` - (Required) The name of the network profile.
 * `mtu` - (Required) The MTU of the network profile.
 * `gateway` - (Optional) The gateway for the network profile.
