@@ -24,10 +24,10 @@ resource "hcx_site_pairing" "example" {
 
 ## Argument Reference
 
-* `sddc_name` - (Optional) The name of the SDDC. Either `sddc_name` or `sddc_id`
-  must be specified.
-* `sddc_id` - (Optional) The ID of the SDDC. Either `sddc_id` or `sddc_name`
-  must be specified.
+* `sddc_name` - (Required) The name of the SDDC.
+* `sddc_id` - (Required) The ID of the SDDC.
+
+~> **NOTE:** Either `sddc_name` or `sddc_id` **must** be provided, but not both.
 
 ## Attribute Reference
 
