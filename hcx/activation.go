@@ -47,14 +47,14 @@ func PostActivate(c *Client, body ActivateBody) (ActivateBody, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -75,14 +75,14 @@ func GetActivate(c *Client) (ActivateBody, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -110,14 +110,14 @@ func DeleteActivate(c *Client, body ActivateBody) (ActivateBody, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)

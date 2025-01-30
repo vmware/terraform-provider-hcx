@@ -25,14 +25,14 @@ func AppEngineStart(c *Client) (AppEngineStartStopResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -53,14 +53,14 @@ func AppEngineStop(c *Client) (AppEngineStartStopResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -81,14 +81,14 @@ func GetAppEngineStatus(c *Client) (AppEngineStartStopResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)

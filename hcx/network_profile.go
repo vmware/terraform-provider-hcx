@@ -86,14 +86,14 @@ func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -127,14 +127,14 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 		return NetworkProfileBody{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return NetworkProfileBody{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -174,14 +174,14 @@ func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
 		return NetworkProfileBody{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return NetworkProfileBody{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -208,14 +208,14 @@ func DeleteNetworkProfile(c *Client, networkID string) (NetworkProfileResult, er
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -243,14 +243,14 @@ func UpdateNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)

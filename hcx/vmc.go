@@ -72,7 +72,7 @@ func VmcAuthenticate(token string) (string, error) {
 	}
 
 	resp := VmcAccessToken{}
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -153,7 +153,7 @@ func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 	}
 
 	resp := GetSddcsResults{}
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -190,7 +190,7 @@ func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 	}
 
 	resp := GetSddcsResults{}
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -228,7 +228,7 @@ func ActivateHcxOnSDDC(client *Client, sddcID string) (ActivateHcxOnSDDCResults,
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -260,7 +260,7 @@ func DeactivateHcxOnSDDC(client *Client, sddcID string) (DeactivateHcxOnSDDCResu
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)

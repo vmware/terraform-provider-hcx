@@ -44,7 +44,7 @@ func SetLocation(c *Client, body SetLocationBody) error {
 		return err
 	}
 
-	// Send the request
+	// Send the request.
 	_, _, err = c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
@@ -65,14 +65,14 @@ func GetLocation(c *Client) (GetLocationResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)

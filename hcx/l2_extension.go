@@ -92,14 +92,14 @@ func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2Extension
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -120,14 +120,14 @@ func GetL2Extensions(c *Client, networkName string) (GetL2ExtensionsResultItem, 
 		return GetL2ExtensionsResultItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return GetL2ExtensionsResultItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -154,14 +154,14 @@ func DeleteL2Extension(c *Client, stretchID string) (DeleteL2ExtensionResult, er
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)

@@ -114,14 +114,14 @@ func InsertComputeProfile(c *Client, body InsertComputeProfileBody) (InsertCompu
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -142,14 +142,14 @@ func DeleteComputeProfile(c *Client, computeprofileID string) (InsertComputeProf
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -170,14 +170,14 @@ func GetComputeProfile(c *Client, endpointID string, computeProfileName string) 
 		return GetComputeProfileResultItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return GetComputeProfileResultItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
