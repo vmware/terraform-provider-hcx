@@ -11,6 +11,7 @@ import (
 	"net/http"
 )
 
+// SetLocationBody represents a structured request body for configuring location data in a system.
 type SetLocationBody struct {
 	City      string  `json:"city"`
 	Country   string  `json:"country"`
@@ -20,6 +21,7 @@ type SetLocationBody struct {
 	Longitude float64 `json:"longitude"`
 }
 
+// GetLocationResult represents the response structure for location details fetched from an external service.
 type GetLocationResult struct {
 	City      string  `json:"city"`
 	Country   string  `json:"country"`
@@ -29,7 +31,8 @@ type GetLocationResult struct {
 	Longitude float64 `json:"longitude"`
 }
 
-// SetLocation ...
+// SetLocation sends request to update the location configuration using the provided body. Returns an error if the
+// request fails or cannot be sent.
 func SetLocation(c *Client, body SetLocationBody) error {
 
 	var buf bytes.Buffer
@@ -54,7 +57,8 @@ func SetLocation(c *Client, body SetLocationBody) error {
 	return nil
 }
 
-// GetLocation ...
+// GetLocation sends a request to retrieve the current location configuration and returns the resulting
+// GetLocationResult object. Returns an error if the request fails or the response cannot be parsed.
 func GetLocation(c *Client) (GetLocationResult, error) {
 
 	resp := GetLocationResult{}

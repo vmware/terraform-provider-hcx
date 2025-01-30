@@ -11,16 +11,19 @@ import (
 	"net/http"
 )
 
+// InsertCertificateBody represents the body structure used to insert a certificate.
 type InsertCertificateBody struct {
 	Certificate string `json:"certificate"`
 }
 
+// InsertCertificateResult represents the result of inserting a certificate, including success and completion status.
 type InsertCertificateResult struct {
 	Success   bool `json:"success"`
 	Completed bool `json:"completed"`
 }
 
-// InsertL2Extention ...
+// InsertCertificate sends a request to create a new certificate using the provided body and returns an
+// InsertCertificateResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertCertificate(c *Client, body InsertCertificateBody) (InsertCertificateResult, error) {
 
 	resp := InsertCertificateResult{}

@@ -10,11 +10,13 @@ import (
 	"net/http"
 )
 
+// AppEngineStartStopResult represents the result of an App Engine start or stop operation.
 type AppEngineStartStopResult struct {
 	Result string `json:"result"`
 }
 
-// AppEngineStart ...
+// AppEngineStart sends a request to start the App Engine component and returns the resulting AppEngineStartStopResult
+// object. Returns an error if the request fails or the response cannot be parsed.
 func AppEngineStart(c *Client) (AppEngineStartStopResult, error) {
 
 	resp := AppEngineStartStopResult{}
@@ -42,7 +44,8 @@ func AppEngineStart(c *Client) (AppEngineStartStopResult, error) {
 	return resp, nil
 }
 
-// AppEngineStop ...
+// AppEngineStop sends a request to stop the App Engine component and returns the resulting AppEngineStartStopResult
+// object. Returns an error if the request fails or the response cannot be parsed.
 func AppEngineStop(c *Client) (AppEngineStartStopResult, error) {
 
 	resp := AppEngineStartStopResult{}
@@ -70,7 +73,8 @@ func AppEngineStop(c *Client) (AppEngineStartStopResult, error) {
 	return resp, nil
 }
 
-// GetAppEngineStatus ...
+// GetAppEngineStatus sends a GET request to retrieve the current status of the App Engine component and returns the
+// resulting AppEngineStartStopResult object. Returns an error if the request fails or the response cannot be parsed.
 func GetAppEngineStatus(c *Client) (AppEngineStartStopResult, error) {
 
 	resp := AppEngineStartStopResult{}

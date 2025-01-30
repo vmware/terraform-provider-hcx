@@ -11,18 +11,22 @@ import (
 	"net/http"
 )
 
+// InsertvCenterBody represents the request body for adding a new vCenter instance configuration.
 type InsertvCenterBody struct {
 	Data InsertvCenterData `json:"data"`
 }
 
+// InsertvCenterData represents a collection of vCenter data items required for configuration or operations.
 type InsertvCenterData struct {
 	Items []InsertvCenterDataItem `json:"items"`
 }
 
+// InsertvCenterDataItem represents a single item containing configuration details for a vCenter instance.
 type InsertvCenterDataItem struct {
 	Config InsertvCenterDataItemConfig `json:"config"`
 }
 
+// InsertvCenterDataItemConfig represents the configuration details for connecting to a vCenter instance.
 type InsertvCenterDataItemConfig struct {
 	URL      string `json:"url"`
 	Username string `json:"userName"`
@@ -31,15 +35,18 @@ type InsertvCenterDataItemConfig struct {
 	UUID     string `json:"UUID,omitempty"`
 }
 
+// InsertvCenterResult represents the result returned after inserting a vCenter configuration.
 type InsertvCenterResult struct {
 	InsertvCenterData InsertvCenterData `json:"data"`
 }
 
+// DeletevCenterResult represents the result returned after a vCenter instance is deleted, containing related data.
 type DeletevCenterResult struct {
 	InsertvCenterData InsertvCenterData `json:"data"`
 }
 
-// InsertvCenter ...
+// InsertvCenter sends a request to add a new vCenter instance configuration using the provided body and returns the
+// resulting InsertvCenterResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertvCenter(c *Client, body InsertvCenterBody) (InsertvCenterResult, error) {
 
 	resp := InsertvCenterResult{}
@@ -74,7 +81,9 @@ func InsertvCenter(c *Client, body InsertvCenterBody) (InsertvCenterResult, erro
 	return resp, nil
 }
 
-// DeletevCenter ...
+// DeletevCenter sends a request to remove a vCenter instance configuration identified by the provided vCenterUUID and
+// returns the resulting DeletevCenterResult object. Returns an error if the request fails or the response cannot be
+// parsed.
 func DeletevCenter(c *Client, vCenterUUID string) (DeletevCenterResult, error) {
 
 	resp := DeletevCenterResult{}

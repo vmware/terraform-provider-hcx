@@ -12,6 +12,7 @@ import (
 	"net/http"
 )
 
+// NetworkProfileBody defines the structure for a network profile.
 type NetworkProfileBody struct {
 	Backings        []Backing `json:"backings"`
 	Description     string    `json:"description"`
@@ -24,15 +25,18 @@ type NetworkProfileBody struct {
 	ObjectID        string    `json:"objectId,omitempty"`
 }
 
+// Filter defines properties for filtering network profiles or interfaces based on system ownership and trunking.
 type Filter struct {
 	OwnedBySystem        bool `json:"ownedBySystem"`
 	AllowTrunkInterfaces bool `json:"allowTrunkInterfaces"`
 }
 
+// NetworkFilter represents a network filtering structure containing filter criteria to query network profiles.
 type NetworkFilter struct {
 	Filter Filter `json:"filter"`
 }
 
+// Backing represents a network backing configuration used in network profiles.
 type Backing struct {
 	BackingID           string `json:"backingId"`
 	BackingName         string `json:"backingName"`
@@ -41,6 +45,7 @@ type Backing struct {
 	VCenterName         string `json:"vCenterName,omitempty"`
 }
 
+// IPScope defines the IP scope configuration for a network.
 type IPScope struct {
 	DNSSuffix       string           `json:"dnsSuffix,omitempty"`
 	Gateway         string           `json:"gateway,omitempty"`
@@ -51,11 +56,13 @@ type IPScope struct {
 	PoolID          string           `json:"poolId"`
 }
 
+// NetworkIPRange represents an IP range with a start and end address in a network configuration.
 type NetworkIPRange struct {
 	EndAddress   string `json:"endAddress"`
 	StartAddress string `json:"startAddress"`
 }
 
+// NetworkProfileResult represents the result of a network profile operation, containing its outcome and related data.
 type NetworkProfileResult struct {
 	Success   bool               `json:"success"`
 	Completed bool               `json:"completed"`
@@ -63,12 +70,14 @@ type NetworkProfileResult struct {
 	Data      NetworkProfileData `json:"data"`
 }
 
+// NetworkProfileData represents network profile-related metadata with a Job ID and an Object ID.
 type NetworkProfileData struct {
 	JobID    string `json:"jobId"`
 	ObjectID string `json:"objectId"`
 }
 
-// InsertNetworkProfile ...
+// InsertNetworkProfile sends a request to create a new network profile using the provided body and returns the
+// resulting NetworkProfileResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileResult, error) {
 
 	resp := NetworkProfileResult{}
@@ -103,7 +112,9 @@ func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 	return resp, nil
 }
 
-// GetNetworkProfile ...
+// GetNetworkProfile sends a request to query the list of network profiles and returns the NetworkProfileBody object
+// matching the specified name. Returns an error if the request fails, the response cannot be parsed, or no profile is
+// found with the given name.
 func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 
 	resp := []NetworkProfileBody{}
@@ -150,7 +161,9 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 	return NetworkProfileBody{}, errors.New("cannot find network profile")
 }
 
-// GetNetworkProfileByID ...
+// GetNetworkProfileByID sends a request to query the list of network profiles and returns the NetworkProfileBody object
+// matching the specified ID. Returns an error if the request fails, the response cannot be parsed, or no profile is
+// found with the given ID.
 func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
 
 	resp := []NetworkProfileBody{}
@@ -197,7 +210,9 @@ func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
 	return NetworkProfileBody{}, errors.New("cannot find network profile")
 }
 
-// DeleteNetworkProfile ...
+// DeleteNetworkProfile sends a DELETE request to remove a network profile identified by the provided networkID and
+// returns the resulting NetworkProfileResult object. Returns an error if the request fails or the response cannot be
+// parsed.
 func DeleteNetworkProfile(c *Client, networkID string) (NetworkProfileResult, error) {
 
 	resp := NetworkProfileResult{}
@@ -225,7 +240,8 @@ func DeleteNetworkProfile(c *Client, networkID string) (NetworkProfileResult, er
 	return resp, nil
 }
 
-// UpdateNetworkProfile ...
+// UpdateNetworkProfile sends a request to update a network profile using the provided body and returns the resulting
+// NetworkProfileResult object. Returns an error if the request fails or the response cannot be parsed.
 func UpdateNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileResult, error) {
 
 	resp := NetworkProfileResult{}
