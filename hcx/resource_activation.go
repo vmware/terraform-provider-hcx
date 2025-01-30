@@ -7,6 +7,8 @@ package hcx
 import (
 	"context"
 
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -24,7 +26,7 @@ func resourceActivation() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The URL for activation.",
 				Optional:    true,
-				Default:     "https://connect.hcx.vmware.com",
+				Default:     constants.HcxCloudURL,
 			},
 			"activationkey": {
 				Type:        schema.TypeString,

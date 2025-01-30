@@ -8,6 +8,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
+	"github.com/vmware/terraform-provider-hcx/hcx/validators"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -44,7 +47,7 @@ func NetSchema() map[string]*schema.Schema {
 		},
 		"site_pairing": {
 			Type:        schema.TypeMap,
-			Description: "The site pairing map, to be retrieved with the 'hcx_site_pairing' resource.",
+			Description: "The site pairing map for the network profile, to be retrieved with the 'hcx_site_pairing' resource.",
 			Required:    true,
 		},
 		"primary_dns": {
@@ -67,14 +70,15 @@ func NetSchema() map[string]*schema.Schema {
 		},
 		"network_name": {
 			Type:        schema.TypeString,
-			Description: "The network name used for the network profile.",
+			Description: "The network name for the network profile.",
 			Optional:    true,
 		},
 		"network_type": {
-			Type:        schema.TypeString,
-			Description: "The network type for the network profile.",
-			Optional:    true,
-			Default:     "DistributedVirtualPortgroup",
+			Type:         schema.TypeString,
+			Description:  fmt.Sprintf("The network type for the network profile. Allowed values include: %v.", constants.AllowedNetworkTypes),
+			Optional:     true,
+			Default:      constants.NetworkTypeDvpg,
+			ValidateFunc: validators.ValidateNetworkType,
 		},
 		"ip_range": {
 			Type:     schema.TypeList,

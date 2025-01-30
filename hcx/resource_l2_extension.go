@@ -8,7 +8,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
+
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
+	"github.com/vmware/terraform-provider-hcx/hcx/validators"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -25,12 +29,12 @@ func resourceL2Extension() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"site_pairing": {
 				Type:        schema.TypeMap,
-				Description: "The site pairing used by this service mesh.",
+				Description: "The site pairing used for the L2 extension.",
 				Required:    true,
 			},
 			"service_mesh_id": {
 				Type:        schema.TypeString,
-				Description: "The ID of the Service Mesh to be used for this L2 extension.",
+				Description: "The ID of the Service Mesh to be used for the L2 extension.",
 				Required:    true,
 			},
 			"source_network": {
@@ -39,10 +43,11 @@ func resourceL2Extension() *schema.Resource {
 				Required:    true,
 			},
 			"network_type": {
-				Type:        schema.TypeString,
-				Description: "The network backing type. Allowed values include: 'DistributedVirtualPortgroup' and 'NsxtSegment'.",
-				Optional:    true,
-				Default:     "DistributedVirtualPortgroup",
+				Type:         schema.TypeString,
+				Description:  fmt.Sprintf("The network type for the L2 extension. Allowed values include: %v.", constants.AllowedNetworkTypes),
+				Optional:     true,
+				Default:      constants.NetworkTypeDvpg,
+				ValidateFunc: validators.ValidateNetworkType,
 			},
 			"destination_t1": {
 				Type:        schema.TypeString,

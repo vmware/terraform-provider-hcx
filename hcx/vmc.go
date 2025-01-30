@@ -12,6 +12,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 )
 
 type SDDC struct {
@@ -56,7 +58,7 @@ func VmcAuthenticate(token string) (string, error) {
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
-		HostURL:    "https://console.cloud.vmware.com/csp/gateway/am/api",
+		HostURL:    constants.VmcAuthURL,
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/api-tokens/authorize?refresh_token=%s", c.HostURL, token), nil)
@@ -91,7 +93,7 @@ func CloudAuthenticate(client *Client, token string) error {
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
-		HostURL:    "https://connect.hcx.vmware.com/provider/csp",
+		HostURL:    constants.HcxCloudAuthURL,
 	}
 
 	body := CloudAuthorizationBody{
@@ -136,7 +138,7 @@ func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
-		HostURL:    "https://connect.hcx.vmware.com/provider/csp/consumer",
+		HostURL:    constants.HcxCloudConsumerURL,
 		HcxToken:   client.HcxToken,
 	}
 
@@ -173,7 +175,7 @@ func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
-		HostURL:    "https://connect.hcx.vmware.com/provider/csp/consumer",
+		HostURL:    constants.HcxCloudConsumerURL,
 		HcxToken:   client.HcxToken,
 	}
 
@@ -212,7 +214,7 @@ func ActivateHcxOnSDDC(client *Client, sddcID string) (ActivateHcxOnSDDCResults,
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
-		HostURL:    "https://connect.hcx.vmware.com/provider/csp/consumer",
+		HostURL:    constants.HcxCloudConsumerURL,
 		HcxToken:   client.HcxToken,
 	}
 
@@ -244,7 +246,7 @@ func DeactivateHcxOnSDDC(client *Client, sddcID string) (DeactivateHcxOnSDDCResu
 
 	c := Client{
 		HTTPClient: &http.Client{Timeout: 60 * time.Second},
-		HostURL:    "https://connect.hcx.vmware.com/provider/csp/consumer",
+		HostURL:    constants.HcxCloudConsumerURL,
 		HcxToken:   client.HcxToken,
 	}
 
