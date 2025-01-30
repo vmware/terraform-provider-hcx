@@ -6,6 +6,7 @@ package hcx
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 	"github.com/vmware/terraform-provider-hcx/hcx/validators"

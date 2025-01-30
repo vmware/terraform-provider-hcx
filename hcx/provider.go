@@ -83,6 +83,8 @@ func Provider() *schema.Provider {
 	}
 }
 
+// providerConfigure initializes and configures the provider client with the provided schema parameters and context.
+// Returns the initialized client interface and diagnostics for any issues encountered during configuration.
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 

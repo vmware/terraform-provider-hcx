@@ -11,18 +11,21 @@ import (
 	"net/http"
 )
 
+// RoleMapping represents the association between a role and a list of user groups.
 type RoleMapping struct {
 	Role       string   `json:"role"`
 	UserGroups []string `json:"userGroups"`
 }
 
+// RoleMappingResult represents the result of a role mapping operation.
 type RoleMappingResult struct {
 	IsSuccess      bool   `json:"isSuccess"`
 	Message        string `json:"message"`
 	HTTPStatusCode int    `json:"httpStatusCode"`
 }
 
-// PostActivate ...
+// PutRoleMapping sends a PUT request to update role mappings using the provided body and returns the resulting
+// RoleMappingResult object. Returns an error if the request fails or the response cannot be parsed.
 func PutRoleMapping(c *Client, body []RoleMapping) (RoleMappingResult, error) {
 
 	resp := RoleMappingResult{}

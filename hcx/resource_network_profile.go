@@ -6,6 +6,7 @@ package hcx
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"

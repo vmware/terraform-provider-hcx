@@ -16,6 +16,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 )
 
+// SDDC defines the properties of a Software-Defined Data Center.
 type SDDC struct {
 	ID               string `json:"id"`
 	Name             string `json:"name"`
@@ -30,10 +31,12 @@ type SDDC struct {
 	State            string `json:"state"`
 }
 
+// GetSddcsResults represents the structure containing a list of Software-Defined Data Centers.
 type GetSddcsResults struct {
 	SDDCs []SDDC `json:"sddcs"`
 }
 
+// VmcAccessToken represents a structure for storing VMware Cloud API authentication tokens and token metadata.
 type VmcAccessToken struct {
 	AccessToken  string `json:"access_token"`
 	IDToken      string `json:"id_token"`
@@ -42,18 +45,23 @@ type VmcAccessToken struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+// CloudAuthorizationBody represents the JSON payload containing the authorization token for cloud authentication.
 type CloudAuthorizationBody struct {
 	Token string `json:"token"`
 }
 
+// ActivateHcxOnSDDCResults represents the result of activating HCX on a Software-Defined Data Center.
 type ActivateHcxOnSDDCResults struct {
 	JobID string `json:"jobId"`
 }
 
+// DeactivateHcxOnSDDCResults represents the result of deactivating HCX on a Software-Defined Data Center.
 type DeactivateHcxOnSDDCResults struct {
 	JobID string `json:"jobId"`
 }
 
+// VmcAuthenticate sends a request to authenticate with the VMware Cloud (VMC) API using the provided token. It returns
+// an access token as a string or an error if the request fails or the response cannot be parsed.
 func VmcAuthenticate(token string) (string, error) {
 
 	c := Client{
@@ -79,7 +87,7 @@ func VmcAuthenticate(token string) (string, error) {
 		return "", err
 	}
 
-	// parse response header
+	// Parse response header.
 
 	log.Printf("**************************")
 	log.Printf("[Access token] = %+v", resp.AccessToken)
@@ -89,6 +97,9 @@ func VmcAuthenticate(token string) (string, error) {
 
 }
 
+// CloudAuthenticate sends a request to authenticate to the HCX cloud service using the provided token. On successful
+// authentication, it sets the HcxToken field of the provided Client. Returns an error if the request fails, the
+// response is invalid, or the token cannot be retrieved.
 func CloudAuthenticate(client *Client, token string) error {
 
 	c := Client{
@@ -122,18 +133,16 @@ func CloudAuthenticate(client *Client, token string) error {
 		return errors.New("cannot authorize hcx cloud")
 	}
 
-	// parse response header
+	// Parse response header.
 	client.HcxToken = auth
 
-	// parse response header
-
-	log.Printf("**************************")
-	log.Printf("[Hcx token] = %+v", client.HcxToken)
-	log.Printf("**************************")
 	return nil
 
 }
 
+// GetSddcByName sends a request to retrieve a list of SDDCs (Software-Defined Data Centers) and searches for an SDDC
+// with the specified sddcName. It returns the matching SDDC object or an error if the request fails, the response
+// cannot be parsed, or the SDDC is not found.
 func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 
 	c := Client{
@@ -153,6 +162,7 @@ func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 	}
 
 	resp := GetSddcsResults{}
+
 	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
@@ -166,11 +176,14 @@ func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 		}
 	}
 
-	// parse response header
+	// Parse response header.
 	return SDDC{}, errors.New("cant find the sddc")
 
 }
 
+// GetSddcByID sends a request to retrieve a list of SDDCs (Software-Defined Data Centers) and searches for an SDDC with
+// the specified sddcID. It returns the matching SDDC object or an error if the request fails, the response cannot be
+// parsed, or the SDDC is not found.
 func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 
 	c := Client{
@@ -190,6 +203,7 @@ func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 	}
 
 	resp := GetSddcsResults{}
+
 	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
@@ -203,11 +217,14 @@ func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 		}
 	}
 
-	// parse response header
+	// Parse response header.
 	return SDDC{}, errors.New("cant find the sddc")
 
 }
 
+// ActivateHcxOnSDDC sends a request to activate HCX on the specified SDDC (Software-Defined Data Center) identified by
+// the provided sddcID. It returns the resulting ActivateHcxOnSDDCResults object or an error if the request fails or the
+// response cannot be parsed.
 func ActivateHcxOnSDDC(client *Client, sddcID string) (ActivateHcxOnSDDCResults, error) {
 
 	resp := ActivateHcxOnSDDCResults{}
@@ -235,11 +252,14 @@ func ActivateHcxOnSDDC(client *Client, sddcID string) (ActivateHcxOnSDDCResults,
 		return resp, err
 	}
 
-	// parse response header
+	// Parse response header.
 	return resp, nil
 
 }
 
+// DeactivateHcxOnSDDC sends a POST request to deactivate HCX on the specified SDDC (Software-Defined Data Center)
+// identified by the provided sddcID. It returns the resulting DeactivateHcxOnSDDCResults object or an error if the
+// request fails or the response cannot be parsed.
 func DeactivateHcxOnSDDC(client *Client, sddcID string) (DeactivateHcxOnSDDCResults, error) {
 
 	resp := DeactivateHcxOnSDDCResults{}
@@ -267,7 +287,7 @@ func DeactivateHcxOnSDDC(client *Client, sddcID string) (DeactivateHcxOnSDDCResu
 		return resp, err
 	}
 
-	// parse response header
+	// Parse response header.
 	return resp, nil
 
 }

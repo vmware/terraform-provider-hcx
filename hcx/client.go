@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// Client -
+// Client represents a structure for managing HTTP communication and authentication details.
 type Client struct {
 	HostURL            string
 	HTTPClient         *http.Client
@@ -30,28 +30,31 @@ type Client struct {
 	AllowUnverifiedSSL bool
 }
 
-// AuthStruct -
+// AuthStruct represents a structure containing username and password for authentication purposes.
 type AuthStruct struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-// AuthResponse -
+// AuthResponse represents the structure of a response returned after a successful authentication.
 type AuthResponse struct {
 	UserID   int    `json:"user_id"`
 	Username string `json:"username"`
 	Token    string `json:"token"`
 }
 
+// Content represents a reusable structure containing a slice of strings, typically used for XML unmarshaling.
 type Content struct {
 	Strings []string `xml:"string"`
 }
 
+// Entries represents a collection of content entries, typically used for XML unmarshaling.
 type Entries struct {
 	Entry []Content `xml:"entry"`
 }
 
-// HCX Authentication
+// HcxConnectorAuthenticate authenticates the client with the HCX service by sending a request with user credentials.
+// It retrieves and stores the HCX authorization token required for subsequent requests.
 func (c *Client) HcxConnectorAuthenticate() error {
 
 	rb, err := json.Marshal(AuthStruct{
@@ -126,14 +129,15 @@ func (c *Client) HcxConnectorAuthenticate() error {
 
 	}
 
-	// parse response header
+	// Parse response header.
 	c.Token = resp.Header.Get("x-hm-authorization")
 
 	return nil
 
 }
 
-// NewClient -
+// NewClient initializes and returns a new Client instance with the provided configuration, including authentication
+// details, HCX URL, and SSL settings.
 func NewClient(hcx, username *string, password *string, adminUsername *string, adminPassword *string, allowUnverifiedSSL *bool, vmcToken *string) (*Client, error) {
 	c := Client{
 		HTTPClient: &http.Client{
@@ -152,6 +156,8 @@ func NewClient(hcx, username *string, password *string, adminUsername *string, a
 	return &c, nil
 }
 
+// doRequest performs an authenticated HTTP request. If the client is not yet authenticated, it performs authentication
+// first, then executes the request. Returns the HTTP response, response body, and any encountered error.
 func (c *Client) doRequest(req *http.Request) (*http.Response, []byte, error) {
 
 	if !c.IsAuthenticated {
@@ -192,6 +198,9 @@ func (c *Client) doRequest(req *http.Request) (*http.Response, []byte, error) {
 	return res, body, err
 }
 
+// doAdminRequest executes an HTTP request using the admin credentials for Basic Authentication. It supports requests
+// that require elevated permissions and optionally skips SSL verification. Returns the response, response body, and any
+// encountered error.
 func (c *Client) doAdminRequest(req *http.Request) (*http.Response, []byte, error) {
 
 	req.Header.Set("Accept", "application/json")
@@ -232,6 +241,8 @@ func (c *Client) doAdminRequest(req *http.Request) (*http.Response, []byte, erro
 	return res, body, err
 }
 
+// doVmcRequest sends an HTTP request to the VMware Cloud (VMC) service. It uses the HCX token for authorization if
+// present and optionally skips SSL verification. Returns the response, response body, and any encountered error.
 func (c *Client) doVmcRequest(req *http.Request) (*http.Response, []byte, error) {
 
 	req.Header.Set("Accept", "application/json")

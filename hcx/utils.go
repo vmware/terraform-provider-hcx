@@ -13,6 +13,7 @@ import (
 	"net/http"
 )
 
+// JobResult represents the result of a job execution, including its status, timing, and completion details.
 type JobResult struct {
 	JobID                   string `json:"jobId"`
 	Enterprise              string `json:"enterprise"`
@@ -31,24 +32,29 @@ type JobResult struct {
 	TimeToExecute           int64  `json:"timeToExecute"`
 }
 
+// TaskResult represents the result of a run.
 type TaskResult struct {
 	InterconnectTaskID string `json:"interconnectTaskId"`
 	Status             string `json:"status"`
 }
 
+// ResourceContainerListFilterCloud defines a filter structure for categorizing resource containers as local or remote.
 type ResourceContainerListFilterCloud struct {
 	Local  bool `json:"local"`
 	Remote bool `json:"remote"`
 }
 
+// ResourceContainerListFilter defines a structure for filtering resource containers based on cloud characteristics.
 type ResourceContainerListFilter struct {
 	Cloud ResourceContainerListFilterCloud `json:"cloud"`
 }
 
+// PostResourceContainerListBody defines the request body for retrieving a filtered list of resource containers.
 type PostResourceContainerListBody struct {
 	Filter ResourceContainerListFilter `json:"filter"`
 }
 
+// PostResourceContainerListResult represents the result of a resource container list request, including success status.
 type PostResourceContainerListResult struct {
 	Success   bool                                `json:"success"`
 	Completed bool                                `json:"completed"`
@@ -56,10 +62,13 @@ type PostResourceContainerListResult struct {
 	Data      PostResourceContainerListResultData `json:"data"`
 }
 
+// PostResourceContainerListResultData represents the data structure for a container list result containing resource
+// items.
 type PostResourceContainerListResultData struct {
 	Items []PostResourceContainerListResultDataItem `json:"items"`
 }
 
+// PostResourceContainerListResultDataItem defines a structure representing a single resource container in the list.
 type PostResourceContainerListResultDataItem struct {
 	URL           string `json:"url"`
 	VcUUID        string `json:"vcuuid"`
@@ -85,28 +94,34 @@ type PostNetworkBackingBodyFilter struct {
 	//BackingTypes        []string `json:"backingTypes"`
 }
 
+// PostNetworkBackingResult represents the structure for the response of a network backing operation, containing data.
 type PostNetworkBackingResult struct {
 	Data PostNetworkBackingResultData `json:"data"`
 }
 
+// PostNetworkBackingResultData represents the response containing a list of distributed port groups.
 type PostNetworkBackingResultData struct {
 	Items []Dvpg `json:"items"`
 }
 
+// Dvpg represents a distributed port group with associated metadata.
 type Dvpg struct {
 	EntityID   string `json:"entity_id"`
 	Name       string `json:"name"`
 	EntityType string `json:"entityType"`
 }
 
+// GetVcInventoryResult represents the structure for the vCenter inventory result containing data about inventory items.
 type GetVcInventoryResult struct {
 	Data GetVcInventoryResultData `json:"data"`
 }
 
+// GetVcInventoryResultData represents the structure containing a list of vCenter instance inventory result data items.
 type GetVcInventoryResultData struct {
 	Items []GetVcInventoryResultDataItem `json:"items"`
 }
 
+// GetVcInventoryResultDataItem represents an inventory item in a vCenter instance including its children and metadata.
 type GetVcInventoryResultDataItem struct {
 	VCenterInstanceID string                                 `json:"vcenter_instanceId"`
 	EntityID          string                                 `json:"entity_id"`
@@ -115,6 +130,8 @@ type GetVcInventoryResultDataItem struct {
 	EntityType        string                                 `json:"entityType"`
 }
 
+// GetVcInventoryResultDataItemChildren represents an inventory item in vCenter instance with nested children and
+// metadata.
 type GetVcInventoryResultDataItemChildren struct {
 	VCenterInstanceID string                                         `json:"vcenter_instanceId"`
 	EntityID          string                                         `json:"entity_id"`
@@ -123,6 +140,7 @@ type GetVcInventoryResultDataItemChildren struct {
 	EntityType        string                                         `json:"entityType"`
 }
 
+// GetVcInventoryResultDataItemChildrenChildren represents nested child items in a vCenter instance inventory structure.
 type GetVcInventoryResultDataItemChildrenChildren struct {
 	VCenterInstanceID string `json:"vcenter_instanceId"`
 	EntityID          string `json:"entity_id"`
@@ -131,6 +149,7 @@ type GetVcInventoryResultDataItemChildrenChildren struct {
 	// Datastores
 }
 
+// GetVcDatastoreResult represents the result of a query for vCenter instance datastore information.
 type GetVcDatastoreResult struct {
 	Success   bool                     `json:"success"`
 	Completed bool                     `json:"completed"`
@@ -138,26 +157,32 @@ type GetVcDatastoreResult struct {
 	Data      GetVcDatastoreResultData `json:"data"`
 }
 
+// GetVcDatastoreResultData represents a collection of datastore result items retrieved from a vCenter instance.
 type GetVcDatastoreResultData struct {
 	Items []GetVcDatastoreResultDataItem `json:"items"`
 }
 
+// GetVcDatastoreResultDataItem represents a single datastore entity retrieved from the vCenter instance.
 type GetVcDatastoreResultDataItem struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
 	EntityType string `json:"entity_type"`
 }
 
+// GetVcDatastoreBody represents the body of the request for querying vCenter instance datastores using specified
+// filters.
 type GetVcDatastoreBody struct {
 	Filter GetVcDatastoreFilter `json:"filter"`
 }
 
+// GetVcDatastoreFilter defines a filter for querying vCenter instance datastoress.
 type GetVcDatastoreFilter struct {
 	ComputeType       string   `json:"computeType"`
 	VCenterInstanceID string   `json:"vcenter_instanceId"`
 	ComputeIDs        []string `json:"computeIds"`
 }
 
+// GetVcDvsResult represents the result of querying a distributed switch in a vCenter instance.
 type GetVcDvsResult struct {
 	Success   bool               `json:"success"`
 	Completed bool               `json:"completed"`
@@ -165,10 +190,12 @@ type GetVcDvsResult struct {
 	Data      GetVcDvsResultData `json:"data"`
 }
 
+// GetVcDvsResultData represents a collection of distributed switch data retrieved from a vCenter instance.
 type GetVcDvsResultData struct {
 	Items []GetVcDvsResultDataItem `json:"items"`
 }
 
+// GetVcDvsResultDataItem represents an individual distributed virtual switch retrieved from a vCenter instance.
 type GetVcDvsResultDataItem struct {
 	ID     string `json:"id"`
 	Name   string `json:"name"`
@@ -176,25 +203,30 @@ type GetVcDvsResultDataItem struct {
 	MaxMTU int    `json:"maxMtu"`
 }
 
+// GetVcDvsBody represents the request body containing parameters to query a distributed switch.
 type GetVcDvsBody struct {
 	Filter GetVcDvsFilter `json:"filter"`
 }
 
+// GetVcDvsFilter represents the filter criteria for querying distributed switches in a vCenter instance.
 type GetVcDvsFilter struct {
 	ComputeType       string   `json:"computeType"`
 	VCenterInstanceID string   `json:"vcenter_instanceId"`
 	ComputeIDs        []string `json:"computeIds"`
 }
 
+// PostCloudListFilter is a struct used to filter cloud list requests based on "local" or "remote" cloud availability.
 type PostCloudListFilter struct {
 	Local  bool `json:"local"`
 	Remote bool `json:"remote"`
 }
 
+// PostCloudListBody represents the body of a request to retrieve a filtered list of clouds.
 type PostCloudListBody struct {
 	Filter PostCloudListFilter `json:"filter"`
 }
 
+// PostCloudListResult contains the structure for response data from a cloud list request.
 type PostCloudListResult struct {
 	Success   bool                    `json:"success"`
 	Completed bool                    `json:"completed"`
@@ -202,10 +234,12 @@ type PostCloudListResult struct {
 	Data      PostCloudListResultData `json:"data"`
 }
 
+// PostCloudListResultData represents a collection of cloud endpoint data items in a response.
 type PostCloudListResultData struct {
 	Items []PostCloudListResultDataItem `json:"items"`
 }
 
+// PostCloudListResultDataItem represents a single cloud endpoint in the response data.
 type PostCloudListResultDataItem struct {
 	EndpointID   string `json:"endpointId,omitempty"`
 	Name         string `json:"name,omitempty"`
@@ -213,27 +247,32 @@ type PostCloudListResultDataItem struct {
 	EndpointType string `json:"endpointType,omitempty"`
 }
 
+// GetApplianceBody represents the request body structure for querying appliances based on filters.
 type GetApplianceBody struct {
 	Filter GetApplianceBodyFilter `json:"filter"`
 }
 
+// GetApplianceBodyFilter defines the structure for filtering appliance queries.
 type GetApplianceBodyFilter struct {
 	ApplianceType string `json:"applianceType"`
 	EndpointID    string `json:"endpointId"`
 	ServiceMeshID string `json:"serviceMeshId,omitempty"`
 }
 
+// GetApplianceResult represents the result of querying appliances.
 type GetApplianceResult struct {
 	Items []GetApplianceResultItem `json:"items"`
 }
 
+// GetApplianceResultItem represents an appliance query result.
 type GetApplianceResultItem struct {
 	ApplianceID           string `json:"applianceId"`
 	ServiceMeshID         string `json:"serviceMeshId"`
 	NetworkExtensionCount int    `json:"networkExtensionCount"`
 }
 
-// GetJobResult ...
+// GetJobResult sends a request to retrieve the result of a job identified by the provided jobID, returning a JobResult
+// object. Returns an error if the request fails or the response cannot be parsed.
 func GetJobResult(c *Client, jobID string) (JobResult, error) {
 
 	resp := JobResult{}
@@ -261,7 +300,8 @@ func GetJobResult(c *Client, jobID string) (JobResult, error) {
 	return resp, nil
 }
 
-// GetTaskResult ...
+// GetTaskResult sends a request to retrieve the result of a task identified by the provided taskID, returning a
+// TaskResult object. Returns an error if the request fails or the response cannot be parsed.
 func GetTaskResult(c *Client, taskID string) (TaskResult, error) {
 
 	resp := TaskResult{}
@@ -289,7 +329,8 @@ func GetTaskResult(c *Client, taskID string) (TaskResult, error) {
 	return resp, nil
 }
 
-// GetLocalConatainer ...
+// GetLocalContainer sends a request to retrieve the local resource container list and returns the first item as a
+// PostResourceContainerListResultDataItem. Returns an error if the request fails or the response cannot be parsed.
 func GetLocalContainer(c *Client) (PostResourceContainerListResultDataItem, error) {
 
 	body := PostResourceContainerListBody{
@@ -333,7 +374,8 @@ func GetLocalContainer(c *Client) (PostResourceContainerListResultDataItem, erro
 	return resp.Data.Items[0], nil
 }
 
-// GetLocalConatainer ...
+// GetRemoteContainer sends a request to retrieve the remote resource container list and returns the first item as a
+// PostResourceContainerListResultDataItem. Returns an error if the request fails or the response cannot be parsed.
 func GetRemoteContainer(c *Client) (PostResourceContainerListResultDataItem, error) {
 
 	body := PostResourceContainerListBody{
@@ -377,7 +419,8 @@ func GetRemoteContainer(c *Client) (PostResourceContainerListResultDataItem, err
 	return resp.Data.Items[0], nil
 }
 
-// GetNetworkBacking ...
+// GetNetworkBacking sends a request to retrieve a network's backing information by matching the given endpointID,
+// network, and networkType. Returns a Dvpg object or an error if it cannot find the network info.
 func GetNetworkBacking(c *Client, endpointID string, network string, networkType string) (Dvpg, error) {
 
 	body := PostNetworkBackingBody{
@@ -430,7 +473,8 @@ func GetNetworkBacking(c *Client, endpointID string, network string, networkType
 	return Dvpg{}, errors.New("cannot find network info")
 }
 
-// GetVcInventory ...
+// GetVcInventory sends a request to retrieve the inventory of vCenter resources and returns the first item as a
+// GetVcInventoryResultDataItem. Returns an error if the request fails or the response cannot be parsed.
 func GetVcInventory(c *Client) (GetVcInventoryResultDataItem, error) {
 
 	var jsonBody = []byte("{}")
@@ -461,7 +505,8 @@ func GetVcInventory(c *Client) (GetVcInventoryResultDataItem, error) {
 	return resp.Data.Items[0], nil
 }
 
-// GetVcDatastore ...
+// GetVcDatastore sends a request to query the vCenter datastore, matching the given datastoreName, vcuuid, and cluster.
+// Returns the matching GetVcDatastoreResultDataItem or an error if the datastore cannot be found.
 func GetVcDatastore(c *Client, datastoreName string, vcuuid string, cluster string) (GetVcDatastoreResultDataItem, error) {
 
 	body := GetVcDatastoreBody{
@@ -510,7 +555,8 @@ func GetVcDatastore(c *Client, datastoreName string, vcuuid string, cluster stri
 	return GetVcDatastoreResultDataItem{}, errors.New("cannot find datastore")
 }
 
-// GetVcDvs ...
+// GetVcDvs sends a request to query a distributed switch matching the given dvsName, vcuuid, and cluster. Returns the
+// matching GetVcDvsResultDataItem or an error if the DVS cannot be found.
 func GetVcDvs(c *Client, dvsName string, vcuuid string, cluster string) (GetVcDvsResultDataItem, error) {
 
 	body := GetVcDvsBody{
@@ -559,7 +605,8 @@ func GetVcDvs(c *Client, dvsName string, vcuuid string, cluster string) (GetVcDv
 	return GetVcDvsResultDataItem{}, errors.New("cannot find datastore")
 }
 
-// GetRemoteCloudList ...
+// GetRemoteCloudList sends a request to retrieve a list of remote clouds and returns the resulting PostCloudListResult
+// object. Returns an error if the request fails or the response cannot be parsed.
 func GetRemoteCloudList(c *Client) (PostCloudListResult, error) {
 
 	body := PostCloudListBody{
@@ -600,7 +647,8 @@ func GetRemoteCloudList(c *Client) (PostCloudListResult, error) {
 	return resp, nil
 }
 
-// GetRemoteCloudList ...
+// GetLocalCloudList sends a request to retrieve a list of local clouds and returns the resulting PostCloudListResult
+// object. Returns an error if the request fails or the response cannot be parsed.
 func GetLocalCloudList(c *Client) (PostCloudListResult, error) {
 
 	body := PostCloudListBody{
@@ -641,7 +689,9 @@ func GetLocalCloudList(c *Client) (PostCloudListResult, error) {
 	return resp, nil
 }
 
-// GetRemoteCloudList ...
+// GetAppliance sends a request to query appliances based on the given endpointID and serviceMeshID. It returns a
+// matching GetApplianceResultItem (with a network extension count less than 9) or the first item in the response.
+// Returns an error if the request fails or no matching item is found.
 func GetAppliance(c *Client, endpointID string, serviceMeshID string) (GetApplianceResultItem, error) {
 
 	body := GetApplianceBody{
@@ -689,7 +739,8 @@ func GetAppliance(c *Client, endpointID string, serviceMeshID string) (GetApplia
 	return resp.Items[0], nil
 }
 
-// GetRemoteCloudList ...
+// GetAppliances sends a request to retrieve all appliances matching the given endpointID and serviceMeshID. Returns a
+// slice of GetApplianceResultItem objects or an error if the request fails or the response cannot be parsed.
 func GetAppliances(c *Client, endpointID string, serviceMeshID string) ([]GetApplianceResultItem, error) {
 
 	body := GetApplianceBody{
