@@ -38,14 +38,14 @@ func InsertCertificate(c *Client, body InsertCertificateBody) (InsertCertificate
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)

@@ -244,14 +244,14 @@ func GetJobResult(c *Client, jobID string) (JobResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -272,14 +272,14 @@ func GetTaskResult(c *Client, taskID string) (TaskResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -316,14 +316,14 @@ func GetLocalContainer(c *Client) (PostResourceContainerListResultDataItem, erro
 		return PostResourceContainerListResultDataItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return PostResourceContainerListResultDataItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -360,14 +360,14 @@ func GetRemoteContainer(c *Client) (PostResourceContainerListResultDataItem, err
 		return PostResourceContainerListResultDataItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return PostResourceContainerListResultDataItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -403,14 +403,14 @@ func GetNetworkBacking(c *Client, endpointID string, network string, networkType
 		return Dvpg{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return Dvpg{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -444,14 +444,14 @@ func GetVcInventory(c *Client) (GetVcInventoryResultDataItem, error) {
 		return GetVcInventoryResultDataItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return GetVcInventoryResultDataItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -487,14 +487,14 @@ func GetVcDatastore(c *Client, datastoreName string, vcuuid string, cluster stri
 		return GetVcDatastoreResultDataItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return GetVcDatastoreResultDataItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -536,14 +536,14 @@ func GetVcDvs(c *Client, dvsName string, vcuuid string, cluster string) (GetVcDv
 		return GetVcDvsResultDataItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return GetVcDvsResultDataItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -583,14 +583,14 @@ func GetRemoteCloudList(c *Client) (PostCloudListResult, error) {
 		return PostCloudListResult{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return PostCloudListResult{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -624,14 +624,14 @@ func GetLocalCloudList(c *Client) (PostCloudListResult, error) {
 		return PostCloudListResult{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return PostCloudListResult{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -666,14 +666,14 @@ func GetAppliance(c *Client, endpointID string, serviceMeshID string) (GetApplia
 		return GetApplianceResultItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return GetApplianceResultItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -715,14 +715,14 @@ func GetAppliances(c *Client, endpointID string, serviceMeshID string) ([]GetApp
 		return []GetApplianceResultItem{}, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return []GetApplianceResultItem{}, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)

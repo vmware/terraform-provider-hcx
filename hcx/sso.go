@@ -52,14 +52,14 @@ func GetSSO(c *Client) (GetSSOResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -87,14 +87,14 @@ func InsertSSO(c *Client, body InsertSSOBody) (InsertSSOResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -122,14 +122,14 @@ func UpdateSSO(c *Client, body InsertSSOBody) (InsertSSOResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
@@ -150,14 +150,14 @@ func DeleteSSO(c *Client, SSOUUID string) (DeleteSSOResult, error) {
 		return resp, err
 	}
 
-	// Send the request
+	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		return resp, err
 	}
 
-	// parse response body
+	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
 		fmt.Println(err)
