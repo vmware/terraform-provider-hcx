@@ -6,6 +6,7 @@ package hcx
 
 import (
 	"context"
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -94,11 +95,11 @@ func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	body := []RoleMapping{
 		{
-			Role:       "System Administrator",
+			Role:       constants.RoleSystemAdmin,
 			UserGroups: adminGroups,
 		},
 		{
-			Role:       "Enterprise Administrator",
+			Role:       constants.RoleEnterpriseAdmin,
 			UserGroups: enterpriseGroups,
 		},
 	}
@@ -124,11 +125,11 @@ func resourceRoleMappingDelete(ctx context.Context, d *schema.ResourceData, m in
 	client := m.(*Client)
 	body := []RoleMapping{
 		{
-			Role:       "System Administrator",
+			Role:       constants.RoleSystemAdmin,
 			UserGroups: []string{},
 		},
 		{
-			Role:       "Enterprise Administrator",
+			Role:       constants.RoleEnterpriseAdmin,
 			UserGroups: []string{},
 		},
 	}

@@ -4,6 +4,8 @@
 
 package constants
 
+import "time"
+
 const (
 	// HCX Cloud URLs
 	HcxBaseURL          = "https://connect.hcx.vmware.com"
@@ -18,6 +20,38 @@ const (
 	// Network Types
 	NetworkTypeDvpg       = "DistributedVirtualPortgroup"
 	NetworkTypeNsxSegment = "NsxtSegment"
+
+	// VMC
+	VmcMaxRetries                 = 12
+	VmcRetryInterval              = 10 * time.Second
+	VmcActivationActiveStatus     = "ACTIVE"
+	VmcActivationFailedStatus     = "ACTIVATION_FAILED"
+	VmcDeactivationInactiveStatus = "DE-ACTIVATED"
+	VmcDeactivationFailedStatus   = "DEACTIVATION_FAILED"
+
+	// Status
+	StoppedStatus  = "STOPPED"
+	RunningStatus  = "RUNNING"
+	FailedStatus   = "FAILED"
+	SuccessStatus  = "SUCCESS"
+	RealizedStatus = "REALIZED"
+
+	// Network Profile
+	DefaultNetworkProfileOrg = "DEFAULT"
+
+	// Location
+	DefaultLatitude  = 0
+	DefaultLongitude = 0
+
+	// Compute Profile
+	DefaultComputeType = "VC"
+
+	// Single Sign-On
+	DefaultSsoProviderType = "PSC"
+
+	// Role Mappings
+	RoleSystemAdmin     = "System Administrator"
+	RoleEnterpriseAdmin = "Enterprise Administrator"
 )
 
 var AllowedNetworkTypes = []string{

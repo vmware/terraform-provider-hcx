@@ -9,6 +9,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
+
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -85,18 +87,18 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
-	// Check if already activated
-	if sddc.DeploymentStatus == "ACTIVE" {
+	// Check if already activated.
+	if sddc.DeploymentStatus == constants.VmcActivationActiveStatus {
 		return diag.Errorf("Already activated")
 	}
 
-	// Activate HCX
+	// Activate HCX.
 	_, err = ActivateHcxOnSDDC(client, sddc.ID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Wait for task to be completed
+	// Wait for task to be completed.
 	errcount := 0
 	for {
 		if sddcID != "" {
@@ -115,15 +117,15 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 			}
 		}
 
-		if sddc.DeploymentStatus == "ACTIVE" {
+		if sddc.DeploymentStatus == constants.VmcActivationActiveStatus {
 			break
 		}
 
-		if sddc.DeploymentStatus == "ACTIVATION_FAILED" {
+		if sddc.DeploymentStatus == constants.VmcActivationFailedStatus {
 			return diag.Errorf("Activation failed")
 		}
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(constants.VmcRetryInterval)
 	}
 
 	return resourceVmcRead(ctx, d, m)
@@ -238,20 +240,20 @@ func resourceVmcDelete(ctx context.Context, d *schema.ResourceData, m interface{
 			// instead of JSON.
 			errcount++
 			hclog.Default().Info("[INFO] - resourceVmcDelete() - Error retrieving SDDC status: ", "error", err.Error(), "Errcount:", errcount)
-			if errcount > 12 {
+			if errcount > constants.VmcMaxRetries {
 				return diag.FromErr(err)
 			}
 		}
 
-		if sddc.DeploymentStatus == "DE-ACTIVATED" {
+		if sddc.DeploymentStatus == constants.VmcDeactivationInactiveStatus {
 			break
 		}
 
-		if sddc.DeploymentStatus == "DEACTIVATION_FAILED" {
+		if sddc.DeploymentStatus == constants.VmcDeactivationFailedStatus {
 			return diag.Errorf("Deactivation failed")
 		}
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(constants.VmcRetryInterval)
 	}
 
 	return diags

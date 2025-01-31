@@ -153,7 +153,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 		}
 
 		if jr.DidFail {
-			return diag.Errorf("Site pairing Job did failed")
+			return diag.Errorf("site pairing job failed")
 		}
 		time.Sleep(10 * time.Second)
 		count = count + 1
@@ -181,7 +181,7 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 			}
 
 			if jr.DidFail {
-				return diag.Errorf("Site pairing Job did failed")
+				return diag.Errorf("site pairing job failed")
 			}
 			time.Sleep(10 * time.Second)
 			count = count + 1

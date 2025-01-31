@@ -11,6 +11,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -185,7 +187,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 		ID:   managementNetworkID,
 		Tags: []string{"management"},
 		Status: Status{
-			State: "REALIZED",
+			State: constants.RealizedStatus,
 		},
 	}
 	networksList = append(networksList, netTmp)
@@ -207,7 +209,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			ID:   replicationNetworkID,
 			Tags: []string{"replication"},
 			Status: Status{
-				State: "REALIZED",
+				State: constants.RealizedStatus,
 			},
 		}
 		networksList = append(networksList, netTmp)
@@ -230,7 +232,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			ID:   uplinkNetworkID,
 			Tags: []string{"uplink"},
 			Status: Status{
-				State: "REALIZED",
+				State: constants.RealizedStatus,
 			},
 		}
 		networksList = append(networksList, netTmp)
@@ -253,7 +255,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			ID:   vmotionNetworkID,
 			Tags: []string{"vmotion"},
 			Status: Status{
-				State: "REALIZED",
+				State: constants.RealizedStatus,
 			},
 		}
 		networksList = append(networksList, netTmp)
@@ -264,7 +266,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 		Services: servicesFromSchema,
 		Computes: []Compute{{
 			ComputeID:   res.EntityID,
-			ComputeType: "VC",
+			ComputeType: constants.DefaultComputeType,
 			ComputeName: res.Name,
 			ID:          res.Children[0].EntityID,
 			Name:        res.Children[0].Name,
@@ -273,7 +275,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 		DeploymentContainers: DeploymentContainer{
 			Computes: []Compute{{
 				ComputeID:   res.EntityID,
-				ComputeType: "VC",
+				ComputeType: constants.DefaultComputeType,
 				ComputeName: res.Name,
 				ID:          clusterID,
 				Name:        clusterName,
@@ -282,7 +284,7 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			},
 			Storage: []Storage{{
 				ComputeID:   res.EntityID,
-				ComputeType: "VC",
+				ComputeType: constants.DefaultComputeType,
 				ComputeName: res.Name,
 				ID:          datastoreFromAPI.ID,
 				Name:        datastoreFromAPI.Name,
@@ -316,11 +318,11 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			return diag.FromErr(err)
 		}
 
-		if jr.Status == "SUCCESS" {
+		if jr.Status == constants.SuccessStatus {
 			break
 		}
 
-		if jr.Status == "FAILED" {
+		if jr.Status == constants.FailedStatus {
 			return diag.FromErr(errors.New("task failed"))
 		}
 
@@ -365,11 +367,11 @@ func resourceComputeProfileDelete(ctx context.Context, d *schema.ResourceData, m
 			return diag.FromErr(err)
 		}
 
-		if jr.Status == "SUCCESS" {
+		if jr.Status == constants.SuccessStatus {
 			break
 		}
 
-		if jr.Status == "FAILED" {
+		if jr.Status == constants.FailedStatus {
 			return diag.FromErr(errors.New("task failed"))
 		}
 

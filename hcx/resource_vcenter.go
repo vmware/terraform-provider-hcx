@@ -10,6 +10,8 @@ import (
 
 	b64 "encoding/base64"
 
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -86,7 +88,7 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 			return diag.FromErr(err)
 		}
 
-		if jr.Result == "STOPPED" {
+		if jr.Result == constants.StoppedStatus {
 			break
 		}
 		time.Sleep(5 * time.Second)
@@ -104,7 +106,7 @@ func resourcevCenterCreate(ctx context.Context, d *schema.ResourceData, m interf
 			return diag.FromErr(err)
 		}
 
-		if jr.Result == "RUNNING" {
+		if jr.Result == constants.RunningStatus {
 			break
 		}
 		time.Sleep(5 * time.Second)
