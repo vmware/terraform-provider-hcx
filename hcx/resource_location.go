@@ -6,6 +6,7 @@ package hcx
 
 import (
 	"context"
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -127,8 +128,8 @@ func resourceLocationDelete(ctx context.Context, d *schema.ResourceData, m inter
 		City:      "",
 		Country:   "",
 		CityASCII: "",
-		Latitude:  0,
-		Longitude: 0,
+		Latitude:  constants.DefaultLatitude,
+		Longitude: constants.DefaultLongitude,
 		Province:  "",
 	}
 

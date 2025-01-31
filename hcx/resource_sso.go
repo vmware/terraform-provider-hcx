@@ -6,6 +6,7 @@ package hcx
 
 import (
 	"context"
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -47,7 +48,7 @@ func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{
 				{
 					Config: InsertSSODataItemConfig{
 						LookupServiceURL: url,
-						ProviderType:     "PSC",
+						ProviderType:     constants.DefaultSsoProviderType,
 					},
 				},
 			},
@@ -61,7 +62,7 @@ func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{
 	}
 
 	if len(res.InsertSSOData.Items) == 0 {
-		// No SSO config found
+		// No SSO configuration found.
 		res, err := InsertSSO(client, body)
 
 		if err != nil {
@@ -72,7 +73,7 @@ func resourceSSOCreate(ctx context.Context, d *schema.ResourceData, m interface{
 		return resourceSSORead(ctx, d, m)
 	}
 
-	// Update existing SSO
+	// Update existing SSO configuration.
 	d.SetId(res.InsertSSOData.Items[0].Config.UUID)
 	return resourceSSOUpdate(ctx, d, m)
 
@@ -99,7 +100,7 @@ func resourceSSOUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 					Config: InsertSSODataItemConfig{
 						LookupServiceURL: url,
 						UUID:             d.Id(),
-						ProviderType:     "PSC",
+						ProviderType:     constants.DefaultSsoProviderType,
 					},
 				},
 			},

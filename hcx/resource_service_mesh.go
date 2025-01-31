@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -202,11 +203,11 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 			return diag.FromErr(err)
 		}
 
-		if jr.Status == "SUCCESS" {
+		if jr.Status == constants.SuccessStatus {
 			break
 		}
 
-		if jr.Status == "FAILED" {
+		if jr.Status == constants.FailedStatus {
 			return diag.FromErr(errors.New("task failed"))
 		}
 
@@ -266,11 +267,11 @@ func resourceServiceMeshDelete(ctx context.Context, d *schema.ResourceData, m in
 			return diag.FromErr(err)
 		}
 
-		if jr.Status == "SUCCESS" {
+		if jr.Status == constants.SuccessStatus {
 			break
 		}
 
-		if jr.Status == "FAILED" {
+		if jr.Status == constants.FailedStatus {
 			return diag.FromErr(errors.New("task failed"))
 		}
 

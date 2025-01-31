@@ -166,7 +166,7 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	body := NetworkProfileBody{
 		Name:         name,
-		Organization: "DEFAULT",
+		Organization: constants.DefaultNetworkProfileOrg,
 		MTU:          mtu,
 		Backings: []Backing{{
 			BackingID:           networkiD.EntityID,
