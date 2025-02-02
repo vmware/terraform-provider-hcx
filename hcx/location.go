@@ -32,26 +32,24 @@ type GetLocationResult struct {
 }
 
 // SetLocation sends request to update the location configuration using the provided body. Returns an error if the
+// SetLocation sends request to update the location configuration using the provided body. Returns an error if the
 // request fails or cannot be sent.
 func SetLocation(c *Client, body SetLocationBody) error {
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s:9443/api/admin/global/config/location", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("failed to create PUT request: %w", err)
 	}
 
-	// Send the request.
 	_, _, err = c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("failed to send PUT request: %w", err)
 	}
 
 	return nil
@@ -65,22 +63,17 @@ func GetLocation(c *Client) (GetLocationResult, error) {
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s:9443/api/admin/global/config/location", c.HostURL), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil

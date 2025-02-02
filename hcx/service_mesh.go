@@ -78,28 +78,22 @@ func InsertServiceMesh(c *Client, body InsertServiceMeshBody) (InsertServiceMesh
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/serviceMesh", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -114,22 +108,17 @@ func DeleteServiceMesh(c *Client, serviceMeshID string, force bool) (DeleteServi
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/interconnect/serviceMesh/%s?force=%v", c.HostURL, serviceMeshID, force), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil

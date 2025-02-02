@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -60,8 +59,8 @@ type DeactivateHcxOnSDDCResults struct {
 	JobID string `json:"jobId"`
 }
 
-// VmcAuthenticate sends a request to authenticate with the VMware Cloud (VMC) API using the provided token. It returns
-// an access token as a string or an error if the request fails or the response cannot be parsed.
+// VmcAuthenticate sends a request to authenticate with the VMware Cloud (VMC) API using the provided token.
+// Returns an access token as a string or an error if the request fails or the response cannot be parsed.
 func VmcAuthenticate(token string) (string, error) {
 
 	c := Client{
@@ -71,35 +70,25 @@ func VmcAuthenticate(token string) (string, error) {
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/auth/api-tokens/authorize?refresh_token=%s", c.HostURL, token), nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	_, r, err := c.doVmcRequest(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to send POST request: %w", err)
 	}
 
 	resp := VmcAccessToken{}
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return "", err
+		return "", fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
-	// Parse response header.
-
-	log.Printf("**************************")
-	log.Printf("[Access token] = %+v", resp.AccessToken)
-	log.Printf("**************************")
-
 	return resp.AccessToken, nil
-
 }
 
-// CloudAuthenticate sends a request to authenticate to the HCX cloud service using the provided token. On successful
-// authentication, it sets the HcxToken field of the provided Client. Returns an error if the request fails, the
-// response is invalid, or the token cannot be retrieved.
+// CloudAuthenticate sends a request to authenticate to the HCX cloud service using the provided token.
+// On success, it sets the HcxToken field of the provided Client.
 func CloudAuthenticate(client *Client, token string) error {
 
 	c := Client{
@@ -114,35 +103,30 @@ func CloudAuthenticate(client *Client, token string) error {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sessions", c.HostURL), &buf)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	resp, _, err := c.doVmcRequest(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to send POST request: %w", err)
 	}
 
 	auth := resp.Header.Get("x-hm-authorization")
 	if auth == "" {
-		return errors.New("cannot authorize hcx cloud")
+		return errors.New("failed to authorize: x-hm-authorization header not found")
 	}
 
-	// Parse response header.
 	client.HcxToken = auth
-
 	return nil
-
 }
 
-// GetSddcByName sends a request to retrieve a list of SDDCs (Software-Defined Data Centers) and searches for an SDDC
-// with the specified sddcName. It returns the matching SDDC object or an error if the request fails, the response
-// cannot be parsed, or the SDDC is not found.
+// GetSddcByName sends a request to retrieve an SDDC by name.
+// Returns the matching SDDC object or an error.
 func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 
 	c := Client{
@@ -153,21 +137,18 @@ func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/sddcs", c.HostURL), nil)
 	if err != nil {
-		return SDDC{}, err
+		return SDDC{}, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
 	_, r, err := c.doVmcRequest(req)
 	if err != nil {
-		return SDDC{}, err
+		return SDDC{}, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
 	resp := GetSddcsResults{}
-
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return SDDC{}, err
+		return SDDC{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp.SDDCs {
@@ -176,14 +157,10 @@ func GetSddcByName(client *Client, sddcName string) (SDDC, error) {
 		}
 	}
 
-	// Parse response header.
-	return SDDC{}, errors.New("cant find the sddc")
-
+	return SDDC{}, errors.New("failed to find SDDC by name")
 }
 
-// GetSddcByID sends a request to retrieve a list of SDDCs (Software-Defined Data Centers) and searches for an SDDC with
-// the specified sddcID. It returns the matching SDDC object or an error if the request fails, the response cannot be
-// parsed, or the SDDC is not found.
+// GetSddcByID sends a request to retrieve an SDDC by ID.
 func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 
 	c := Client{
@@ -194,21 +171,18 @@ func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/sddcs", c.HostURL), nil)
 	if err != nil {
-		return SDDC{}, err
+		return SDDC{}, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
 	_, r, err := c.doVmcRequest(req)
 	if err != nil {
-		return SDDC{}, err
+		return SDDC{}, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
 	resp := GetSddcsResults{}
-
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return SDDC{}, err
+		return SDDC{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp.SDDCs {
@@ -217,14 +191,10 @@ func GetSddcByID(client *Client, sddcID string) (SDDC, error) {
 		}
 	}
 
-	// Parse response header.
-	return SDDC{}, errors.New("cant find the sddc")
-
+	return SDDC{}, errors.New("failed to find SDDC by ID")
 }
 
-// ActivateHcxOnSDDC sends a request to activate HCX on the specified SDDC (Software-Defined Data Center) identified by
-// the provided sddcID. It returns the resulting ActivateHcxOnSDDCResults object or an error if the request fails or the
-// response cannot be parsed.
+// ActivateHcxOnSDDC sends a request to activate HCX on the specified SDDC.
 func ActivateHcxOnSDDC(client *Client, sddcID string) (ActivateHcxOnSDDCResults, error) {
 
 	resp := ActivateHcxOnSDDCResults{}
@@ -237,29 +207,23 @@ func ActivateHcxOnSDDC(client *Client, sddcID string) (ActivateHcxOnSDDCResults,
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sddcs/%s?action=activate", c.HostURL, sddcID), nil)
 	if err != nil {
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	_, r, err := c.doVmcRequest(req)
 	if err != nil {
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
-	// Parse response header.
 	return resp, nil
-
 }
 
-// DeactivateHcxOnSDDC sends a POST request to deactivate HCX on the specified SDDC (Software-Defined Data Center)
-// identified by the provided sddcID. It returns the resulting DeactivateHcxOnSDDCResults object or an error if the
-// request fails or the response cannot be parsed.
+// DeactivateHcxOnSDDC sends a request to deactivate HCX on the specified SDDC.
 func DeactivateHcxOnSDDC(client *Client, sddcID string) (DeactivateHcxOnSDDCResults, error) {
 
 	resp := DeactivateHcxOnSDDCResults{}
@@ -272,22 +236,18 @@ func DeactivateHcxOnSDDC(client *Client, sddcID string) (DeactivateHcxOnSDDCResu
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/sddcs/%s?action=deactivate", c.HostURL, sddcID), nil)
 	if err != nil {
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	_, r, err := c.doVmcRequest(req)
 	if err != nil {
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
-	// Parse response header.
 	return resp, nil
-
 }

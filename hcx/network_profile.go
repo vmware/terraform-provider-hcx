@@ -7,7 +7,6 @@ package hcx
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -79,34 +78,27 @@ type NetworkProfileData struct {
 // InsertNetworkProfile sends a request to create a new network profile using the provided body and returns the
 // resulting NetworkProfileResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileResult, error) {
-
 	resp := NetworkProfileResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/admin/hybridity/api/networks", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -116,7 +108,6 @@ func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 // matching the specified name. Returns an error if the request fails, the response cannot be parsed, or no profile is
 // found with the given name.
 func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
-
 	resp := []NetworkProfileBody{}
 	body := NetworkFilter{
 		Filter: Filter{
@@ -128,28 +119,22 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return NetworkProfileBody{}, err
+		return NetworkProfileBody{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return NetworkProfileBody{}, err
+		return NetworkProfileBody{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return NetworkProfileBody{}, err
+		return NetworkProfileBody{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return NetworkProfileBody{}, err
+		return NetworkProfileBody{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp {
@@ -158,14 +143,13 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 		}
 	}
 
-	return NetworkProfileBody{}, errors.New("cannot find network profile")
+	return NetworkProfileBody{}, fmt.Errorf("network profile with name '%s' not found", name)
 }
 
 // GetNetworkProfileByID sends a request to query the list of network profiles and returns the NetworkProfileBody object
 // matching the specified ID. Returns an error if the request fails, the response cannot be parsed, or no profile is
 // found with the given ID.
 func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
-
 	resp := []NetworkProfileBody{}
 	body := NetworkFilter{
 		Filter: Filter{
@@ -177,28 +161,22 @@ func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return NetworkProfileBody{}, err
+		return NetworkProfileBody{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return NetworkProfileBody{}, err
+		return NetworkProfileBody{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return NetworkProfileBody{}, err
+		return NetworkProfileBody{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return NetworkProfileBody{}, err
+		return NetworkProfileBody{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp {
@@ -207,34 +185,28 @@ func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
 		}
 	}
 
-	return NetworkProfileBody{}, errors.New("cannot find network profile")
+	return NetworkProfileBody{}, fmt.Errorf("network profile with ID '%s' not found", id)
 }
 
 // DeleteNetworkProfile sends a DELETE request to remove a network profile identified by the provided networkID and
 // returns the resulting NetworkProfileResult object. Returns an error if the request fails or the response cannot be
 // parsed.
 func DeleteNetworkProfile(c *Client, networkID string) (NetworkProfileResult, error) {
-
 	resp := NetworkProfileResult{}
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, networkID), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -243,34 +215,27 @@ func DeleteNetworkProfile(c *Client, networkID string) (NetworkProfileResult, er
 // UpdateNetworkProfile sends a request to update a network profile using the provided body and returns the resulting
 // NetworkProfileResult object. Returns an error if the request fails or the response cannot be parsed.
 func UpdateNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileResult, error) {
-
 	resp := NetworkProfileResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, body.ObjectID), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create PUT request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send PUT request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil

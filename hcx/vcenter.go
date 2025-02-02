@@ -48,34 +48,27 @@ type DeletevCenterResult struct {
 // InsertvCenter sends a request to add a new vCenter instance configuration using the provided body and returns the
 // resulting InsertvCenterResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertvCenter(c *Client, body InsertvCenterBody) (InsertvCenterResult, error) {
-
 	resp := InsertvCenterResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/vcenter", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -85,27 +78,21 @@ func InsertvCenter(c *Client, body InsertvCenterBody) (InsertvCenterResult, erro
 // returns the resulting DeletevCenterResult object. Returns an error if the request fails or the response cannot be
 // parsed.
 func DeletevCenter(c *Client, vCenterUUID string) (DeletevCenterResult, error) {
-
 	resp := DeletevCenterResult{}
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s:9443/api/admin/global/config/vcenter/%s", c.HostURL, vCenterUUID), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil

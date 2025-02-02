@@ -74,34 +74,27 @@ type DeleteRemoteCloudConfigResult struct {
 // InsertSitePairing sends a request to create a new site pairing using the provided body and returns the resulting
 // PostRemoteCloudConfigResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertSitePairing(c *Client, body RemoteCloudConfigBody) (PostRemoteCloudConfigResult, error) {
-
 	resp := PostRemoteCloudConfigResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/cloudConfigs", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -110,27 +103,21 @@ func InsertSitePairing(c *Client, body RemoteCloudConfigBody) (PostRemoteCloudCo
 // GetSitePairings sends a GET request to retrieve all existing site pairings and returns the resulting
 // GetRemoteCloudConfigResult object. Returns an error if the request fails or the response cannot be parsed.
 func GetSitePairings(c *Client) (GetRemoteCloudConfigResult, error) {
-
 	resp := GetRemoteCloudConfigResult{}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/cloudConfigs", c.HostURL), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -140,27 +127,21 @@ func GetSitePairings(c *Client) (GetRemoteCloudConfigResult, error) {
 // the resulting DeleteRemoteCloudConfigResult object. Returns an error if the request fails or the response cannot be
 // parsed.
 func DeleteSitePairings(c *Client, endpointID string) (DeleteRemoteCloudConfigResult, error) {
-
 	resp := DeleteRemoteCloudConfigResult{}
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/endpointPairing/%s", c.HostURL, endpointID), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil

@@ -53,27 +53,21 @@ type GetSSOResult struct {
 // GetSSO sends a GET request to retrieve the current SSO configuration and returns the resulting GetSSOResult object.
 // Returns an error if the request fails or the response cannot be parsed.
 func GetSSO(c *Client) (GetSSOResult, error) {
-
 	resp := GetSSOResult{}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s:9443/api/admin/global/config/lookupservice", c.HostURL), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -82,34 +76,27 @@ func GetSSO(c *Client) (GetSSOResult, error) {
 // InsertSSO sends a POST request to create a new SSO configuration using the provided body and returns the resulting
 // InsertSSOResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertSSO(c *Client, body InsertSSOBody) (InsertSSOResult, error) {
-
 	resp := InsertSSOResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/lookupservice", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -118,34 +105,27 @@ func InsertSSO(c *Client, body InsertSSOBody) (InsertSSOResult, error) {
 // UpdateSSO sends a POST request to update the existing SSO configuration using the provided body. It returns the
 // resulting InsertSSOResult object or an error if the request fails or the response cannot be parsed.
 func UpdateSSO(c *Client, body InsertSSOBody) (InsertSSOResult, error) {
-
 	resp := InsertSSOResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/lookupservice/%s", c.HostURL, body.Data.Items[0].Config.UUID), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -154,27 +134,21 @@ func UpdateSSO(c *Client, body InsertSSOBody) (InsertSSOResult, error) {
 // DeleteSSO sends a DELETE request to remove the SSO configuration identified by the provided SSOUUID and returns the
 // resulting DeleteSSOResult object. Returns an error if the request fails or the response cannot be parsed.
 func DeleteSSO(c *Client, SSOUUID string) (DeleteSSOResult, error) {
-
 	resp := DeleteSSOResult{}
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s:9443/api/admin/global/config/lookupservice/%s", c.HostURL, SSOUUID), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
