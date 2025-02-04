@@ -7,9 +7,7 @@ package hcx
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -271,66 +269,52 @@ type GetApplianceResultItem struct {
 	NetworkExtensionCount int    `json:"networkExtensionCount"`
 }
 
-// GetJobResult sends a request to retrieve the result of a job identified by the provided jobID, returning a JobResult
-// object. Returns an error if the request fails or the response cannot be parsed.
+// GetJobResult sends a request to retrieve the result of a job identified by the provided jobID, returning a JobResult object.
 func GetJobResult(c *Client, jobID string) (JobResult, error) {
-
 	resp := JobResult{}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/jobs/%s", c.HostURL, jobID), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse job result response: %w", err)
 	}
 
 	return resp, nil
 }
 
-// GetTaskResult sends a request to retrieve the result of a task identified by the provided taskID, returning a
-// TaskResult object. Returns an error if the request fails or the response cannot be parsed.
+// GetTaskResult sends a request to retrieve the result of a task identified by the provided taskID.
 func GetTaskResult(c *Client, taskID string) (TaskResult, error) {
-
 	resp := TaskResult{}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/interconnect/tasks/%s", c.HostURL, taskID), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse task result response: %w", err)
 	}
 
 	return resp, nil
 }
 
 // GetLocalContainer sends a request to retrieve the local resource container list and returns the first item as a
-// PostResourceContainerListResultDataItem. Returns an error if the request fails or the response cannot be parsed.
+// PostResourceContainerListResultDataItem.
 func GetLocalContainer(c *Client) (PostResourceContainerListResultDataItem, error) {
 
 	body := PostResourceContainerListBody{
@@ -345,37 +329,31 @@ func GetLocalContainer(c *Client) (PostResourceContainerListResultDataItem, erro
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return PostResourceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	resp := PostResourceContainerListResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/resourcecontainer/list", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return PostResourceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return PostResourceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, fmt.Errorf("failed to send HTTP request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return PostResourceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp.Data.Items[0], nil
 }
 
 // GetRemoteContainer sends a request to retrieve the remote resource container list and returns the first item as a
-// PostResourceContainerListResultDataItem. Returns an error if the request fails or the response cannot be parsed.
+// PostResourceContainerListResultDataItem.
 func GetRemoteContainer(c *Client) (PostResourceContainerListResultDataItem, error) {
 
 	body := PostResourceContainerListBody{
@@ -390,38 +368,31 @@ func GetRemoteContainer(c *Client) (PostResourceContainerListResultDataItem, err
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return PostResourceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	resp := PostResourceContainerListResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/resourcecontainer/list", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return PostResourceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return PostResourceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, fmt.Errorf("failed to send HTTP request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return PostResourceContainerListResultDataItem{}, err
+		return PostResourceContainerListResultDataItem{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp.Data.Items[0], nil
 }
 
-// GetNetworkBacking sends a request to retrieve a network's backing information by matching the given endpointID,
-// network, and networkType. Returns a Dvpg object or an error if it cannot find the network info.
-func GetNetworkBacking(c *Client, endpointID string, network string, networkType string) (Dvpg, error) {
+// GetNetworkBacking sends a request to retrieve a network's backing information.
+func GetNetworkBacking(c *Client, endpointID, network, networkType string) (Dvpg, error) {
 
 	body := PostNetworkBackingBody{
 		Filter: PostNetworkBackingBodyFilter{
@@ -434,35 +405,25 @@ func GetNetworkBacking(c *Client, endpointID string, network string, networkType
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return Dvpg{}, err
+		return Dvpg{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	resp := PostNetworkBackingResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/networks", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return Dvpg{}, err
+		return Dvpg{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return Dvpg{}, err
+		return Dvpg{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return Dvpg{}, err
+		return Dvpg{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
-
-	log.Printf("*************************************")
-	log.Printf("networks list: %+v", resp)
-	log.Printf("*************************************")
 
 	for _, j := range resp.Data.Items {
 		if j.Name == network && j.EntityType == networkType {
@@ -470,11 +431,10 @@ func GetNetworkBacking(c *Client, endpointID string, network string, networkType
 		}
 	}
 
-	return Dvpg{}, errors.New("cannot find network info")
+	return Dvpg{}, fmt.Errorf("failed to find matching network info in GetNetworkBacking")
 }
 
-// GetVcInventory sends a request to retrieve the inventory of vCenter resources and returns the first item as a
-// GetVcInventoryResultDataItem. Returns an error if the request fails or the response cannot be parsed.
+// GetVcInventory sends a request to retrieve the vCenter resource inventory.
 func GetVcInventory(c *Client) (GetVcInventoryResultDataItem, error) {
 
 	var jsonBody = []byte("{}")
@@ -484,30 +444,24 @@ func GetVcInventory(c *Client) (GetVcInventoryResultDataItem, error) {
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/vc/list", c.HostURL), buf)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcInventoryResultDataItem{}, err
+		return GetVcInventoryResultDataItem{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcInventoryResultDataItem{}, err
+		return GetVcInventoryResultDataItem{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcInventoryResultDataItem{}, err
+		return GetVcInventoryResultDataItem{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp.Data.Items[0], nil
 }
 
-// GetVcDatastore sends a request to query the vCenter datastore, matching the given datastoreName, vcuuid, and cluster.
-// Returns the matching GetVcDatastoreResultDataItem or an error if the datastore cannot be found.
-func GetVcDatastore(c *Client, datastoreName string, vcuuid string, cluster string) (GetVcDatastoreResultDataItem, error) {
+// GetVcDatastore sends a request to query a vCenter datastore.
+func GetVcDatastore(c *Client, datastoreName, vcuuid, cluster string) (GetVcDatastoreResultDataItem, error) {
 
 	body := GetVcDatastoreBody{
 		Filter: GetVcDatastoreFilter{
@@ -520,30 +474,24 @@ func GetVcDatastore(c *Client, datastoreName string, vcuuid string, cluster stri
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcDatastoreResultDataItem{}, err
+		return GetVcDatastoreResultDataItem{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	resp := GetVcDatastoreResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/vc/datastores/query", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcDatastoreResultDataItem{}, err
+		return GetVcDatastoreResultDataItem{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcDatastoreResultDataItem{}, err
+		return GetVcDatastoreResultDataItem{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcDatastoreResultDataItem{}, err
+		return GetVcDatastoreResultDataItem{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp.Data.Items {
@@ -552,12 +500,11 @@ func GetVcDatastore(c *Client, datastoreName string, vcuuid string, cluster stri
 		}
 	}
 
-	return GetVcDatastoreResultDataItem{}, errors.New("cannot find datastore")
+	return GetVcDatastoreResultDataItem{}, fmt.Errorf("datastore not found in GetVcDatastore")
 }
 
-// GetVcDvs sends a request to query a distributed switch matching the given dvsName, vcuuid, and cluster. Returns the
-// matching GetVcDvsResultDataItem or an error if the DVS cannot be found.
-func GetVcDvs(c *Client, dvsName string, vcuuid string, cluster string) (GetVcDvsResultDataItem, error) {
+// GetVcDvs sends a request to query a distributed switch.
+func GetVcDvs(c *Client, dvsName, vcuuid, cluster string) (GetVcDvsResultDataItem, error) {
 
 	body := GetVcDvsBody{
 		Filter: GetVcDvsFilter{
@@ -570,30 +517,24 @@ func GetVcDvs(c *Client, dvsName string, vcuuid string, cluster string) (GetVcDv
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcDvsResultDataItem{}, err
+		return GetVcDvsResultDataItem{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	resp := GetVcDvsResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/vc/dvs/query", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcDvsResultDataItem{}, err
+		return GetVcDvsResultDataItem{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcDvsResultDataItem{}, err
+		return GetVcDvsResultDataItem{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return GetVcDvsResultDataItem{}, err
+		return GetVcDvsResultDataItem{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp.Data.Items {
@@ -602,11 +543,10 @@ func GetVcDvs(c *Client, dvsName string, vcuuid string, cluster string) (GetVcDv
 		}
 	}
 
-	return GetVcDvsResultDataItem{}, errors.New("cannot find datastore")
+	return GetVcDvsResultDataItem{}, fmt.Errorf("distributed switch not found in GetVcDvs")
 }
 
-// GetRemoteCloudList sends a request to retrieve a list of remote clouds and returns the resulting PostCloudListResult
-// object. Returns an error if the request fails or the response cannot be parsed.
+// GetRemoteCloudList sends a request to retrieve a list of remote clouds and returns the resulting PostCloudListResult.
 func GetRemoteCloudList(c *Client) (PostCloudListResult, error) {
 
 	body := PostCloudListBody{
@@ -618,37 +558,30 @@ func GetRemoteCloudList(c *Client) (PostCloudListResult, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return PostCloudListResult{}, err
+		return PostCloudListResult{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	resp := PostCloudListResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/cloud/list", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return PostCloudListResult{}, err
+		return PostCloudListResult{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return PostCloudListResult{}, err
+		return PostCloudListResult{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return PostCloudListResult{}, err
+		return PostCloudListResult{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
 }
 
-// GetLocalCloudList sends a request to retrieve a list of local clouds and returns the resulting PostCloudListResult
-// object. Returns an error if the request fails or the response cannot be parsed.
+// GetLocalCloudList sends a request to retrieve a list of local clouds and returns the resulting PostCloudListResult.
 func GetLocalCloudList(c *Client) (PostCloudListResult, error) {
 
 	body := PostCloudListBody{
@@ -660,38 +593,31 @@ func GetLocalCloudList(c *Client) (PostCloudListResult, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return PostCloudListResult{}, err
+		return PostCloudListResult{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	resp := PostCloudListResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/service/inventory/cloud/list", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return PostCloudListResult{}, err
+		return PostCloudListResult{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return PostCloudListResult{}, err
+		return PostCloudListResult{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return PostCloudListResult{}, err
+		return PostCloudListResult{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
 }
 
-// GetAppliance sends a request to query appliances based on the given endpointID and serviceMeshID. It returns a
-// matching GetApplianceResultItem (with a network extension count less than 9) or the first item in the response.
-// Returns an error if the request fails or no matching item is found.
+// GetAppliance sends a request to query appliances based on the given endpointID and serviceMeshID.
+// It returns a matching GetApplianceResultItem (with a network extension count less than 9) or an error.
 func GetAppliance(c *Client, endpointID string, serviceMeshID string) (GetApplianceResultItem, error) {
 
 	body := GetApplianceBody{
@@ -704,30 +630,24 @@ func GetAppliance(c *Client, endpointID string, serviceMeshID string) (GetApplia
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return GetApplianceResultItem{}, err
+		return GetApplianceResultItem{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	resp := GetApplianceResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/appliances/query", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return GetApplianceResultItem{}, err
+		return GetApplianceResultItem{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return GetApplianceResultItem{}, err
+		return GetApplianceResultItem{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return GetApplianceResultItem{}, err
+		return GetApplianceResultItem{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp.Items {
@@ -739,8 +659,8 @@ func GetAppliance(c *Client, endpointID string, serviceMeshID string) (GetApplia
 	return resp.Items[0], nil
 }
 
-// GetAppliances sends a request to retrieve all appliances matching the given endpointID and serviceMeshID. Returns a
-// slice of GetApplianceResultItem objects or an error if the request fails or the response cannot be parsed.
+// GetAppliances sends a request to retrieve all appliances matching the given endpointID and serviceMeshID.
+// Returns a slice of GetApplianceResultItem objects or an error if the request fails.
 func GetAppliances(c *Client, endpointID string, serviceMeshID string) ([]GetApplianceResultItem, error) {
 
 	body := GetApplianceBody{
@@ -754,30 +674,24 @@ func GetAppliances(c *Client, endpointID string, serviceMeshID string) ([]GetApp
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return []GetApplianceResultItem{}, err
+		return []GetApplianceResultItem{}, fmt.Errorf("failed to encode request bodys: %w", err)
 	}
 
 	resp := GetApplianceResult{}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/appliances/query", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return []GetApplianceResultItem{}, err
+		return []GetApplianceResultItem{}, fmt.Errorf("failed to POST create requests: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return []GetApplianceResultItem{}, err
+		return []GetApplianceResultItem{}, fmt.Errorf("failed to send POST requests: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return []GetApplianceResultItem{}, err
+		return []GetApplianceResultItem{}, fmt.Errorf("failed to parse HTTP responses: %w", err)
 	}
 
 	return resp.Items, nil

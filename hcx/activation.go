@@ -36,34 +36,27 @@ type ActivateDataItemConfig struct {
 // PostActivate sends a request to activate a configuration using the provided body and returns the resulting
 // ActivateBody object. Returns an error if the request fails or the response cannot be parsed.
 func PostActivate(c *Client, body ActivateBody) (ActivateBody, error) {
-
 	resp := ActivateBody{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/hcx", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send admin POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to unmarshal POST response: %w", err)
 	}
 
 	return resp, nil
@@ -72,64 +65,50 @@ func PostActivate(c *Client, body ActivateBody) (ActivateBody, error) {
 // GetActivate sends a request to retrieve the current activation configuration and returns the resulting ActivateBody
 // object. Returns an error if the request fails or the response cannot be parsed.
 func GetActivate(c *Client) (ActivateBody, error) {
-
 	resp := ActivateBody{}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s:9443/api/admin/global/config/hcx", c.HostURL), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send admin GET request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to unmarshal GET response: %w", err)
 	}
 
 	return resp, nil
 }
 
-// DeleteActivate sends a  request to remove the activation configuration using the provided body and returns the
+// DeleteActivate sends a request to remove the activation configuration using the provided body and returns the
 // resulting ActivateBody object. Returns an error if the request fails or the response cannot be parsed.
-
 func DeleteActivate(c *Client, body ActivateBody) (ActivateBody, error) {
-
 	resp := ActivateBody{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s:9443/api/admin/global/config/hcx", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send admin DELETE request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to unmarshal DELETE response: %w", err)
 	}
 
 	return resp, nil

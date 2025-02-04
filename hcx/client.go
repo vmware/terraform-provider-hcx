@@ -62,13 +62,12 @@ func (c *Client) HcxConnectorAuthenticate() error {
 		Password: c.Password,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to marshal authentication request body: %w", err)
 	}
 
-	// authenticate
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/sessions", c.HostURL), strings.NewReader(string(rb)))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create authentication request: %w", err)
 	}
 
 	tlsConfig := &tls.Config{
@@ -84,31 +83,26 @@ func (c *Client) HcxConnectorAuthenticate() error {
 			resp, err = c.HTTPClient.Do(req)
 
 			if err != nil {
-				return fmt.Errorf("Unable to authenticate. Check vCenter User / SSO configuration. Error: %s", err.Error())
+				return fmt.Errorf("authentication failed after retry; check credentials: %w", err)
 			}
-
 		}
 
 		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to read authentication response body: %w", err)
 		}
 
-		if resp.StatusCode == http.StatusOK {
+		if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusAccepted {
 			break
 		}
 
-		if resp.StatusCode == http.StatusAccepted {
-			break
-		}
-
-		// Check if SSO is ready
+		// Check if SSO is ready.
 		var xmlmessage Entries
 		err = xml.Unmarshal(body, &xmlmessage)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to unmarshal XML response: %w", err)
 		}
 
 		certificatePb := false
@@ -122,18 +116,16 @@ func (c *Client) HcxConnectorAuthenticate() error {
 		}
 
 		if !certificatePb {
-			return fmt.Errorf("body: %s", body)
+			return fmt.Errorf("unexpected authentication response body: %s", body)
 		}
 
 		time.Sleep(10 * time.Second)
-
 	}
 
 	// Parse response header.
 	c.Token = resp.Header.Get("x-hm-authorization")
 
 	return nil
-
 }
 
 // NewClient initializes and returns a new Client instance with the provided configuration, including authentication
@@ -162,9 +154,8 @@ func (c *Client) doRequest(req *http.Request) (*http.Response, []byte, error) {
 
 	if !c.IsAuthenticated {
 		err := c.HcxConnectorAuthenticate()
-
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("authentication failed during request: %w", err)
 		}
 		c.IsAuthenticated = true
 	}
@@ -180,22 +171,20 @@ func (c *Client) doRequest(req *http.Request) (*http.Response, []byte, error) {
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to send HTTP request: %w", err)
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to read HTTP response: %w", err)
 	}
 
-	if res.StatusCode != http.StatusOK {
-		if res.StatusCode != http.StatusAccepted {
-			return nil, nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
-		}
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusAccepted {
+		return nil, nil, fmt.Errorf("unexpected response status: %d, body: %s", res.StatusCode, body)
 	}
 
-	return res, body, err
+	return res, body, nil
 }
 
 // doAdminRequest executes an HTTP request using the admin credentials for Basic Authentication. It supports requests
@@ -221,24 +210,20 @@ func (c *Client) doAdminRequest(req *http.Request) (*http.Response, []byte, erro
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to send HTTP request: %w", err)
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to read HTTP response: %w", err)
 	}
 
-	if res.StatusCode != http.StatusOK {
-		if res.StatusCode != http.StatusNoContent {
-			if res.StatusCode != http.StatusAccepted {
-				return nil, nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
-			}
-		}
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusNoContent && res.StatusCode != http.StatusAccepted {
+		return nil, nil, fmt.Errorf("unexpected response status from admin request: %d, body: %s", res.StatusCode, body)
 	}
 
-	return res, body, err
+	return res, body, nil
 }
 
 // doVmcRequest sends an HTTP request to the VMware Cloud (VMC) service. It uses the HCX token for authorization if
@@ -259,20 +244,18 @@ func (c *Client) doVmcRequest(req *http.Request) (*http.Response, []byte, error)
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to send HTTP request: %w", err)
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to read HTTP response: %w", err)
 	}
 
-	if res.StatusCode != http.StatusOK {
-		if res.StatusCode != http.StatusAccepted {
-			return nil, nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
-		}
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusAccepted {
+		return nil, nil, fmt.Errorf("unexpected vmc response status: %d, body: %s", res.StatusCode, body)
 	}
 
-	return res, body, err
+	return res, body, nil
 }

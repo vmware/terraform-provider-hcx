@@ -7,7 +7,6 @@ package hcx
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -96,28 +95,22 @@ func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2Extension
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/l2Extensions", c.HostURL), &buf)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
@@ -132,22 +125,17 @@ func GetL2Extensions(c *Client, networkName string) (GetL2ExtensionsResultItem, 
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/l2Extensions", c.HostURL), nil)
 	if err != nil {
-		fmt.Println(err)
-		return GetL2ExtensionsResultItem{}, err
+		return GetL2ExtensionsResultItem{}, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return GetL2ExtensionsResultItem{}, err
+		return GetL2ExtensionsResultItem{}, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return GetL2ExtensionsResultItem{}, err
+		return GetL2ExtensionsResultItem{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp.Items {
@@ -156,7 +144,7 @@ func GetL2Extensions(c *Client, networkName string) (GetL2ExtensionsResultItem, 
 		}
 	}
 
-	return GetL2ExtensionsResultItem{}, errors.New("cant find compute L2 extension")
+	return GetL2ExtensionsResultItem{}, fmt.Errorf("cannot find L2 extension for network name: %s", networkName)
 }
 
 // DeleteL2Extension sends a DELETE request to remove an L2 extension with the provided stretchID and returns the
@@ -167,22 +155,17 @@ func DeleteL2Extension(c *Client, stretchID string) (DeleteL2ExtensionResult, er
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/l2Extensions/%s", c.HostURL, stretchID), nil)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
-	// Send the request.
 	_, r, err := c.doRequest(req)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
-	// Parse response body.
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
-		fmt.Println(err)
-		return resp, err
+		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	return resp, nil
