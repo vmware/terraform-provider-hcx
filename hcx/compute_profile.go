@@ -8,7 +8,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 	"net/http"
+	"path"
 )
 
 // InsertComputeProfileBody represents the body structure for inserting a compute profile.
@@ -119,7 +121,7 @@ func InsertComputeProfile(c *Client, body InsertComputeProfileBody) (InsertCompu
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles", c.HostURL), &buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", c.HostURL, constants.HcxComputeProfileAPI), &buf)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
@@ -144,7 +146,7 @@ func DeleteComputeProfile(c *Client, computeProfileID string) (InsertComputeProf
 
 	resp := InsertComputeProfileResult{}
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles/%s", c.HostURL, computeProfileID), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s%s", c.HostURL, path.Join(constants.HcxComputeProfileAPI, computeProfileID)), nil)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
@@ -169,7 +171,7 @@ func GetComputeProfile(c *Client, endpointID string, computeProfileName string) 
 
 	resp := GetComputeProfileResult{}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles?endpointId=%s", c.HostURL, endpointID), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s?endpointId=%s", c.HostURL, constants.HcxComputeProfileAPI, endpointID), nil)
 	if err != nil {
 		return GetComputeProfileResultItem{}, fmt.Errorf("failed to create GET request: %w", err)
 	}
