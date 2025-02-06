@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 )
 
 // ActivateBody represents the structure of the request body used for activation actions.
@@ -44,7 +46,7 @@ func PostActivate(c *Client, body ActivateBody) (ActivateBody, error) {
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/api/admin/global/config/hcx", c.HostURL), &buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s:%d%s", c.HostURL, constants.HcxDefaultPort, constants.HcxActivationAPI), &buf)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}

@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 )
 
 // InsertL2ExtensionBody represents the request body structure for creating a Layer 2 extension.
@@ -98,7 +100,7 @@ func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2Extension
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/l2Extensions", c.HostURL), &buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", c.HostURL, constants.HcxL2ExtensionsCreateAPI), &buf)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
@@ -123,7 +125,7 @@ func GetL2Extensions(c *Client, networkName string) (GetL2ExtensionsResultItem, 
 
 	resp := GetL2ExtensionsResult{}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/l2Extensions", c.HostURL), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", c.HostURL, constants.HcxL2ExtensionsGetAPI), nil)
 	if err != nil {
 		return GetL2ExtensionsResultItem{}, fmt.Errorf("failed to create GET request: %w", err)
 	}
@@ -153,7 +155,7 @@ func DeleteL2Extension(c *Client, stretchID string) (DeleteL2ExtensionResult, er
 
 	resp := DeleteL2ExtensionResult{}
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/l2Extensions/%s", c.HostURL, stretchID), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s%s", c.HostURL, fmt.Sprintf(constants.HcxL2ExtensionsDeleteAPI, stretchID)), nil)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}

@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 )
 
 // AppEngineStartStopResult represents the result of an App Engine start or stop operation.
@@ -18,10 +20,9 @@ type AppEngineStartStopResult struct {
 // AppEngineStart sends a request to start the App Engine component and returns the resulting AppEngineStartStopResult
 // object. Returns an error if the request fails or the response cannot be parsed.
 func AppEngineStart(c *Client) (AppEngineStartStopResult, error) {
-
 	resp := AppEngineStartStopResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/components/appengine?action=start", c.HostURL), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s:%d%s", c.HostURL, constants.HcxDefaultPort, constants.HcxAppEngineStartAPI), nil)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
@@ -42,10 +43,9 @@ func AppEngineStart(c *Client) (AppEngineStartStopResult, error) {
 // AppEngineStop sends a request to stop the App Engine component and returns the resulting AppEngineStartStopResult
 // object. Returns an error if the request fails or the response cannot be parsed.
 func AppEngineStop(c *Client) (AppEngineStartStopResult, error) {
-
 	resp := AppEngineStartStopResult{}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s:9443/components/appengine?action=stop", c.HostURL), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s:%d%s", c.HostURL, constants.HcxDefaultPort, constants.HcxAppEngineStopAPI), nil)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
@@ -66,10 +66,9 @@ func AppEngineStop(c *Client) (AppEngineStartStopResult, error) {
 // GetAppEngineStatus sends a GET request to retrieve the current status of the App Engine component and returns the
 // resulting AppEngineStartStopResult object. Returns an error if the request fails or the response cannot be parsed.
 func GetAppEngineStatus(c *Client) (AppEngineStartStopResult, error) {
-
 	resp := AppEngineStartStopResult{}
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s:9443/components/appengine/status", c.HostURL), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s:%d%s", c.HostURL, constants.HcxDefaultPort, constants.HcxAppEngineStatusAPI), nil)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create GET request: %w", err)
 	}

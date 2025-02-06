@@ -7,6 +7,23 @@ package constants
 import "time"
 
 const (
+
+	// HCX
+	HcxDefaultPort = 9443
+
+	// APIs
+	HcxActivationAPI         = "/api/admin/global/config/hcx"
+	HcxAppEngineBaseAPI      = "/components/appengine"
+	HcxAppEngineStartAPI     = HcxAppEngineBaseAPI + "?action=start"
+	HcxAppEngineStopAPI      = HcxAppEngineBaseAPI + "?action=stop"
+	HcxAppEngineStatusAPI    = HcxAppEngineBaseAPI + "/status"
+	HcxCertificatesAPI       = "/hybridity/api/admin/certificates"
+	HcxComputeProfileAPI     = "/hybridity/api/interconnect/computeProfiles"
+	HcxL2ExtensionsBaseAPI   = "/hybridity/api/l2Extensions"
+	HcxL2ExtensionsGetAPI    = HcxL2ExtensionsBaseAPI
+	HcxL2ExtensionsCreateAPI = HcxL2ExtensionsBaseAPI
+	HcxL2ExtensionsDeleteAPI = HcxL2ExtensionsBaseAPI + "/%s"
+
 	// HCX Cloud URLs
 	HcxBaseURL          = "https://connect.hcx.vmware.com"
 	HcxCloudURL         = HcxBaseURL

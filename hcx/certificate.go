@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 )
 
 // InsertCertificateBody represents the body structure used to insert a certificate.
@@ -34,7 +36,7 @@ func InsertCertificate(c *Client, body InsertCertificateBody) (InsertCertificate
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/admin/certificates", c.HostURL), &buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", c.HostURL, constants.HcxCertificatesAPI), &buf)
 	if err != nil {
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
