@@ -1,10 +1,10 @@
 module github.com/vmware/terraform-provider-hcx
 
 go 1.22.7
-toolchain go1.23.4
+toolchain go1.24.1
 
 require (
-	github.com/hashicorp/go-cty v1.4.1
+	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.35.0
 )
