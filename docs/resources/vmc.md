@@ -12,13 +12,13 @@ resources to work, (e.g. firewall configuration).
 
 ```hcl
 resource "hcx_vmc" "example" {
-    sddc_name   = "example"
+  sddc_name = "example"
 }
 
 resource "hcx_site_pairing" "example" {
-    url         = hcx_vmc.example.cloud_url
-    username    = "cloudadmin@vmc.local"
-    password    = var.vmc_vcenter_password
+  url      = hcx_vmc.example.cloud_url
+  username = "cloudadmin@vmc.local"
+  password = var.vmc_vcenter_password
 }
 ```
 

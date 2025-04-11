@@ -8,12 +8,12 @@ appliances when a Service Mesh is added.
 
 ```hcl
 data "hcx_compute_profile" "vmc_cp" {
-    vcenter       = hcx_site_pairing.C2C1toC2C2.local_vc
-    name          = "ComputeProfile(vcenter)"
+  vcenter = hcx_site_pairing.C2C1toC2C2.local_vc
+  name    = "ComputeProfile(vcenter)"
 }
 
 output "compute_profile_vmc" {
-    value = data.hcx_compute_profile.vmc_cp
+  value = data.hcx_compute_profile.vmc_cp
 }
 ```
 

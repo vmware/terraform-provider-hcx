@@ -7,16 +7,16 @@ HCX operations.
 
 ```hcl
 resource "hcx_rolemapping" "rolemapping" {
-    sso = hcx_sso.sso.id
-    admin {
-      user_group = "vsphere.local\\Administrators"
-    }
-    admin {
-      user_group = "example.com\\Administrators"
-    }
-    enterprise {
-      user_group = "example.com\\Administrators"
-    }
+  sso = hcx_sso.sso.id
+  admin {
+    user_group = "vsphere.local\\Administrators"
+  }
+  admin {
+    user_group = "example.com\\Administrators"
+  }
+  enterprise {
+    user_group = "example.com\\Administrators"
+  }
 }
 ```
 

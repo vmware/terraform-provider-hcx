@@ -6,7 +6,7 @@ An activation key is mandatory to use a HCX system.
 
 ```hcl
 resource "hcx_activation" "activation" {
-    activationkey = "*****-*****-*****-*****-*****"
+  activationkey = "*****-*****-*****-*****-*****"
 }
 ```
 

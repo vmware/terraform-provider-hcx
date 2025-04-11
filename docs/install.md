@@ -26,7 +26,7 @@ Providers listed on the Terraform Registry can be automatically downloaded when 
 terraform {
   required_providers {
     hcx = {
-      source  = "vmware/hcx"
+      source = "vmware/hcx"
     }
   }
   required_version = ">= x.y.z"

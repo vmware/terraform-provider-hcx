@@ -10,11 +10,11 @@ HCX sites are visually represented in the Dashboard.
 
 ```hcl
 resource "hcx_location" "location" {
-    city        = "Paris"
-    country     = "France"
-    province    = "Ile-de-France"
-    latitude    = 48.86669293
-    longitude   = 2.333335326
+  city      = "Paris"
+  country   = "France"
+  province  = "Ile-de-France"
+  latitude  = 48.86669293
+  longitude = 2.333335326
 }
 ```
 
