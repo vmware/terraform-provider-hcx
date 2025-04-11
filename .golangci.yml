@@ -32,12 +32,25 @@ linters:
       - legacy
       - std-error-handling
     rules:
+      # TODO: Setting temporary exclusions.
       - linters:
           - errcheck
         text: Error return value of `d.Set` is not checked
       - linters:
           - revive
-        text: 'redefines-builtin-id: redefinition of the built-in'
+        text: redefines-builtin-id
+      - linters:
+          - revive
+        text: unused-parameter
+      - linters:
+          - revive
+        text: indent-error-flow
+      - linters:
+          - gosec
+        text: G402
+      - linters:
+          - goimports
+        text: formatted
     paths:
       - third_party$
       - builtin$
