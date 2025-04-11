@@ -13,13 +13,13 @@ reverse migrations, are always initiated from the HCX Connector at the source.
 
 ```hcl
 resource "hcx_site_pairing" "site1" {
-    url      = "https://hcx-cloud-01b.example.com"
-    username = "administrator@vsphere.local"
-    password = "VMware1!"
+  url      = "https://hcx-cloud-01b.example.com"
+  username = "administrator@vsphere.local"
+  password = "VMware1!"
 }
 
 output "hcx_site_pairing_site1" {
-    value = hcx_site_pairing.site1
+  value = hcx_site_pairing.site1
 }
 ```
 
