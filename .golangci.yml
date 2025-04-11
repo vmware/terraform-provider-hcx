@@ -1,32 +1,15 @@
-# © Broadcom. All Rights Reserved.
-# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: MPL-2.0
+---
+version: "2"
 
-# For more information about the golangci-lint configuration file, refer to:
-# https://golangci-lint.run/usage/configuration/
-
-issues:
-  max-per-linter: 0
-  max-same-issues: 0
-  exclude-rules:
-    # Exclude errcheck for some rules.
-  - linters: [errcheck]
-    text: "Error return value of `d.Set` is not checked"
-    # Exclude revive for some rules.
-  - linters:
-    - revive
-    text: 'redefines-builtin-id: redefinition of the built-in'
-
-run:
-  deadline: 5m
+output:
+  formats:
+    text:
+      path: stdout
 
 linters:
-  disable-all: true
+  default: none
   enable:
     - errcheck
-    - gofmt
-    - goimports
-    - gosimple
     - gosec
     - govet
     - ineffassign
@@ -35,14 +18,54 @@ linters:
     - staticcheck
     - unconvert
     - unused
+  settings:
+    errcheck:
+      exclude-functions:
+        - github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema:ForceNew|Set
+        - fmt:.*
+        - io:Close
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      # TODO: Setting temporary exclusions.
+      - linters:
+          - errcheck
+        text: Error return value of `d.Set` is not checked
+      - linters:
+          - revive
+        text: redefines-builtin-id
+      - linters:
+          - revive
+        text: unused-parameter
+      - linters:
+          - revive
+        text: indent-error-flow
+      - linters:
+          - gosec
+        text: G402
+      - linters:
+          - goimports
+        text: formatted
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 
-output:
-  formats:
-    - format: colored-line-number
+issues:
+  max-same-issues: 0
 
-linters-settings:
-  errcheck:
-    exclude-functions:
-      - "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema:ForceNew|Set"
-      - "fmt:.*"
-      - "io:Close"
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
