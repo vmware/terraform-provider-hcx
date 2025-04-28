@@ -71,7 +71,7 @@ func (c *Client) HcxConnectorAuthenticate() error {
 	}
 
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: c.AllowUnverifiedSSL,
+		InsecureSkipVerify: c.AllowUnverifiedSSL, // #nosec G402
 	}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = tlsConfig
 
@@ -165,7 +165,7 @@ func (c *Client) doRequest(req *http.Request) (*http.Response, []byte, error) {
 	req.Header.Set("x-hm-authorization", c.Token)
 
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: c.AllowUnverifiedSSL,
+		InsecureSkipVerify: c.AllowUnverifiedSSL, // #nosec G402
 	}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = tlsConfig
 
@@ -204,7 +204,7 @@ func (c *Client) doAdminRequest(req *http.Request) (*http.Response, []byte, erro
 	req.SetBasicAuth(c.AdminUsername, c.AdminPassword)
 
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: c.AllowUnverifiedSSL,
+		InsecureSkipVerify: c.AllowUnverifiedSSL, // #nosec G402
 	}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = tlsConfig
 
@@ -238,7 +238,7 @@ func (c *Client) doVmcRequest(req *http.Request) (*http.Response, []byte, error)
 	}
 
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: c.AllowUnverifiedSSL,
+		InsecureSkipVerify: c.AllowUnverifiedSSL, // #nosec G402
 	}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = tlsConfig
 
