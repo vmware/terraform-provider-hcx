@@ -43,9 +43,6 @@ linters:
           - revive
         text: unused-parameter
       - linters:
-          - revive
-        text: indent-error-flow
-      - linters:
           - gosec
         text: G402
       - linters:
