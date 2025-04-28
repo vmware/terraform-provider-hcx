@@ -38,9 +38,6 @@ linters:
         text: Error return value of `d.Set` is not checked
       - linters:
           - revive
-        text: redefines-builtin-id
-      - linters:
-          - revive
         text: unused-parameter
     paths:
       - third_party$
