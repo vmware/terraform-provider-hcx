@@ -42,9 +42,6 @@ linters:
       - linters:
           - revive
         text: unused-parameter
-      - linters:
-          - gosec
-        text: G402
     paths:
       - third_party$
       - builtin$
