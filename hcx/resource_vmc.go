@@ -175,9 +175,15 @@ func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	}
 
 	d.SetId(sddc.ID)
-	d.Set("cloud_url", sddc.CloudURL)
-	d.Set("cloud_name", sddc.CloudName)
-	d.Set("cloud_type", sddc.CloudType)
+	if err := d.Set("cloud_url", sddc.CloudURL); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("cloud_name", sddc.CloudName); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("cloud_type", sddc.CloudType); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }

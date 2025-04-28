@@ -79,11 +79,21 @@ func resourceLocationRead(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	d.SetId(resp.City)
-	d.Set("cityascii", resp.City)
-	d.Set("country", resp.Country)
-	d.Set("province", resp.Province)
-	d.Set("latitude", resp.Latitude)
-	d.Set("longitude", resp.Longitude)
+	if err := d.Set("cityascii", resp.City); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("country", resp.Country); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("province", resp.Province); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("latitude", resp.Latitude); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("longitude", resp.Longitude); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }

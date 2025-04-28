@@ -215,15 +215,23 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 				return diag.FromErr(errors.New("cannot get local container info"))
 			}
 
-			d.Set("local_vc", lc.VcUUID)
+			if err := d.Set("local_vc", lc.VcUUID); err != nil {
+				return diag.FromErr(err)
+			}
 
 			rc, err := GetRemoteContainer(client)
 			if err != nil {
 				return diag.FromErr(errors.New("cannot get remote container info"))
 			}
-			d.Set("remote_resource_id", rc.ResourceID)
-			d.Set("remote_resource_type", rc.ResourceType)
-			d.Set("remote_resource_name", rc.ResourceName)
+			if err := d.Set("remote_resource_id", rc.ResourceID); err != nil {
+				return diag.FromErr(err)
+			}
+			if err := d.Set("remote_resource_type", rc.ResourceType); err != nil {
+				return diag.FromErr(err)
+			}
+			if err := d.Set("remote_resource_name", rc.ResourceName); err != nil {
+				return diag.FromErr(err)
+			}
 
 			// Update Remote Cloud Info
 			res2, err := GetRemoteCloudList(client)
@@ -232,8 +240,12 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 			}
 			for _, j := range res2.Data.Items {
 				if j.URL == url {
-					d.Set("remote_name", j.Name)
-					d.Set("remote_endpoint_type", res2.Data.Items[0].EndpointType)
+					if err := d.Set("remote_name", j.Name); err != nil {
+						return diag.FromErr(err)
+					}
+					if err := d.Set("remote_endpoint_type", res2.Data.Items[0].EndpointType); err != nil {
+						return diag.FromErr(err)
+					}
 				}
 			}
 
@@ -242,8 +254,12 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 			if err != nil {
 				return diag.FromErr(errors.New("cannot get remote cloud info"))
 			}
-			d.Set("local_endpoint_id", res3.Data.Items[0].EndpointID)
-			d.Set("local_name", res3.Data.Items[0].Name)
+			if err := d.Set("local_endpoint_id", res3.Data.Items[0].EndpointID); err != nil {
+				return diag.FromErr(err)
+			}
+			if err := d.Set("local_name", res3.Data.Items[0].Name); err != nil {
+				return diag.FromErr(err)
+			}
 
 			return diags
 		}
