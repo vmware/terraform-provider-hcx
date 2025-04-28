@@ -34,9 +34,6 @@ linters:
     rules:
       # TODO: Setting temporary exclusions.
       - linters:
-          - errcheck
-        text: Error return value of `d.Set` is not checked
-      - linters:
           - revive
         text: unused-parameter
     paths:

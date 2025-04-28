@@ -228,7 +228,9 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 		a["id"] = j.ApplianceID
 		tmp = append(tmp, a)
 	}
-	d.Set("appliances_id", tmp)
+	if err := d.Set("appliances_id", tmp); err != nil {
+		return diag.FromErr(err)
+	}
 
 	d.SetId(res2.Data.ServiceMeshID)
 
