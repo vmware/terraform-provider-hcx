@@ -356,12 +356,11 @@ func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m
 			}
 		*/
 		return diags
-	} else {
-		res, err = DeleteNetworkProfile(client, d.Id())
+	}
+	res, err = DeleteNetworkProfile(client, d.Id())
 
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	// Wait for job completion
