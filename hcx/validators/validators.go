@@ -6,6 +6,7 @@ package validators
 
 import (
 	"fmt"
+
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 )
 
