@@ -6,9 +6,11 @@ package main
 
 import (
 	"flag"
+
+	"github.com/vmware/terraform-provider-hcx/hcx"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/vmware/terraform-provider-hcx/hcx"
 )
 
 // main initializes and starts the plugin service for the provider with optional debugging support.

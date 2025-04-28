@@ -9,8 +9,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 	"time"
+
+	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

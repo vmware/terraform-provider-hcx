@@ -45,9 +45,6 @@ linters:
       - linters:
           - gosec
         text: G402
-      - linters:
-          - goimports
-        text: formatted
     paths:
       - third_party$
       - builtin$
