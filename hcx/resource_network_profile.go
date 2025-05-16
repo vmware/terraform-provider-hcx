@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 	"github.com/vmware/terraform-provider-hcx/hcx/validators"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -116,19 +117,24 @@ func resourceNetworkProfile() *schema.Resource {
 
 // resourceNetworkProfileCreate creates the network profile configuration.
 func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
 	client := m.(*Client)
+	name := d.Get("name").(string)
+
+	tflog.Info(ctx, "Creating network profile", map[string]interface{}{
+		"name": name,
+	})
 
 	vmc := d.Get("vmc").(bool)
 	if vmc {
+		tflog.Debug(ctx, "VMC mode enabled, skipping create and performing update instead", map[string]interface{}{
+			"name": name,
+		})
 		// Dont create the network profile, just update it
 		return resourceNetworkProfileUpdate(ctx, d, m)
 	}
 
 	mtu := d.Get("mtu").(int)
 	prefixLength := d.Get("prefix_length").(int)
-
-	name := d.Get("name").(string)
 	gateway := d.Get("gateway").(string)
 
 	primaryDNS := d.Get("primary_dns").(string)
@@ -141,11 +147,23 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	networkName, ok := d.GetOk("network_name")
 	if !ok && !vmc {
+		tflog.Error(ctx, "Network name is required when VMC mode is disabled")
 		return diag.Errorf("VMC switch is not enabled. Network name is mandatory")
 	}
 	networkType := d.Get("network_type").(string)
+
+	tflog.Debug(ctx, "Getting network backing", map[string]interface{}{
+		"networkName": networkName,
+		"networkType": networkType,
+		"endpointID":  vcLocalEndpointID,
+	})
 	networkiD, err := GetNetworkBacking(client, vcLocalEndpointID, networkName.(string), networkType)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get network backing", map[string]interface{}{
+			"error":       err.Error(),
+			"networkName": networkName,
+			"networkType": networkType,
+		})
 		return diag.FromErr(err)
 	}
 
@@ -163,6 +181,17 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			EndAddress:   endAddress,
 		})
 	}
+
+	tflog.Debug(ctx, "Preparing network profile configuration", map[string]interface{}{
+		"name":         name,
+		"mtu":          mtu,
+		"networkID":    networkiD.EntityID,
+		"networkName":  networkName,
+		"networkType":  networkType,
+		"prefixLength": prefixLength,
+		"gateway":      gateway,
+		"ipRangeCount": len(ipr),
+	})
 
 	body := NetworkProfileBody{
 		Name:         name,
@@ -192,19 +221,38 @@ func resourceNetworkProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	res, err := InsertNetworkProfile(client, body)
 
 	if err != nil {
+		tflog.Error(ctx, "Failed to create network profile", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return diag.FromErr(err)
 	}
+
+	tflog.Info(ctx, "Network profile creation initiated", map[string]interface{}{
+		"name":  name,
+		"jobID": res.Data.JobID,
+	})
 
 	// Wait for job completion
 	for {
 		jr, err := GetJobResult(client, res.Data.JobID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get job result", map[string]interface{}{
+				"error": err.Error(),
+				"jobID": res.Data.JobID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.IsDone {
+			tflog.Info(ctx, "Network profile creation completed", map[string]interface{}{
+				"name": name,
+			})
 			break
 		}
+		tflog.Debug(ctx, "Waiting for network profile creation to complete", map[string]interface{}{
+			"jobID": res.Data.JobID,
+		})
 		time.Sleep(5 * time.Second)
 	}
 
@@ -218,26 +266,41 @@ func resourceNetworkProfileRead(ctx context.Context, d *schema.ResourceData, m i
 	client := m.(*Client)
 	name := d.Get("name").(string)
 
+	tflog.Debug(ctx, "Reading network profile", map[string]interface{}{
+		"name": name,
+	})
+
 	np, err := GetNetworkProfile(client, name)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get network profile", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return diag.FromErr(err)
 	}
 	d.SetId(np.ObjectID)
+
+	tflog.Debug(ctx, "Network profile read successfully", map[string]interface{}{
+		"name":     name,
+		"objectID": np.ObjectID,
+	})
 
 	return diags
 }
 
 // resourceNetworkProfileUpdate updates the network profile configuration.
 func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
 	client := m.(*Client)
+	name := d.Get("name").(string)
+
+	tflog.Info(ctx, "Updating network profile", map[string]interface{}{
+		"name": name,
+	})
 
 	// Get values from schema
 	vmc := d.Get("vmc").(bool)
 	mtu := d.Get("mtu").(int)
 	prefixLength := d.Get("prefix_length").(int)
-
-	name := d.Get("name").(string)
 	gateway := d.Get("gateway").(string)
 
 	primaryDNS := d.Get("primary_dns").(string)
@@ -265,20 +328,37 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 		})
 	}
 
+	tflog.Debug(ctx, "Reading existing network profile", map[string]interface{}{
+		"name": name,
+	})
+
 	// Read the existing profile
 	body, err := GetNetworkProfile(client, name)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get existing network profile", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return diag.FromErr(err)
 	}
 
 	// Update the network profile
-
 	if !vmc {
 		body.Name = name
 
 		// Get network details
+		tflog.Debug(ctx, "Getting network backing for update", map[string]interface{}{
+			"networkName": networkName,
+			"networkType": networkType,
+		})
+
 		networkID, err := GetNetworkBacking(client, vcLocalEndpointID, networkName, networkType)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get network backing", map[string]interface{}{
+				"error":       err.Error(),
+				"networkName": networkName,
+				"networkType": networkType,
+			})
 			return diag.FromErr(err)
 		}
 
@@ -304,22 +384,48 @@ func resourceNetworkProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 		},
 	}
 
+	tflog.Debug(ctx, "Updating network profile configuration", map[string]interface{}{
+		"name":         name,
+		"mtu":          mtu,
+		"prefixLength": prefixLength,
+		"ipRangeCount": len(ipr),
+	})
+
 	res, err := UpdateNetworkProfile(client, body)
 
 	if err != nil {
+		tflog.Error(ctx, "Failed to update network profile", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return diag.FromErr(err)
 	}
+
+	tflog.Info(ctx, "Network profile update initiated", map[string]interface{}{
+		"name":  name,
+		"jobID": res.Data.JobID,
+	})
 
 	// Wait for job completion
 	for {
 		jr, err := GetJobResult(client, res.Data.JobID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get job result", map[string]interface{}{
+				"error": err.Error(),
+				"jobID": res.Data.JobID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.IsDone {
+			tflog.Info(ctx, "Network profile update completed", map[string]interface{}{
+				"name": name,
+			})
 			break
 		}
+		tflog.Debug(ctx, "Waiting for network profile update to complete", map[string]interface{}{
+			"jobID": res.Data.JobID,
+		})
 		time.Sleep(5 * time.Second)
 	}
 
@@ -334,45 +440,63 @@ func resourceNetworkProfileDelete(ctx context.Context, d *schema.ResourceData, m
 	var err error
 
 	client := m.(*Client)
-	//name := d.Get("name").(string)
+	name := d.Get("name").(string)
 	vmc := d.Get("vmc").(bool)
+
+	tflog.Info(ctx, "Deleting network profile", map[string]interface{}{
+		"name": name,
+		"vmc":  vmc,
+	})
 
 	if vmc {
 		// If VMware Cloud on AWS, don't really delete the network profile
-		// Read the existing profile
-		/*
-			body, err := hcx.GetNetworkProfile(client, name)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-
-			// Empty the IP Ranges
-			body.IPScopes[0].NetworkIPRanges = []hcx.NetworkIPRange{}
-
-			res, err = hcx.UpdateNetworkProfile(client, body)
-
-			if err != nil {
-				return diag.FromErr(err)
-			}
-		*/
+		tflog.Info(ctx, "VMC mode enabled, skipping network profile deletion", map[string]interface{}{
+			"name": name,
+		})
 		return diags
 	}
+
+	tflog.Debug(ctx, "Deleting network profile", map[string]interface{}{
+		"name":     name,
+		"objectID": d.Id(),
+	})
+
 	res, err = DeleteNetworkProfile(client, d.Id())
 
 	if err != nil {
+		tflog.Error(ctx, "Failed to delete network profile", map[string]interface{}{
+			"error":    err.Error(),
+			"name":     name,
+			"objectID": d.Id(),
+		})
 		return diag.FromErr(err)
 	}
+
+	tflog.Info(ctx, "Network profile deletion initiated", map[string]interface{}{
+		"name":  name,
+		"jobID": res.Data.JobID,
+	})
 
 	// Wait for job completion
 	for {
 		jr, err := GetJobResult(client, res.Data.JobID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get job result", map[string]interface{}{
+				"error": err.Error(),
+				"jobID": res.Data.JobID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.IsDone {
+			tflog.Info(ctx, "Network profile deletion completed", map[string]interface{}{
+				"name": name,
+			})
 			break
 		}
+		tflog.Debug(ctx, "Waiting for network profile deletion to complete", map[string]interface{}{
+			"jobID": res.Data.JobID,
+		})
 		time.Sleep(5 * time.Second)
 	}
 

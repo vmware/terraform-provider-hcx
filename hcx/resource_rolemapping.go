@@ -9,6 +9,7 @@ import (
 
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -63,21 +64,21 @@ func resourceRoleMapping() *schema.Resource {
 
 // resourceRoleMappingCreate creates the role mapping configuration.
 func resourceRoleMappingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
+	tflog.Info(ctx, "Creating role mapping configuration")
 	return resourceRoleMappingUpdate(ctx, d, m)
 }
 
 // resourceRoleMappingRead retrieves the role mapping configuration.
 func resourceRoleMappingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-
+	tflog.Debug(ctx, "Reading role mapping configuration")
 	return diags
 }
 
 // resourceRoleMappingUpdate updates the role mapping configuration.
 func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
 	client := m.(*Client)
+	tflog.Info(ctx, "Updating role mapping configuration")
 
 	admin := d.Get("admin").([]interface{})
 	enterprise := d.Get("enterprise").([]interface{})
@@ -94,6 +95,11 @@ func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m in
 		enterpriseGroups = append(enterpriseGroups, tmp["user_group"].(string))
 	}
 
+	tflog.Debug(ctx, "Preparing role mapping configuration", map[string]interface{}{
+		"adminGroups":      adminGroups,
+		"enterpriseGroups": enterpriseGroups,
+	})
+
 	body := []RoleMapping{
 		{
 			Role:       constants.RoleSystemAdmin,
@@ -109,10 +115,18 @@ func resourceRoleMappingUpdate(ctx context.Context, d *schema.ResourceData, m in
 		json.NewEncoder(buf).Encode(body)
 		return diag.Errorf("%s", buf)
 	*/
-	_, err := PutRoleMapping(client, body)
+	result, err := PutRoleMapping(client, body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to update role mapping", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
+
+	tflog.Info(ctx, "Role mapping updated successfully", map[string]interface{}{
+		"isSuccess": result.IsSuccess,
+		"message":   result.Message,
+	})
 
 	d.SetId("role_mapping")
 
@@ -124,6 +138,8 @@ func resourceRoleMappingDelete(ctx context.Context, d *schema.ResourceData, m in
 	var diags diag.Diagnostics
 
 	client := m.(*Client)
+	tflog.Info(ctx, "Deleting role mapping configuration")
+
 	body := []RoleMapping{
 		{
 			Role:       constants.RoleSystemAdmin,
@@ -135,10 +151,18 @@ func resourceRoleMappingDelete(ctx context.Context, d *schema.ResourceData, m in
 		},
 	}
 
-	_, err := PutRoleMapping(client, body)
+	result, err := PutRoleMapping(client, body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to delete role mapping", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
+
+	tflog.Info(ctx, "Role mapping reset successfully", map[string]interface{}{
+		"isSuccess": result.IsSuccess,
+		"message":   result.Message,
+	})
 
 	return diags
 }

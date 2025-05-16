@@ -13,6 +13,7 @@ import (
 
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -110,6 +111,7 @@ func resourceServiceMesh() *schema.Resource {
 
 // resourceServiceMeshCreate creates the service mesh configuration.
 func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "Creating service mesh")
 
 	client := m.(*Client)
 
@@ -120,6 +122,14 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	remoteEndpointID := sitePairing["id"].(string)
 	remoteEndpointName := sitePairing["remote_name"].(string)
+
+	tflog.Debug(ctx, "Service mesh parameters", map[string]interface{}{
+		"name":                 name,
+		"local_endpoint_id":    localEndpointID,
+		"local_endpoint_name":  localEndpointName,
+		"remote_endpoint_id":   remoteEndpointID,
+		"remote_endpoint_name": remoteEndpointName,
+	})
 
 	uplinkMaxBandwidth := d.Get("uplink_max_bandwidth").(int)
 	appPathResiliencyEnabled := d.Get("app_path_resiliency_enabled").(bool)
@@ -188,23 +198,41 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	buf := new(bytes.Buffer)
 	if err := json.NewEncoder(buf).Encode(body); err != nil {
+		tflog.Error(ctx, "Failed to encode service mesh request body", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
+	tflog.Debug(ctx, "Creating service mesh", map[string]interface{}{
+		"name": name,
+	})
 	res2, err := InsertServiceMesh(client, body)
 
 	if err != nil {
+		tflog.Error(ctx, "Failed to create service mesh", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return diag.FromErr(err)
 	}
 
 	// Wait for task completion
+	tflog.Info(ctx, "Waiting for service mesh creation task to complete", map[string]interface{}{
+		"task_id": res2.Data.InterconnectID,
+	})
 	for {
 		jr, err := GetTaskResult(client, res2.Data.InterconnectID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get task result", map[string]interface{}{
+				"error":   err.Error(),
+				"task_id": res2.Data.InterconnectID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.Status == constants.SuccessStatus {
+			tflog.Info(ctx, "Service mesh creation task completed successfully")
 			break
 		}
 
@@ -216,8 +244,15 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	// Update Appliances ID
+	tflog.Debug(ctx, "Getting appliances for service mesh", map[string]interface{}{
+		"service_mesh_id": res2.Data.ServiceMeshID,
+	})
 	appliances, err := GetAppliances(client, sitePairing["local_endpoint_id"].(string), res2.Data.ServiceMeshID)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get appliances", map[string]interface{}{
+			"error":           err.Error(),
+			"service_mesh_id": res2.Data.ServiceMeshID,
+		})
 		return diag.FromErr(err)
 	}
 
@@ -227,12 +262,22 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 		a := map[string]string{}
 		a["id"] = j.ApplianceID
 		tmp = append(tmp, a)
+		tflog.Debug(ctx, "Found appliance", map[string]interface{}{
+			"appliance_id": j.ApplianceID,
+		})
 	}
 	if err := d.Set("appliances_id", tmp); err != nil {
+		tflog.Error(ctx, "Failed to set appliances_id", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	d.SetId(res2.Data.ServiceMeshID)
+	tflog.Info(ctx, "Service mesh created successfully", map[string]interface{}{
+		"id":   res2.Data.ServiceMeshID,
+		"name": name,
+	})
 
 	return resourceServiceMeshRead(ctx, d, m)
 
@@ -242,11 +287,18 @@ func resourceServiceMeshCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceServiceMeshRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Reading service mesh", map[string]interface{}{
+		"id": d.Id(),
+	})
+
 	return diags
 }
 
 // resourceServiceMeshUpdate updates the service mesh configuration.
 func resourceServiceMeshUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "Updating service mesh", map[string]interface{}{
+		"id": d.Id(),
+	})
 
 	return resourceServiceMeshRead(ctx, d, m)
 }
@@ -255,29 +307,56 @@ func resourceServiceMeshUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceServiceMeshDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Deleting service mesh", map[string]interface{}{
+		"id": d.Id(),
+	})
+
 	client := m.(*Client)
 	force := d.Get("force_delete").(bool)
 
+	tflog.Debug(ctx, "Calling DeleteServiceMesh", map[string]interface{}{
+		"id":    d.Id(),
+		"force": force,
+	})
 	res, err := DeleteServiceMesh(client, d.Id(), force)
 	if err != nil {
+		tflog.Error(ctx, "Failed to delete service mesh", map[string]interface{}{
+			"error": err.Error(),
+			"id":    d.Id(),
+		})
 		return diag.FromErr(err)
 	}
 
 	// Wait for task completion
+	tflog.Info(ctx, "Waiting for service mesh deletion task to complete", map[string]interface{}{
+		"task_id": res.Data.InterconnectTaskID,
+	})
 	for {
 		jr, err := GetTaskResult(client, res.Data.InterconnectTaskID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get task result", map[string]interface{}{
+				"error":   err.Error(),
+				"task_id": res.Data.InterconnectTaskID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.Status == constants.SuccessStatus {
+			tflog.Info(ctx, "Service mesh deletion task completed successfully")
 			break
 		}
 
 		if jr.Status == constants.FailedStatus {
+			tflog.Error(ctx, "Service mesh deletion task failed", map[string]interface{}{
+				"task_id": res.Data.InterconnectTaskID,
+			})
 			return diag.FromErr(errors.New("task failed"))
 		}
 
+		tflog.Debug(ctx, "Waiting for service mesh deletion to complete", map[string]interface{}{
+			"task_id": res.Data.InterconnectTaskID,
+			"status":  jr.Status,
+		})
 		time.Sleep(5 * time.Second)
 	}
 

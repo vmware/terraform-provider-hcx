@@ -13,6 +13,7 @@ import (
 
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -94,14 +95,23 @@ func resourceComputeProfile() *schema.Resource {
 
 // resourceComputeProfileCreate creates the compute profile configuration.
 func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "Creating compute profile")
 
 	client := m.(*Client)
 
 	name := d.Get("name").(string)
 	cluster := d.Get("cluster").(string)
 
+	tflog.Debug(ctx, "Getting vCenter inventory", map[string]interface{}{
+		"name":    name,
+		"cluster": cluster,
+	})
+
 	res, err := GetVcInventory(client)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get vCenter inventory", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
@@ -114,23 +124,42 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 			clusterID = j.EntityID
 			clusterName = j.Name
 			found = true
+			tflog.Debug(ctx, "Found cluster", map[string]interface{}{
+				"cluster_id":   clusterID,
+				"cluster_name": clusterName,
+			})
 		}
 	}
 	if !found {
+		tflog.Error(ctx, "Cluster not found", map[string]interface{}{
+			"cluster": cluster,
+		})
 		return diag.FromErr(errors.New("cluster not found"))
 	}
 
 	// Get Datastore info
 	datastore := d.Get("datastore").(string)
+	tflog.Debug(ctx, "Getting datastore info", map[string]interface{}{
+		"datastore": datastore,
+	})
 	datastoreFromAPI, err := GetVcDatastore(client, datastore, res.EntityID, clusterID)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get datastore info", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	// Get DVS info
 	dvs := d.Get("dvs").(string)
+	tflog.Debug(ctx, "Getting DVS info", map[string]interface{}{
+		"dvs": dvs,
+	})
 	dvsFromAPI, err := GetVcDvs(client, dvs, res.EntityID, clusterID)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get DVS info", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
@@ -156,6 +185,9 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	networksList := []Network{}
 	np, err := GetNetworkProfileByID(client, managementNetwork)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get management network profile", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 	managementNetworkName := np.Name
@@ -163,6 +195,9 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	np, err = GetNetworkProfileByID(client, replicationNetwork)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get replication network profile", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 	replicationNetworkName := np.Name
@@ -170,6 +205,9 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	np, err = GetNetworkProfileByID(client, uplinkNetwork)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get uplink network profile", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 	uplinkNetworkName := np.Name
@@ -177,6 +215,9 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	np, err = GetNetworkProfileByID(client, vmotionNetwork)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get vMotion network profile", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 	vmotionNetworkName := np.Name
@@ -303,26 +344,45 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	buf := new(bytes.Buffer)
 	if err := json.NewEncoder(buf).Encode(body); err != nil {
+		tflog.Error(ctx, "Failed to encode request body", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
+	tflog.Debug(ctx, "Sending request to create compute profile")
 	res2, err := InsertComputeProfile(client, body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create compute profile", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	// Wait for task completion
 	for {
+		tflog.Debug(ctx, "Checking task status", map[string]interface{}{
+			"task_id": res2.Data.InterconnectTaskID,
+		})
 		jr, err := GetTaskResult(client, res2.Data.InterconnectTaskID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get task result", map[string]interface{}{
+				"error": err.Error(),
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.Status == constants.SuccessStatus {
+			tflog.Info(ctx, "Task completed successfully", map[string]interface{}{
+				"task_id": res2.Data.InterconnectTaskID,
+			})
 			break
 		}
 
 		if jr.Status == constants.FailedStatus {
+			tflog.Error(ctx, "Task failed", map[string]interface{}{
+				"task_id": res2.Data.InterconnectTaskID,
+			})
 			return diag.FromErr(errors.New("task failed"))
 		}
 
@@ -332,18 +392,24 @@ func resourceComputeProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	d.SetId(res2.Data.ComputeProfileID)
 
 	return resourceComputeProfileRead(ctx, d, m)
-
 }
 
 // resourceComputeProfileRead retrieves the compute profile configuration.
 func resourceComputeProfileRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Reading compute profile", map[string]interface{}{
+		"id": d.Id(),
+	})
+
 	return diags
 }
 
 // resourceComputeProfileUpdate updates the compute profile configuration.
 func resourceComputeProfileUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "Updating compute profile", map[string]interface{}{
+		"id": d.Id(),
+	})
 
 	return resourceComputeProfileRead(ctx, d, m)
 }
@@ -353,28 +419,54 @@ func resourceComputeProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 func resourceComputeProfileDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Deleting compute profile", map[string]interface{}{
+		"id": d.Id(),
+	})
+
 	client := m.(*Client)
 
+	tflog.Debug(ctx, "Calling DeleteComputeProfile", map[string]interface{}{
+		"profile_id": d.Id(),
+	})
 	res, err := DeleteComputeProfile(client, d.Id())
 	if err != nil {
+		tflog.Error(ctx, "Failed to delete compute profile", map[string]interface{}{
+			"error": err.Error(),
+			"id":    d.Id(),
+		})
 		return diag.FromErr(err)
 	}
 
 	// Wait for task completion
+	tflog.Info(ctx, "Waiting for delete task completion", map[string]interface{}{
+		"task_id": res.Data.InterconnectTaskID,
+	})
 	for {
 		jr, err := GetTaskResult(client, res.Data.InterconnectTaskID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get task result", map[string]interface{}{
+				"error":   err.Error(),
+				"task_id": res.Data.InterconnectTaskID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.Status == constants.SuccessStatus {
+			tflog.Info(ctx, "Delete task completed successfully")
 			break
 		}
 
 		if jr.Status == constants.FailedStatus {
+			tflog.Error(ctx, "Delete task failed", map[string]interface{}{
+				"task_id": res.Data.InterconnectTaskID,
+			})
 			return diag.FromErr(errors.New("task failed"))
 		}
 
+		tflog.Debug(ctx, "Waiting for delete task to complete...", map[string]interface{}{
+			"status":  jr.Status,
+			"task_id": res.Data.InterconnectTaskID,
+		})
 		time.Sleep(5 * time.Second)
 	}
 

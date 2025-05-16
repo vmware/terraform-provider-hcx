@@ -6,9 +6,12 @@ package hcx
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // SetLocationBody represents a structured request body for configuring location data in a system.
@@ -32,49 +35,80 @@ type GetLocationResult struct {
 }
 
 // SetLocation sends request to update the location configuration using the provided body. Returns an error if the
-// SetLocation sends request to update the location configuration using the provided body. Returns an error if the
 // request fails or cannot be sent.
 func SetLocation(c *Client, body SetLocationBody) error {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Preparing to set location configuration", map[string]interface{}{
+		"city":     body.City,
+		"country":  body.Country,
+		"province": body.Province,
+	})
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to encode location request body", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s:9443/api/admin/global/config/location", c.HostURL), &buf)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create location PUT request", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return fmt.Errorf("failed to create PUT request: %w", err)
 	}
 
 	_, _, err = c.doAdminRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send location PUT request", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return fmt.Errorf("failed to send PUT request: %w", err)
 	}
 
+	tflog.Debug(ctx, "Location configuration set successfully")
 	return nil
 }
 
 // GetLocation sends a request to retrieve the current location configuration and returns the resulting
 // GetLocationResult object. Returns an error if the request fails or the response cannot be parsed.
 func GetLocation(c *Client) (GetLocationResult, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Retrieving location configuration")
 
 	resp := GetLocationResult{}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s:9443/api/admin/global/config/location", c.HostURL), nil)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create location GET request", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return resp, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
 	_, r, err := c.doAdminRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send location GET request", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return resp, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse location HTTP response", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
+	tflog.Debug(ctx, "Location configuration retrieved successfully", map[string]interface{}{
+		"city":     resp.City,
+		"country":  resp.Country,
+		"province": resp.Province,
+	})
 	return resp, nil
 }

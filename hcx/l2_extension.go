@@ -6,9 +6,12 @@ package hcx
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // InsertL2ExtensionBody represents the request body structure for creating a Layer 2 extension.
@@ -89,30 +92,54 @@ type DeleteL2ExtensionResult struct {
 // InsertL2Extension sends a POST request to create a new L2 extension using the provided body and returns the resulting
 // InsertL2ExtensionResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2ExtensionResult, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Creating new L2 extension", map[string]interface{}{
+		"sourceNetwork": body.SourceNetwork.NetworkName,
+	})
 
 	resp := InsertL2ExtensionResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to encode L2 extension request body", map[string]interface{}{
+			"error":         err.Error(),
+			"sourceNetwork": body.SourceNetwork.NetworkName,
+		})
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/l2Extensions", c.HostURL), &buf)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create L2 extension POST request", map[string]interface{}{
+			"error":         err.Error(),
+			"sourceNetwork": body.SourceNetwork.NetworkName,
+		})
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send L2 extension POST request", map[string]interface{}{
+			"error":         err.Error(),
+			"sourceNetwork": body.SourceNetwork.NetworkName,
+		})
 		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse L2 extension response", map[string]interface{}{
+			"error":         err.Error(),
+			"sourceNetwork": body.SourceNetwork.NetworkName,
+		})
 		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
+	tflog.Info(ctx, "Successfully created L2 extension", map[string]interface{}{
+		"sourceNetwork": body.SourceNetwork.NetworkName,
+		"id":            resp.ID,
+	})
 	return resp, nil
 }
 
@@ -120,53 +147,97 @@ func InsertL2Extension(c *Client, body InsertL2ExtensionBody) (InsertL2Extension
 // GetL2ExtensionsResultItem object matching the given networkName. Returns an error if the request fails, the response
 // cannot be parsed, or no matching L2 extension is found.
 func GetL2Extensions(c *Client, networkName string) (GetL2ExtensionsResultItem, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Getting L2 extensions", map[string]interface{}{
+		"networkName": networkName,
+	})
 
 	resp := GetL2ExtensionsResult{}
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/hybridity/api/l2Extensions", c.HostURL), nil)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create L2 extensions GET request", map[string]interface{}{
+			"error":       err.Error(),
+			"networkName": networkName,
+		})
 		return GetL2ExtensionsResultItem{}, fmt.Errorf("failed to create GET request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send L2 extensions GET request", map[string]interface{}{
+			"error":       err.Error(),
+			"networkName": networkName,
+		})
 		return GetL2ExtensionsResultItem{}, fmt.Errorf("failed to send GET request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse L2 extensions response", map[string]interface{}{
+			"error":       err.Error(),
+			"networkName": networkName,
+		})
 		return GetL2ExtensionsResultItem{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp.Items {
 		if j.SourceNetwork.NetworkName == networkName {
+			tflog.Debug(ctx, "Found L2 extension", map[string]interface{}{
+				"networkName": networkName,
+				"stretchID":   j.StretchID,
+				"state":       j.OperationStatus.State,
+			})
 			return j, nil
 		}
 	}
 
+	tflog.Error(ctx, "L2 extension not found", map[string]interface{}{
+		"networkName": networkName,
+	})
 	return GetL2ExtensionsResultItem{}, fmt.Errorf("cannot find L2 extension for network name: %s", networkName)
 }
 
 // DeleteL2Extension sends a DELETE request to remove an L2 extension with the provided stretchID and returns the
 // resulting DeleteL2ExtensionResult object. Returns an error if the request fails or the response cannot be parsed.
 func DeleteL2Extension(c *Client, stretchID string) (DeleteL2ExtensionResult, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Deleting L2 extension", map[string]interface{}{
+		"stretchID": stretchID,
+	})
 
 	resp := DeleteL2ExtensionResult{}
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/l2Extensions/%s", c.HostURL, stretchID), nil)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create L2 extension DELETE request", map[string]interface{}{
+			"error":     err.Error(),
+			"stretchID": stretchID,
+		})
 		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send L2 extension DELETE request", map[string]interface{}{
+			"error":     err.Error(),
+			"stretchID": stretchID,
+		})
 		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse L2 extension DELETE response", map[string]interface{}{
+			"error":     err.Error(),
+			"stretchID": stretchID,
+		})
 		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
+	tflog.Info(ctx, "Successfully deleted L2 extension", map[string]interface{}{
+		"stretchID": stretchID,
+		"id":        resp.ID,
+	})
 	return resp, nil
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 	"github.com/vmware/terraform-provider-hcx/hcx/validators"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -51,18 +52,34 @@ func dataSourceNetworkBacking() *schema.Resource {
 func dataSourceNetworkBackingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Reading network backing data source")
+
 	client := m.(*Client)
 
 	network := d.Get("name").(string)
 	vcUUID := d.Get("vcuuid").(string)
 	networkType := d.Get("network_type").(string)
 
-	res, err := GetNetworkBacking(client, vcUUID, network, networkType)
+	tflog.Debug(ctx, "Getting network backing", map[string]interface{}{
+		"name":         network,
+		"vcuuid":       vcUUID,
+		"network_type": networkType,
+	})
 
+	res, err := GetNetworkBacking(client, vcUUID, network, networkType)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get network backing", map[string]interface{}{
+			"error":        err.Error(),
+			"network":      network,
+			"network_type": networkType,
+		})
 		return diag.FromErr(err)
 	}
 
+	tflog.Debug(ctx, "Found network backing", map[string]interface{}{
+		"entity_id": res.EntityID,
+		"name":      network,
+	})
 	d.SetId(res.EntityID)
 
 	return diags

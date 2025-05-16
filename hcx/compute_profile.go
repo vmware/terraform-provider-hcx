@@ -6,9 +6,12 @@ package hcx
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // InsertComputeProfileBody represents the body structure for inserting a compute profile.
@@ -110,30 +113,54 @@ type GetComputeProfileResultItem struct {
 // InsertComputeProfile sends a request to create a new compute profile using the provided body and returns an
 // InsertComputeProfileResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertComputeProfile(c *Client, body InsertComputeProfileBody) (InsertComputeProfileResult, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Creating new compute profile", map[string]interface{}{
+		"name": body.Name,
+	})
 
 	resp := InsertComputeProfileResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to encode compute profile request body", map[string]interface{}{
+			"error": err.Error(),
+			"name":  body.Name,
+		})
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles", c.HostURL), &buf)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create compute profile POST request", map[string]interface{}{
+			"error": err.Error(),
+			"name":  body.Name,
+		})
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send compute profile POST request", map[string]interface{}{
+			"error": err.Error(),
+			"name":  body.Name,
+		})
 		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse compute profile response", map[string]interface{}{
+			"error": err.Error(),
+			"name":  body.Name,
+		})
 		return resp, fmt.Errorf("failed to unmarshal POST response: %w", err)
 	}
 
+	tflog.Info(ctx, "Successfully created compute profile", map[string]interface{}{
+		"name":             body.Name,
+		"computeProfileID": resp.Data.ComputeProfileID,
+	})
 	return resp, nil
 }
 
@@ -141,24 +168,43 @@ func InsertComputeProfile(c *Client, body InsertComputeProfileBody) (InsertCompu
 // InsertComputeProfileResult object indicating the result of the operation. Returns an error if the request fails or
 // the response cannot be parsed.
 func DeleteComputeProfile(c *Client, computeProfileID string) (InsertComputeProfileResult, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Deleting compute profile", map[string]interface{}{
+		"computeProfileID": computeProfileID,
+	})
 
 	resp := InsertComputeProfileResult{}
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/interconnect/computeProfiles/%s", c.HostURL, computeProfileID), nil)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create compute profile DELETE request", map[string]interface{}{
+			"error":            err.Error(),
+			"computeProfileID": computeProfileID,
+		})
 		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send compute profile DELETE request", map[string]interface{}{
+			"error":            err.Error(),
+			"computeProfileID": computeProfileID,
+		})
 		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse compute profile DELETE response", map[string]interface{}{
+			"error":            err.Error(),
+			"computeProfileID": computeProfileID,
+		})
 		return resp, fmt.Errorf("failed to unmarshal DELETE response: %w", err)
 	}
 
+	tflog.Info(ctx, "Successfully deleted compute profile", map[string]interface{}{
+		"computeProfileID": computeProfileID,
+	})
 	return resp, nil
 }
 

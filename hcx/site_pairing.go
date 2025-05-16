@@ -6,9 +6,12 @@ package hcx
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // RemoteData represents the structure required for remote connection configurations.
@@ -75,27 +78,53 @@ type DeleteRemoteCloudConfigResult struct {
 // PostRemoteCloudConfigResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertSitePairing(c *Client, body RemoteCloudConfigBody) (PostRemoteCloudConfigResult, error) {
 	resp := PostRemoteCloudConfigResult{}
+	ctx := context.Background()
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to encode site pairing request body", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
+	tflog.Debug(ctx, "Creating site pairing request", map[string]interface{}{
+		"url": fmt.Sprintf("%s/hybridity/api/cloudConfigs", c.HostURL),
+	})
+
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/cloudConfigs", c.HostURL), &buf)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create site pairing request", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
+	req = req.WithContext(ctx)
+
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send site pairing request", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse site pairing response", map[string]interface{}{
+			"error": err.Error(),
+			"body":  string(r),
+		})
 		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
+
+	tflog.Debug(ctx, "Site pairing request successful", map[string]interface{}{
+		"success":    resp.Success,
+		"completed":  resp.Completed,
+		"has_errors": resp.Errors != nil && len(resp.Errors) > 0,
+	})
 
 	return resp, nil
 }

@@ -7,8 +7,10 @@ package hcx
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -84,12 +86,18 @@ func resourceSitePairing() *schema.Resource {
 
 // resourceSitePairingCreate creates the site paring configuration.
 func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "Creating site pairing")
 
 	client := m.(*Client)
 
 	url := d.Get("url").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
+
+	tflog.Debug(ctx, "Preparing remote cloud config body", map[string]interface{}{
+		"url":      url,
+		"username": username,
+	})
 
 	body := RemoteCloudConfigBody{
 		Remote: RemoteData{
@@ -102,31 +110,46 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 	res, err := InsertSitePairing(client, body)
 
 	if err != nil {
+		tflog.Error(ctx, "Failed to create site pairing", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	secondTry := false
 	if res.Errors != nil {
 		if res.Errors[0].Error == "Login failure" {
+			tflog.Error(ctx, "Login failure when creating site pairing", map[string]interface{}{
+				"error_text": res.Errors[0].Text,
+			})
 			return diag.Errorf("%s", res.Errors[0].Text)
 		}
 
 		if len(res.Errors[0].Data) > 0 {
 			// Try to get certificate
+			tflog.Info(ctx, "Certificate needs to be added for site pairing")
 			certificateRaw := res.Errors[0].Data[0]
 			certificate, ok := certificateRaw["certificate"].(string)
 
 			if ok {
 				// Add certificate
+				tflog.Debug(ctx, "Adding certificate for site pairing")
 				body := InsertCertificateBody{
 					Certificate: certificate,
 				}
 				_, err := InsertCertificate(client, body)
 				if err != nil {
+					tflog.Error(ctx, "Failed to add certificate", map[string]interface{}{
+						"error": err.Error(),
+					})
 					return diag.FromErr(err)
 				}
+				tflog.Info(ctx, "Certificate added successfully")
 			}
 		} else {
+			tflog.Error(ctx, "Unknown error during site pairing", map[string]interface{}{
+				"errors": fmt.Sprintf("%+v", res.Errors),
+			})
 			return diag.Errorf("Unknown error(s): %+v", res.Errors)
 		}
 
@@ -134,27 +157,51 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	if secondTry {
+		tflog.Info(ctx, "Retrying site pairing after adding certificate")
 		res, err = InsertSitePairing(client, body)
 		if err != nil {
+			tflog.Error(ctx, "Failed to create site pairing on retry", map[string]interface{}{
+				"error": err.Error(),
+			})
 			return diag.FromErr(err)
 		}
 	}
 
 	// Wait for job completion
+	tflog.Info(ctx, "Waiting for site pairing job to complete", map[string]interface{}{
+		"job_id": res.Data.JobID,
+	})
 	count := 0
 	for {
 		jr, err := GetJobResult(client, res.Data.JobID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get job result", map[string]interface{}{
+				"error":  err.Error(),
+				"job_id": res.Data.JobID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.IsDone {
+			tflog.Info(ctx, "Site pairing job completed successfully")
 			break
 		}
 
 		if jr.DidFail {
+			tflog.Error(ctx, "Site pairing job failed", map[string]interface{}{
+				"job_id": res.Data.JobID,
+			})
 			return diag.Errorf("site pairing job failed")
 		}
+
+		count++
+		if count%6 == 0 { // Log every minute (6 * 10 seconds)
+			tflog.Debug(ctx, "Still waiting for site pairing job to complete", map[string]interface{}{
+				"job_id":    res.Data.JobID,
+				"wait_time": fmt.Sprintf("%d seconds", count*10),
+			})
+		}
+
 		time.Sleep(10 * time.Second)
 		count = count + 1
 		if count > 5 {
@@ -200,27 +247,55 @@ func resourceSitePairingCreate(ctx context.Context, d *schema.ResourceData, m in
 func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Reading site pairing", map[string]interface{}{
+		"id": d.Id(),
+	})
+
 	client := m.(*Client)
 
 	url := d.Get("url").(string)
 
+	tflog.Debug(ctx, "Getting site pairings to find matching URL", map[string]interface{}{
+		"url": url,
+	})
 	res, err := GetSitePairings(client)
+	if err != nil {
+		tflog.Error(ctx, "Failed to get site pairings", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return diag.FromErr(err)
+	}
 
 	for _, item := range res.Data.Items {
 		if item.URL == url {
+			tflog.Info(ctx, "Found matching site pairing", map[string]interface{}{
+				"endpoint_id": item.EndpointID,
+				"url":         url,
+			})
 			d.SetId(item.EndpointID)
 
+			tflog.Debug(ctx, "Getting local container info")
 			lc, err := GetLocalContainer(client)
 			if err != nil {
+				tflog.Error(ctx, "Failed to get local container info", map[string]interface{}{
+					"error": err.Error(),
+				})
 				return diag.FromErr(errors.New("cannot get local container info"))
 			}
 
 			if err := d.Set("local_vc", lc.VcUUID); err != nil {
+				tflog.Error(ctx, "Failed to set local_vc", map[string]interface{}{
+					"error": err.Error(),
+				})
 				return diag.FromErr(err)
 			}
 
+			tflog.Debug(ctx, "Getting remote container info")
 			rc, err := GetRemoteContainer(client)
 			if err != nil {
+				tflog.Error(ctx, "Failed to get remote container info", map[string]interface{}{
+					"error": err.Error(),
+				})
 				return diag.FromErr(errors.New("cannot get remote container info"))
 			}
 			if err := d.Set("remote_resource_id", rc.ResourceID); err != nil {
@@ -264,10 +339,6 @@ func resourceSitePairingRead(ctx context.Context, d *schema.ResourceData, m inte
 			return diags
 		}
 	}
-	if err != nil {
-		return diag.FromErr(errors.New("cannot find site pairing info"))
-	}
-
 	return diags
 }
 
@@ -281,19 +352,35 @@ func resourceSitePairingUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceSitePairingDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Deleting site pairing", map[string]interface{}{
+		"id": d.Id(),
+	})
+
 	client := m.(*Client)
 	url := d.Get("url").(string)
 
+	tflog.Debug(ctx, "Calling DeleteSitePairings", map[string]interface{}{
+		"endpoint_id": d.Id(),
+		"url":         url,
+	})
 	_, err := DeleteSitePairings(client, d.Id())
 
 	if err != nil {
+		tflog.Error(ctx, "Failed to delete site pairing", map[string]interface{}{
+			"error": err.Error(),
+			"id":    d.Id(),
+		})
 		return diag.FromErr(err)
 	}
 
 	// Wait for site pairing deletion
+	tflog.Info(ctx, "Waiting for site pairing deletion to complete")
 	for {
 		res, err := GetSitePairings(client)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get site pairings while waiting for deletion", map[string]interface{}{
+				"error": err.Error(),
+			})
 			return diag.FromErr(err)
 		}
 
@@ -301,15 +388,19 @@ func resourceSitePairingDelete(ctx context.Context, d *schema.ResourceData, m in
 		for _, item := range res.Data.Items {
 			if item.URL == url {
 				found = true
+				tflog.Debug(ctx, "Site pairing still exists, continuing to wait")
 			}
 		}
 
 		if !found {
+			tflog.Info(ctx, "Site pairing deletion completed successfully")
 			break
 		}
 
 		time.Sleep(5 * time.Second)
 	}
+
+	d.SetId("")
 
 	return diags
 }

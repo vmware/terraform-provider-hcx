@@ -6,9 +6,12 @@ package hcx
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // NetworkProfileBody defines the structure for a network profile.
@@ -78,29 +81,56 @@ type NetworkProfileData struct {
 // InsertNetworkProfile sends a request to create a new network profile using the provided body and returns the
 // resulting NetworkProfileResult object. Returns an error if the request fails or the response cannot be parsed.
 func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileResult, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Creating new network profile", map[string]interface{}{
+		"name": body.Name,
+		"mtu":  body.MTU,
+	})
+
 	resp := NetworkProfileResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to encode network profile request body", map[string]interface{}{
+			"error": err.Error(),
+			"name":  body.Name,
+		})
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/admin/hybridity/api/networks", c.HostURL), &buf)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create network profile POST request", map[string]interface{}{
+			"error": err.Error(),
+			"name":  body.Name,
+		})
 		return resp, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send network profile POST request", map[string]interface{}{
+			"error": err.Error(),
+			"name":  body.Name,
+		})
 		return resp, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse network profile HTTP response", map[string]interface{}{
+			"error": err.Error(),
+			"name":  body.Name,
+		})
 		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
+	tflog.Debug(ctx, "Network profile creation request successful", map[string]interface{}{
+		"name":     body.Name,
+		"jobID":    resp.Data.JobID,
+		"objectID": resp.Data.ObjectID,
+	})
 	return resp, nil
 }
 
@@ -108,6 +138,11 @@ func InsertNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileRes
 // matching the specified name. Returns an error if the request fails, the response cannot be parsed, or no profile is
 // found with the given name.
 func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Getting network profile", map[string]interface{}{
+		"name": name,
+	})
+
 	resp := []NetworkProfileBody{}
 	body := NetworkFilter{
 		Filter: Filter{
@@ -119,30 +154,53 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to encode network profile filter request body", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return NetworkProfileBody{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), &buf)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create network profile query POST request", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return NetworkProfileBody{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send network profile query POST request", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return NetworkProfileBody{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse network profile query HTTP response", map[string]interface{}{
+			"error": err.Error(),
+			"name":  name,
+		})
 		return NetworkProfileBody{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp {
 		if j.Name == name {
+			tflog.Debug(ctx, "Network profile found", map[string]interface{}{
+				"name":     name,
+				"objectID": j.ObjectID,
+			})
 			return j, nil
 		}
 	}
 
+	tflog.Error(ctx, "Network profile not found", map[string]interface{}{
+		"name": name,
+	})
 	return NetworkProfileBody{}, fmt.Errorf("network profile with name '%s' not found", name)
 }
 
@@ -150,6 +208,11 @@ func GetNetworkProfile(c *Client, name string) (NetworkProfileBody, error) {
 // matching the specified ID. Returns an error if the request fails, the response cannot be parsed, or no profile is
 // found with the given ID.
 func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Getting network profile by ID", map[string]interface{}{
+		"objectID": id,
+	})
+
 	resp := []NetworkProfileBody{}
 	body := NetworkFilter{
 		Filter: Filter{
@@ -161,30 +224,53 @@ func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to encode network profile filter request body", map[string]interface{}{
+			"error":    err.Error(),
+			"objectID": id,
+		})
 		return NetworkProfileBody{}, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/hybridity/api/networks?action=queryIpUsage", c.HostURL), &buf)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create network profile query POST request", map[string]interface{}{
+			"error":    err.Error(),
+			"objectID": id,
+		})
 		return NetworkProfileBody{}, fmt.Errorf("failed to create POST request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send network profile query POST request", map[string]interface{}{
+			"error":    err.Error(),
+			"objectID": id,
+		})
 		return NetworkProfileBody{}, fmt.Errorf("failed to send POST request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse network profile query HTTP response", map[string]interface{}{
+			"error":    err.Error(),
+			"objectID": id,
+		})
 		return NetworkProfileBody{}, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
 	for _, j := range resp {
 		if j.ObjectID == id {
+			tflog.Debug(ctx, "Network profile found by ID", map[string]interface{}{
+				"objectID": id,
+				"name":     j.Name,
+			})
 			return j, nil
 		}
 	}
 
+	tflog.Error(ctx, "Network profile not found by ID", map[string]interface{}{
+		"objectID": id,
+	})
 	return NetworkProfileBody{}, fmt.Errorf("network profile with ID '%s' not found", id)
 }
 
@@ -192,51 +278,103 @@ func GetNetworkProfileByID(c *Client, id string) (NetworkProfileBody, error) {
 // returns the resulting NetworkProfileResult object. Returns an error if the request fails or the response cannot be
 // parsed.
 func DeleteNetworkProfile(c *Client, networkID string) (NetworkProfileResult, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Deleting network profile", map[string]interface{}{
+		"objectID": networkID,
+	})
+
 	resp := NetworkProfileResult{}
 
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, networkID), nil)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create network profile DELETE request", map[string]interface{}{
+			"error":    err.Error(),
+			"objectID": networkID,
+		})
 		return resp, fmt.Errorf("failed to create DELETE request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send network profile DELETE request", map[string]interface{}{
+			"error":    err.Error(),
+			"objectID": networkID,
+		})
 		return resp, fmt.Errorf("failed to send DELETE request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse network profile DELETE response", map[string]interface{}{
+			"error":    err.Error(),
+			"objectID": networkID,
+		})
 		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
+	tflog.Debug(ctx, "Network profile deletion request successful", map[string]interface{}{
+		"objectID": networkID,
+		"jobID":    resp.Data.JobID,
+	})
 	return resp, nil
 }
 
 // UpdateNetworkProfile sends a request to update a network profile using the provided body and returns the resulting
 // NetworkProfileResult object. Returns an error if the request fails or the response cannot be parsed.
 func UpdateNetworkProfile(c *Client, body NetworkProfileBody) (NetworkProfileResult, error) {
+	ctx := context.Background()
+	tflog.Debug(ctx, "Updating network profile", map[string]interface{}{
+		"name":     body.Name,
+		"objectID": body.ObjectID,
+	})
+
 	resp := NetworkProfileResult{}
 
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to encode network profile update request body", map[string]interface{}{
+			"error":    err.Error(),
+			"name":     body.Name,
+			"objectID": body.ObjectID,
+		})
 		return resp, fmt.Errorf("failed to encode request body: %w", err)
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/hybridity/api/networks/%s", c.HostURL, body.ObjectID), &buf)
 	if err != nil {
+		tflog.Error(ctx, "Failed to create network profile PUT request", map[string]interface{}{
+			"error":    err.Error(),
+			"name":     body.Name,
+			"objectID": body.ObjectID,
+		})
 		return resp, fmt.Errorf("failed to create PUT request: %w", err)
 	}
 
 	_, r, err := c.doRequest(req)
 	if err != nil {
+		tflog.Error(ctx, "Failed to send network profile PUT request", map[string]interface{}{
+			"error":    err.Error(),
+			"name":     body.Name,
+			"objectID": body.ObjectID,
+		})
 		return resp, fmt.Errorf("failed to send PUT request: %w", err)
 	}
 
 	err = json.Unmarshal(r, &resp)
 	if err != nil {
+		tflog.Error(ctx, "Failed to parse network profile update HTTP response", map[string]interface{}{
+			"error":    err.Error(),
+			"name":     body.Name,
+			"objectID": body.ObjectID,
+		})
 		return resp, fmt.Errorf("failed to parse HTTP response: %w", err)
 	}
 
+	tflog.Debug(ctx, "Network profile update request successful", map[string]interface{}{
+		"name":     body.Name,
+		"objectID": body.ObjectID,
+		"jobID":    resp.Data.JobID,
+	})
 	return resp, nil
 }

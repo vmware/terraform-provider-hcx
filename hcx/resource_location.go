@@ -9,6 +9,7 @@ import (
 
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -63,18 +64,22 @@ func resourceLocation() *schema.Resource {
 
 // resourceLocationCreate creates the location configuration for an HCX site.
 func resourceLocationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
+	tflog.Info(ctx, "Creating location configuration")
 	return resourceLocationUpdate(ctx, d, m)
 }
 
 // resourceLocationRead retrieves the location configuration for an HCX site.
 func resourceLocationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	tflog.Debug(ctx, "Reading location configuration")
 
 	client := m.(*Client)
 
 	resp, err := GetLocation(client)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get location configuration", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
@@ -95,12 +100,16 @@ func resourceLocationRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
+	tflog.Debug(ctx, "Location configuration read successfully", map[string]interface{}{
+		"city":     resp.City,
+		"country":  resp.Country,
+		"province": resp.Province,
+	})
 	return diags
 }
 
 // resourceLocationUpdate updates the location configuration for an HCX site.
 func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
 	client := m.(*Client)
 
 	city := d.Get("city").(string)
@@ -109,6 +118,14 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	latitude := d.Get("latitude").(float64)
 	longitude := d.Get("longitude").(float64)
 	province := d.Get("province").(string)
+
+	tflog.Info(ctx, "Updating location configuration", map[string]interface{}{
+		"city":      city,
+		"country":   country,
+		"province":  province,
+		"latitude":  latitude,
+		"longitude": longitude,
+	})
 
 	body := SetLocationBody{
 		City:      city,
@@ -121,10 +138,14 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 	err := SetLocation(client, body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to set location configuration", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	d.SetId(city)
+	tflog.Info(ctx, "Location configuration updated successfully")
 
 	return resourceLocationRead(ctx, d, m)
 }
@@ -132,6 +153,7 @@ func resourceLocationUpdate(ctx context.Context, d *schema.ResourceData, m inter
 // resourceLocationDelete removes the location configuration and clears the state of the resource in the schema.
 func resourceLocationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	tflog.Info(ctx, "Deleting location configuration")
 
 	client := m.(*Client)
 
@@ -146,8 +168,12 @@ func resourceLocationDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 	err := SetLocation(client, body)
 	if err != nil {
+		tflog.Error(ctx, "Failed to reset location configuration", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
+	tflog.Info(ctx, "Location configuration reset successfully")
 	return diags
 }

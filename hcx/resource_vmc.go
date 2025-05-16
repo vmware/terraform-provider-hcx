@@ -6,12 +6,11 @@ package hcx
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 
-	"github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -58,43 +57,72 @@ func resourceVmc() *schema.Resource {
 
 // resourceVmcCreate creates the VMware Cloud on AWS configuration.
 func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
 	client := m.(*Client)
 
 	token := client.Token
 	sddcName := d.Get("sddc_name").(string)
 	sddcID := d.Get("sddc_id").(string)
 
+	tflog.Info(ctx, "Creating VMC resource", map[string]interface{}{
+		"sddc_name": sddcName,
+		"sddc_id":   sddcID,
+	})
+
 	// Authenticate with VMware Cloud Services
 	accessToken, err := VmcAuthenticate(token)
 	if err != nil {
+		tflog.Error(ctx, "Error authenticating with VMware Cloud Services", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	err = CloudAuthenticate(client, accessToken)
 	if err != nil {
+		tflog.Error(ctx, "Error authenticating with Cloud", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	var sddc SDDC
 	if sddcID != "" {
+		tflog.Debug(ctx, "Getting SDDC by ID", map[string]interface{}{
+			"sddc_id": sddcID,
+		})
 		sddc, err = GetSddcByID(client, sddcID)
 	} else {
+		tflog.Debug(ctx, "Getting SDDC by name", map[string]interface{}{
+			"sddc_name": sddcName,
+		})
 		sddc, err = GetSddcByName(client, sddcName)
 	}
 
 	if err != nil {
+		tflog.Error(ctx, "Error retrieving SDDC", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	// Check if already activated.
 	if sddc.DeploymentStatus == constants.VmcActivationActiveStatus {
+		tflog.Warn(ctx, "SDDC already activated", map[string]interface{}{
+			"sddc_id": sddc.ID,
+		})
 		return diag.Errorf("Already activated")
 	}
 
 	// Activate HCX.
+	tflog.Info(ctx, "Activating HCX on SDDC", map[string]interface{}{
+		"sddc_id": sddc.ID,
+	})
 	_, err = ActivateHcxOnSDDC(client, sddc.ID)
 	if err != nil {
+		tflog.Error(ctx, "Error activating HCX on SDDC", map[string]interface{}{
+			"error":   err.Error(),
+			"sddc_id": sddc.ID,
+		})
 		return diag.FromErr(err)
 	}
 
@@ -111,20 +139,36 @@ func resourceVmcCreate(ctx context.Context, d *schema.ResourceData, m interface{
 			// returns status 502 with a proxy server error, and an HTML response
 			// instead of JSON.
 			errcount++
-			hclog.Default().Info("[INFO] - resourceVmcCreate() - Error retrieving SDDC status: ", "error", err.Error(), "Errcount:", errcount)
+			tflog.Warn(ctx, "Error retrieving SDDC status during activation", map[string]interface{}{
+				"error":     err.Error(),
+				"err_count": errcount,
+			})
 			if errcount > 12 {
+				tflog.Error(ctx, "Max retries exceeded while checking SDDC activation status", map[string]interface{}{
+					"error": err.Error(),
+				})
 				return diag.FromErr(err)
 			}
 		}
 
 		if sddc.DeploymentStatus == constants.VmcActivationActiveStatus {
+			tflog.Info(ctx, "SDDC activation completed successfully", map[string]interface{}{
+				"sddc_id": sddc.ID,
+			})
 			break
 		}
 
 		if sddc.DeploymentStatus == constants.VmcActivationFailedStatus {
+			tflog.Error(ctx, "SDDC activation failed", map[string]interface{}{
+				"sddc_id": sddc.ID,
+			})
 			return diag.Errorf("Activation failed")
 		}
 
+		tflog.Debug(ctx, "Waiting for SDDC activation to complete", map[string]interface{}{
+			"sddc_id":           sddc.ID,
+			"deployment_status": sddc.DeploymentStatus,
+		})
 		time.Sleep(constants.VmcRetryInterval)
 	}
 
@@ -141,36 +185,53 @@ func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{})
 	sddcName := d.Get("sddc_name").(string)
 	sddcID := d.Get("sddc_id").(string)
 
-	log.Printf("******************************************************************\n")
-	log.Printf("token: %s, sddc_name: %s,   sddc: %s   \n", token, sddcName, sddcID)
-	log.Printf("******************************************************************\n")
+	tflog.Debug(ctx, "Reading VMC resource", map[string]interface{}{
+		"sddc_name": sddcName,
+		"sddc_id":   sddcID,
+	})
 
 	if sddcName == "" && sddcID == "" {
+		tflog.Error(ctx, "SDDC name or ID must be specified")
 		return diag.Errorf("SDDC name or Id must be specified")
 	}
 
 	// Authenticate with VMware Cloud Services
 	accessToken, err := VmcAuthenticate(token)
 	if err != nil {
+		tflog.Error(ctx, "Error authenticating with VMware Cloud Services", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	err = CloudAuthenticate(client, accessToken)
 	if err != nil {
+		tflog.Error(ctx, "Error authenticating with Cloud", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
-	log.Printf("****************")
-	log.Printf("[Client inside]: %+v ", client)
-	log.Printf("****************")
+	tflog.Debug(ctx, "Successfully authenticated with VMware Cloud Services", map[string]interface{}{
+		"client": client.HostURL,
+	})
 
 	var sddc SDDC
 	if sddcID != "" {
+		tflog.Debug(ctx, "Getting SDDC by ID", map[string]interface{}{
+			"sddc_id": sddcID,
+		})
 		sddc, err = GetSddcByID(client, sddcID)
 	} else {
+		tflog.Debug(ctx, "Getting SDDC by name", map[string]interface{}{
+			"sddc_name": sddcName,
+		})
 		sddc, err = GetSddcByName(client, sddcName)
 	}
 	if err != nil {
+		tflog.Error(ctx, "Error retrieving SDDC", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
@@ -185,12 +246,21 @@ func resourceVmcRead(ctx context.Context, d *schema.ResourceData, m interface{})
 		return diag.FromErr(err)
 	}
 
+	tflog.Debug(ctx, "Successfully read VMC resource", map[string]interface{}{
+		"sddc_id":    sddc.ID,
+		"cloud_url":  sddc.CloudURL,
+		"cloud_name": sddc.CloudName,
+		"cloud_type": sddc.CloudType,
+	})
+
 	return diags
 }
 
 // resourceVmcUpdate updates the VMware Cloud on AWS resource configuration.
 func resourceVmcUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
+	tflog.Info(ctx, "Updating VMC resource", map[string]interface{}{
+		"id": d.Id(),
+	})
 	return resourceVmcRead(ctx, d, m)
 }
 
@@ -204,30 +274,57 @@ func resourceVmcDelete(ctx context.Context, d *schema.ResourceData, m interface{
 	sddcName := d.Get("sddc_name").(string)
 	sddcID := d.Get("sddc_id").(string)
 
+	tflog.Info(ctx, "Deleting VMC resource", map[string]interface{}{
+		"sddc_name": sddcName,
+		"sddc_id":   sddcID,
+	})
+
 	// Authenticate with VMware Cloud Services
 	accessToken, err := VmcAuthenticate(token)
 	if err != nil {
+		tflog.Error(ctx, "Error authenticating with VMware Cloud Services", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	err = CloudAuthenticate(client, accessToken)
 	if err != nil {
+		tflog.Error(ctx, "Error authenticating with Cloud", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	var sddc SDDC
 	if sddcID != "" {
+		tflog.Debug(ctx, "Getting SDDC by ID", map[string]interface{}{
+			"sddc_id": sddcID,
+		})
 		sddc, err = GetSddcByID(client, sddcID)
 	} else {
+		tflog.Debug(ctx, "Getting SDDC by name", map[string]interface{}{
+			"sddc_name": sddcName,
+		})
 		sddc, err = GetSddcByName(client, sddcName)
 	}
 	if err != nil {
+		tflog.Error(ctx, "Error retrieving SDDC", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
 	// Deactivate HCX
+	tflog.Info(ctx, "Deactivating HCX on SDDC", map[string]interface{}{
+		"sddc_id": sddc.ID,
+	})
 	_, err = DeactivateHcxOnSDDC(client, sddc.ID)
 	if err != nil {
+		tflog.Error(ctx, "Error deactivating HCX on SDDC", map[string]interface{}{
+			"error":   err.Error(),
+			"sddc_id": sddc.ID,
+		})
 		return diag.FromErr(err)
 	}
 
@@ -245,20 +342,36 @@ func resourceVmcDelete(ctx context.Context, d *schema.ResourceData, m interface{
 			// returns status 502 with a proxy server error, and an HTML response
 			// instead of JSON.
 			errcount++
-			hclog.Default().Info("[INFO] - resourceVmcDelete() - Error retrieving SDDC status: ", "error", err.Error(), "Errcount:", errcount)
+			tflog.Warn(ctx, "Error retrieving SDDC status during deactivation", map[string]interface{}{
+				"error":     err.Error(),
+				"err_count": errcount,
+			})
 			if errcount > constants.VmcMaxRetries {
+				tflog.Error(ctx, "Max retries exceeded while checking SDDC deactivation status", map[string]interface{}{
+					"error": err.Error(),
+				})
 				return diag.FromErr(err)
 			}
 		}
 
 		if sddc.DeploymentStatus == constants.VmcDeactivationInactiveStatus {
+			tflog.Info(ctx, "SDDC deactivation completed successfully", map[string]interface{}{
+				"sddc_id": sddc.ID,
+			})
 			break
 		}
 
 		if sddc.DeploymentStatus == constants.VmcDeactivationFailedStatus {
+			tflog.Error(ctx, "SDDC deactivation failed", map[string]interface{}{
+				"sddc_id": sddc.ID,
+			})
 			return diag.Errorf("Deactivation failed")
 		}
 
+		tflog.Debug(ctx, "Waiting for SDDC deactivation to complete", map[string]interface{}{
+			"sddc_id":           sddc.ID,
+			"deployment_status": sddc.DeploymentStatus,
+		})
 		time.Sleep(constants.VmcRetryInterval)
 	}
 

@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -101,6 +102,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
+
+	tflog.Info(ctx, "Initializing provider", map[string]interface{}{
+		"hcx_url":              hcxURL,
+		"allow_unverified_ssl": allowUnverifiedSSL,
+	})
 
 	if hcxURL == "" {
 		diags = append(diags, diag.Diagnostic{

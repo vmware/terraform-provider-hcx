@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/terraform-provider-hcx/hcx/constants"
 	"github.com/vmware/terraform-provider-hcx/hcx/validators"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -90,17 +91,24 @@ func resourceL2Extension() *schema.Resource {
 
 // resourceComputeProfileCreate creates the L2 extension configuration on the specified service.
 func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "Creating L2 extension")
 
 	client := m.(*Client)
 
 	sitePairing := d.Get("site_pairing").(map[string]interface{})
 	vcGUID := sitePairing["local_vc"].(string)
 
-	//service_mesh := d.Get("service_mesh").(map[string]interface{})
 	sourceNetwork := d.Get("source_network").(string)
 	destinationT1 := d.Get("destination_t1").(string)
 	gateway := d.Get("gateway").(string)
 	netmask := d.Get("netmask").(string)
+
+	tflog.Debug(ctx, "L2 extension parameters", map[string]interface{}{
+		"source_network": sourceNetwork,
+		"destination_t1": destinationT1,
+		"gateway":        gateway,
+		"netmask":        netmask,
+	})
 
 	destinationEndpointID := sitePairing["id"].(string)
 	destinationEndpointName := sitePairing["remote_name"].(string)
@@ -117,19 +125,38 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	serviceMeshID := d.Get("service_mesh_id").(string)
 
+	tflog.Debug(ctx, "Getting network backing", map[string]interface{}{
+		"source_network": sourceNetwork,
+		"network_type":   networkType,
+	})
+
 	dvpg, err := GetNetworkBacking(client, sitePairing["local_endpoint_id"].(string), sourceNetwork, networkType)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get network backing", map[string]interface{}{
+			"error":          err.Error(),
+			"source_network": sourceNetwork,
+			"network_type":   networkType,
+		})
 		return diag.FromErr(err)
 	}
 
 	applianceID := d.Get("appliance_id").(string)
 	if applianceID == "" {
-		// GET THE FIRST APPLIANCE
+		tflog.Debug(ctx, "Getting appliance ID for service mesh", map[string]interface{}{
+			"service_mesh_id": serviceMeshID,
+		})
 		appliance, err := GetAppliance(client, sitePairing["local_endpoint_id"].(string), serviceMeshID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get appliance ID", map[string]interface{}{
+				"error":           err.Error(),
+				"service_mesh_id": serviceMeshID,
+			})
 			return diag.FromErr(err)
 		}
 		applianceID = appliance.ApplianceID
+		tflog.Debug(ctx, "Found appliance ID", map[string]interface{}{
+			"appliance_id": applianceID,
+		})
 	}
 
 	body := InsertL2ExtensionBody{
@@ -164,49 +191,84 @@ func resourceL2ExtensionCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	buf := new(bytes.Buffer)
 	if err := json.NewEncoder(buf).Encode(body); err != nil {
+		tflog.Error(ctx, "Failed to encode L2 extension request body", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return diag.FromErr(err)
 	}
 
+	tflog.Debug(ctx, "Creating L2 extension")
 	res2, err := InsertL2Extension(client, body)
 
 	if err != nil {
+		tflog.Error(ctx, "Failed to create L2 extension", map[string]interface{}{
+			"error":          err.Error(),
+			"source_network": sourceNetwork,
+		})
 		return diag.FromErr(err)
 	}
 
 	// Wait for job completion
 	for {
+		tflog.Debug(ctx, "Waiting for L2 extension job to complete", map[string]interface{}{
+			"job_id": res2.ID,
+		})
 		jr, err := GetJobResult(client, res2.ID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get job result", map[string]interface{}{
+				"error":  err.Error(),
+				"job_id": res2.ID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.IsDone {
+			tflog.Info(ctx, "L2 extension job completed successfully", map[string]interface{}{
+				"job_id": res2.ID,
+			})
 			break
 		}
 		time.Sleep(5 * time.Second)
 	}
 
 	// Get L2 Extension ID
+	tflog.Debug(ctx, "Getting L2 extension ID for network", map[string]interface{}{
+		"source_network": dvpg.Name,
+	})
 	res3, err := GetL2Extensions(client, dvpg.Name)
 	if err != nil {
+		tflog.Error(ctx, "Failed to get L2 extension", map[string]interface{}{
+			"error":          err.Error(),
+			"source_network": dvpg.Name,
+		})
 		return diag.FromErr(err)
 	}
 
 	d.SetId(res3.StretchID)
+	tflog.Info(ctx, "Created L2 extension successfully", map[string]interface{}{
+		"id":             res3.StretchID,
+		"source_network": dvpg.Name,
+	})
 
 	return resourceL2ExtensionRead(ctx, d, m)
-
 }
 
 // resourceL2ExtensionRead retrieves the L2 extension configuration.
 func resourceL2ExtensionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Reading L2 extension", map[string]interface{}{
+		"id": d.Id(),
+	})
+
 	return diags
 }
 
 // resourceL2ExtensionUpdate updates the L2 extension configuration.
 func resourceL2ExtensionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	tflog.Info(ctx, "Updating L2 extension", map[string]interface{}{
+		"id": d.Id(),
+	})
 
 	return resourceL2ExtensionRead(ctx, d, m)
 }
@@ -215,23 +277,50 @@ func resourceL2ExtensionUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceL2ExtensionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
+	tflog.Info(ctx, "Deleting L2 extension", map[string]interface{}{
+		"id": d.Id(),
+	})
+
 	client := m.(*Client)
 
+	tflog.Debug(ctx, "Calling DeleteL2Extension", map[string]interface{}{
+		"id": d.Id(),
+	})
 	res, err := DeleteL2Extension(client, d.Id())
 	if err != nil {
+		tflog.Error(ctx, "Failed to delete L2 extension", map[string]interface{}{
+			"error": err.Error(),
+			"id":    d.Id(),
+		})
 		return diag.FromErr(err)
 	}
 
 	// Wait for job completion
+	tflog.Info(ctx, "Waiting for delete job to complete", map[string]interface{}{
+		"job_id": res.ID,
+	})
 	for {
 		jr, err := GetJobResult(client, res.ID)
 		if err != nil {
+			tflog.Error(ctx, "Failed to get job result", map[string]interface{}{
+				"error":  err.Error(),
+				"job_id": res.ID,
+			})
 			return diag.FromErr(err)
 		}
 
 		if jr.IsDone {
+			tflog.Info(ctx, "Delete job completed successfully")
 			break
 		}
+
+		if jr.DidFail {
+			tflog.Error(ctx, "Delete job failed", map[string]interface{}{
+				"job_id": res.ID,
+			})
+			return diag.FromErr(fmt.Errorf("delete job failed"))
+		}
+
 		time.Sleep(5 * time.Second)
 	}
 
